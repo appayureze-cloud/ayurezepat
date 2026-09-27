@@ -100,7 +100,12 @@ class PaymentService {
     razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, (PaymentFailureResponse r) {
       logger.e('Razorpay error: ${r.code} ${r.message}');
       if (!completer.isCompleted) {
-        completer.completeError(PaymentCancelledException());
+        if (r.code == Razorpay.PAYMENT_CANCELLED) {
+          completer.completeError(PaymentCancelledException());
+        } else {
+          completer
+              .completeError(PaymentException(r.message ?? 'Payment failed'));
+        }
       }
     });
     razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (ExternalWalletResponse r) {});

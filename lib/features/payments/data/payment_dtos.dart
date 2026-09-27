@@ -11,6 +11,7 @@ part 'payment_dtos.g.dart';
 @JsonSerializable()
 class CreatePaymentOrderRequest {
   final String purpose;
+  @JsonKey(name: 'case_id')
   final String? caseId;
   final Map<String, dynamic> reference;
 

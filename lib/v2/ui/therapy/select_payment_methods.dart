@@ -45,14 +45,14 @@ class SelectTherapyPaymentMethods extends HookWidget {
         useState(isRazorEnabled == 1 ? 'razorpay' : null);
     final ValueNotifier<bool> loading = useState(false);
 
-    Future<void> makeBooking({String? paymentReference}) async {
+    Future<void> makeBooking({String? paymentReference, String? caseId}) async {
       try {
         final dio = await RetroApi().dioData(context);
-        final caseModel =
-            await CaseService.withDio(dio).repository.ensureActiveCase();
+        final resolvedCaseId =
+            caseId ?? (await CaseService.withDio(dio).ensureActiveCase()).id;
 
         Map<String, dynamic> body = {
-          "case_id": caseModel.id,
+          "case_id": resolvedCaseId,
           "booking_for": details.bookingFor,
           "name": details.name,
           "age": details.age,
@@ -104,8 +104,10 @@ class SelectTherapyPaymentMethods extends HookWidget {
       loading.value = true;
       try {
         final dio = await RetroApi().dioData(context);
+        final caseModel = await CaseService.withDio(dio).ensureActiveCase();
         final paymentReference = await PaymentService.withDio(dio).charge(
           purpose: PaymentRepository.purposeTherapy,
+          caseId: caseModel.id,
           reference: {
             'package_id': details.package?.id,
             'service_id': details.service?.id,
@@ -113,7 +115,8 @@ class SelectTherapyPaymentMethods extends HookWidget {
           },
           contactPhone: details.phone,
         );
-        await makeBooking(paymentReference: paymentReference);
+        await makeBooking(
+            paymentReference: paymentReference, caseId: caseModel.id);
       } on PaymentCancelledException {
         loading.value = false;
       } catch (e) {

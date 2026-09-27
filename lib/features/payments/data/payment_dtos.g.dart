@@ -11,14 +11,14 @@ CreatePaymentOrderRequest _$CreatePaymentOrderRequestFromJson(
     CreatePaymentOrderRequest(
       purpose: json['purpose'] as String,
       reference: json['reference'] as Map<String, dynamic>,
-      caseId: json['caseId'] as String?,
+      caseId: json['case_id'] as String?,
     );
 
 Map<String, dynamic> _$CreatePaymentOrderRequestToJson(
         CreatePaymentOrderRequest instance) =>
     <String, dynamic>{
       'purpose': instance.purpose,
-      'caseId': instance.caseId,
+      'case_id': instance.caseId,
       'reference': instance.reference,
     };
 

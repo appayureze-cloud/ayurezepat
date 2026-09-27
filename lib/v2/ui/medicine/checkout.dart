@@ -67,14 +67,14 @@ class Checkout extends HookWidget {
       }
     }
 
-    Future<void> makeOrder({String? paymentReference}) async {
+    Future<void> makeOrder({String? paymentReference, String? caseId}) async {
       try {
         final dio = await RetroApi().dioData(context);
-        final caseModel =
-            await CaseService.withDio(dio).repository.ensureActiveCase();
+        final resolvedCaseId =
+            caseId ?? (await CaseService.withDio(dio).ensureActiveCase()).id;
 
         Map<String, dynamic> body = {
-          "case_id": caseModel.id,
+          "case_id": resolvedCaseId,
           "line_items": List.generate(items.value.length, (i) {
             return {
               "variant_id": items.value[i].variantId!,
@@ -118,8 +118,10 @@ class Checkout extends HookWidget {
       loading.value = true;
       try {
         final dio = await RetroApi().dioData(context);
+        final caseModel = await CaseService.withDio(dio).ensureActiveCase();
         final paymentReference = await PaymentService.withDio(dio).charge(
           purpose: PaymentRepository.purposeMedicineOrder,
+          caseId: caseModel.id,
           reference: {
             'line_items': List.generate(items.value.length, (i) {
               return {
@@ -132,14 +134,16 @@ class Checkout extends HookWidget {
           contactEmail:
               SharedPreferenceHelper.getString(FirestoreConstants.email),
         );
-        await makeOrder(paymentReference: paymentReference);
+        await makeOrder(
+            paymentReference: paymentReference, caseId: caseModel.id);
       } on PaymentCancelledException {
-        loading.value = false;
+        // no-op: user dismissed Razorpay.
       } catch (e) {
-        loading.value = false;
         logger.e('Payment failed: $e');
         Fluttertoast.showToast(
             msg: "Payment Failed", toastLength: Toast.LENGTH_SHORT);
+      } finally {
+        loading.value = false;
       }
     }
 

@@ -45,14 +45,15 @@ class SelectAppointmentPaymentMethods extends HookWidget {
         useState(isRazorEnabled == 1 ? 'razorpay' : null);
     ValueNotifier<bool> loading = useState(false);
 
-    Future<void> bookAppointment({String? paymentReference}) async {
+    Future<void> bookAppointment(
+        {String? paymentReference, String? caseId}) async {
       try {
         final dio = await RetroApi().dioData(context);
-        final caseModel =
-            await CaseService.withDio(dio).repository.ensureActiveCase();
+        final resolvedCaseId =
+            caseId ?? (await CaseService.withDio(dio).ensureActiveCase()).id;
 
         Map<String, dynamic> body = {
-          "case_id": caseModel.id,
+          "case_id": resolvedCaseId,
           "appointment_for": details.bookingFor,
           "hospital_id": details.hospital.id,
           "patient_name": details.name,
@@ -110,8 +111,10 @@ class SelectAppointmentPaymentMethods extends HookWidget {
       loading.value = true;
       try {
         final dio = await RetroApi().dioData(context);
+        final caseModel = await CaseService.withDio(dio).ensureActiveCase();
         final paymentReference = await PaymentService.withDio(dio).charge(
           purpose: PaymentRepository.purposeAppointment,
+          caseId: caseModel.id,
           reference: {
             'doctor_id': details.doctor.id,
             'hospital_id': details.hospital.id,
@@ -121,7 +124,8 @@ class SelectAppointmentPaymentMethods extends HookWidget {
           contactEmail:
               SharedPreferenceHelper.getString(FirestoreConstants.email),
         );
-        await bookAppointment(paymentReference: paymentReference);
+        await bookAppointment(
+            paymentReference: paymentReference, caseId: caseModel.id);
       } on PaymentCancelledException {
         loading.value = false;
       } catch (e) {
