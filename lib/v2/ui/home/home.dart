@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:doctro_patient/model/v2/home_response.dart' as hr;
 import 'package:doctro_patient/v2/ui/home/doctor_category_list.dart';
+import 'package:doctro_patient/v2/utils/nav_constants.dart';
 import 'package:doctro_patient/v2/ui/others/blog_detail.dart';
 import 'package:doctro_patient/v2/ui/others/blog_list.dart';
 import 'package:doctro_patient/v2/ui/widgets/doctor_category_card.dart';
@@ -304,7 +305,7 @@ class MainHome extends HookWidget {
                                     if (text.isNotEmpty) {
                                       Navigator.pushReplacementNamed(
                                           context, 'Home',
-                                          arguments: [1, text]);
+                                          arguments: [doctorsTabIndex, text]);
                                     }
                                   },
                                   decoration: InputDecoration(
@@ -366,7 +367,7 @@ class MainHome extends HookWidget {
                                         case 0:
                                           Navigator.pushReplacementNamed(
                                               context, 'Home',
-                                              arguments: [1]);
+                                              arguments: [doctorsTabIndex]);
                                           break;
                                         case 2:
                                           Navigator.pushNamed(
@@ -528,7 +529,7 @@ class MainHome extends HookWidget {
                                 onTap: () {
                                   Navigator.pushReplacementNamed(
                                       context, 'Home',
-                                      arguments: [1]);
+                                      arguments: [doctorsTabIndex]);
                                 },
                                 child: Text(
                                   'See All',

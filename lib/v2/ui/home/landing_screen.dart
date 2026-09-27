@@ -1,4 +1,5 @@
 import 'package:doctro_patient/const/Palette.dart';
+import 'package:doctro_patient/features/astra/presentation/astra_chat_screen.dart';
 import 'package:doctro_patient/v2/ui/appointment/appointment_list.dart';
 import 'package:doctro_patient/v2/ui/authentication/profile.dart';
 import 'package:doctro_patient/v2/ui/home/doctors_list.dart';
@@ -13,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../const/prefConstatnt.dart';
 import '../../../const/preference.dart';
+import '../../utils/nav_constants.dart';
 import 'home.dart';
 
 class MainLandingPage extends HookWidget {
@@ -37,7 +39,7 @@ class MainLandingPage extends HookWidget {
             arguments.isNotEmpty &&
             arguments.length > 1 &&
             arguments.first is int &&
-            arguments.first == 1) {
+            arguments.first == doctorsTabIndex) {
           if (arguments[1] is int) catId.value = arguments[1];
           if (arguments[1] is String) search.value = arguments[1];
         }
@@ -63,7 +65,7 @@ class MainLandingPage extends HookWidget {
             bottomNavigationBar: BottomNavigationBar(
               onTap: (index) {
                 currentIndex.value = index;
-                if (index == 1) {
+                if (index == doctorsTabIndex) {
                   search.value = null;
                   catId.value = null;
                 }
@@ -72,6 +74,12 @@ class MainLandingPage extends HookWidget {
               unselectedItemColor: Palette.grey,
               currentIndex: currentIndex.value,
               items: [
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.auto_awesome_outlined,
+                  ),
+                  label: 'Astra',
+                ),
                 BottomNavigationBarItem(
                   icon: Icon(
                     Icons.home_outlined,
@@ -99,6 +107,7 @@ class MainLandingPage extends HookWidget {
               ],
             ),
             body: [
+              const AstraChatScreen(),
               MainHome(landingLoader: loading),
               DoctorsList(
                 category: catId.value,

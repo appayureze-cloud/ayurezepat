@@ -1,0 +1,16 @@
+{
+  "astra_disclaimer": "Astra is an AI health assistant. It does not diagnose or prescribe.",
+  "astra_input_hint": "Tell Astra what's going on...",
+  "astra_send": "Send",
+  "astra_hold_to_talk": "Hold to talk",
+  "astra_listening": "Listening...",
+  "astra_starting": "Starting Astra...",
+  "astra_error_start": "Astra couldn't start right now. Please try again.",
+  "astra_error_reply": "Astra couldn't reply right now. Please try again.",
+  "astra_emergency_title": "This may be a medical emergency",
+  "astra_emergency_body": "What you've described could be a medical emergency. Please call 112 (or your local emergency number) or go to the nearest emergency room right now. This is not something Astra can help with in chat.",
+  "astra_emergency_call": "Call 112 now",
+  "astra_language_english": "English",
+  "astra_language_hindi": "हिन्दी",
+  "astra_retry": "Retry"
+}

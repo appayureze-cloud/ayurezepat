@@ -8,6 +8,12 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- RECORD_AUDIO: Astra voice input (speech_to_text) and Agora voice/video calls. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- CAMERA: Agora video calls. The app already requests this permission
+         at runtime (lib/VideoCall/videoCall.dart) but it was missing here,
+         which silently fails the runtime request on Android. -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> -->
 
     <application

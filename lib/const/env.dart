@@ -32,4 +32,9 @@ class Env {
     'USE_MOCK_CASES',
     defaultValue: true,
   );
+
+  static const bool useMockAstra = bool.fromEnvironment(
+    'USE_MOCK_ASTRA',
+    defaultValue: true,
+  );
 }

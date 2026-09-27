@@ -34,6 +34,8 @@
 		<string>To determine availability of doctors nearby</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>MIC</string>
+		<key>NSSpeechRecognitionUsageDescription</key>
+		<string>Astra uses speech recognition to let you talk instead of type.</string>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>UIBackgroundModes</key>

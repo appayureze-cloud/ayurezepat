@@ -4,6 +4,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../../const/Palette.dart';
 import '../../../model/v2/home_response.dart';
+import '../../utils/nav_constants.dart';
 
 class DoctorCategoryCard extends StatelessWidget {
   final DoctorCategory catagory;
@@ -15,7 +16,7 @@ class DoctorCategoryCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Navigator.pushReplacementNamed(context, 'Home',
-            arguments: [1, catagory.id]);
+            arguments: [doctorsTabIndex, catagory.id]);
       },
       child: Container(
         width: 24.w,
