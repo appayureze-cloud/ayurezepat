@@ -72,4 +72,12 @@ class Apis {
   // docs/backend/case.md.
   static const String createCase = "cases";
   static const String getCase = "cases/{id}";
+
+  // Smart order drafts (Phase 2). See docs/backend/smart-orders.md.
+  static const String getSmartOrderDraft = "smart_orders/{id}";
+  static const String markSmartOrderDraftBought = "smart_orders/{id}/bought";
+  static const String markSmartOrderDraftIgnored = "smart_orders/{id}/ignore";
+
+  // Health record timeline (Phase 2). See docs/backend/health-records.md.
+  static const String getHealthRecordTimeline = "cases/{caseId}/health_records";
 }

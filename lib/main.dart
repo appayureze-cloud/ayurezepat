@@ -40,6 +40,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 import 'Chat/chatPage.dart';
 import 'VideoCall/overlay_handler.dart';
@@ -47,13 +48,19 @@ import 'VideoCall/videoCall.dart';
 import 'const/Palette.dart';
 import 'const/prefConstatnt.dart';
 import 'firebase_options.dart';
+import 'features/health_records/presentation/health_record_timeline_screen.dart';
+import 'features/smart_orders/presentation/smart_order_draft_screen.dart';
 import 'v2/ui/authentication/edit_profile.dart';
+import 'v2/ui/medicine/order_details.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPreferences.getInstance();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await SharedPreferenceHelper.init();
+  // Needed for zonedSchedule (used by the smart order draft 24h re-prompt
+  // and Phase 3's dose reminders).
+  tz.initializeTimeZones();
   await FirebaseMessaging.instance.subscribeToTopic("all");
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
@@ -335,6 +342,34 @@ class _MyAppState extends State<MyApp> {
           ),
         );
       }
+      return;
+    }
+
+    // Astra's smart order draft prompt/re-prompt (Phase 2) - see
+    // docs/backend/smart-orders.md and
+    // lib/features/smart_orders/presentation/smart_order_reprompt_scheduler.dart.
+    if (actionId == null && screen == 'smart_order_draft') {
+      final draftId = payload['draft_id'];
+      if (draftId != null) {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (_) => SmartOrderDraftScreen(draftId: '$draftId'),
+          ),
+        );
+      }
+      return;
+    }
+
+    // Shipment status change (Phase 2) - see docs/backend/shipments.md.
+    if (actionId == null && screen == 'order_tracking') {
+      final orderId = int.tryParse('${payload['order_id']}');
+      if (orderId != null) {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (_) => OrderDetails(id: orderId),
+          ),
+        );
+      }
     }
   }
 
@@ -528,6 +563,7 @@ class _MyAppState extends State<MyApp> {
               'Blogs': (context) => BlogsList(),
               'AddressList': (context) => AddressList(),
               'Notifications': (context) => Notifications(),
+              'HealthRecord': (context) => const HealthRecordTimelineScreen(),
 
               'Home': (context) => MainLandingPage(),
               // 'Home22': (context) => MedicineLandingPage(),

@@ -1,3 +1,4 @@
+import 'package:doctro_patient/features/prescriptions/domain/entities/prescription_item.dart';
 import 'package:doctro_patient/model/v2/home_response.dart';
 
 class PrescriptionResponse {
@@ -35,7 +36,10 @@ class Data {
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    doctor = json['doctor'];
+    // `doctor` is typed as `Doctor?` but this used to assign the raw JSON
+    // map straight into it, which throws a runtime TypeError the first
+    // time a response actually includes a doctor object.
+    doctor = json['doctor'] != null ? Doctor.fromJson(json['doctor']) : null;
     prescription = json['prescription'] != null
         ? new Prescription.fromJson(json['prescription'])
         : null;
@@ -67,6 +71,15 @@ class Prescription {
   String? updatedAt;
   String? pdfPath;
 
+  /// Structured line items, per docs/backend/prescriptions.md. Null/empty
+  /// until the backend ships this - the PDF (`pdf`/`pdfPath`) remains the
+  /// source of truth until then.
+  List<PrescriptionItem>? items;
+
+  /// Free-text treatment/therapy recommendation from the doctor, if any.
+  /// Phase 3 prefills the therapy booking flow from this.
+  String? treatmentRecommendation;
+
   Prescription(
       {this.id,
       this.appointmentId,
@@ -76,7 +89,9 @@ class Prescription {
       this.pdf,
       this.createdAt,
       this.updatedAt,
-      this.pdfPath});
+      this.pdfPath,
+      this.items,
+      this.treatmentRecommendation});
 
   Prescription.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -88,6 +103,12 @@ class Prescription {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     pdfPath = json['pdfPath'];
+    if (json['items'] != null) {
+      items = (json['items'] as List)
+          .map((e) => PrescriptionItem.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    treatmentRecommendation = json['treatment_recommendation'];
   }
 
   Map<String, dynamic> toJson() {
@@ -101,6 +122,10 @@ class Prescription {
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['pdfPath'] = this.pdfPath;
+    if (this.items != null) {
+      data['items'] = this.items!.map((e) => e.toJson()).toList();
+    }
+    data['treatment_recommendation'] = this.treatmentRecommendation;
     return data;
   }
 }

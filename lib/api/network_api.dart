@@ -36,7 +36,9 @@ import 'package:retrofit/http.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../features/case/data/case_dtos.dart';
+import '../features/health_records/data/health_record_parser.dart';
 import '../features/payments/data/payment_dtos.dart';
+import '../features/smart_orders/data/smart_order_dtos.dart';
 import '../model/v2/app_section_response.dart';
 import '../model/v2/appointment_details_response.dart';
 import '../model/v2/blog.dart';
@@ -234,6 +236,19 @@ abstract class RestClient {
 
   @GET(Apis.getCase)
   Future<CaseResponse> getCase(@Path() String id);
+
+  @GET(Apis.getSmartOrderDraft)
+  Future<SmartOrderDraftResponse> getSmartOrderDraft(@Path() String id);
+
+  @POST(Apis.markSmartOrderDraftBought)
+  Future<CommonResponse> markSmartOrderDraftBought(@Path() String id);
+
+  @POST(Apis.markSmartOrderDraftIgnored)
+  Future<CommonResponse> markSmartOrderDraftIgnored(@Path() String id);
+
+  @GET(Apis.getHealthRecordTimeline)
+  Future<HealthRecordTimelineResponse> getHealthRecordTimeline(
+      @Path() String caseId);
 
 // @GET(Apis.insurers)
 // Future<InsurersResponse> callInsurers();

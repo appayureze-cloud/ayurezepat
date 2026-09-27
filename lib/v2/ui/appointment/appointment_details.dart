@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:io' show Directory, File, HttpClient, Platform;
 
 import 'package:doctro_patient/VideoCall/videoCall.dart';
+import 'package:doctro_patient/features/prescriptions/presentation/prescription_detail_screen.dart';
 import 'package:doctro_patient/model/v2/appointment_list_response.dart';
 import 'package:doctro_patient/v2/ui/others/add_review_screen.dart';
 import 'package:doctro_patient/v2/ui/widgets/no_data.dart';
@@ -13,8 +13,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../api/network_api.dart';
@@ -26,7 +24,7 @@ import '../../../model/v2/appointment_details_response.dart';
 import '../../../model/v2/common_response.dart';
 import '../../utils/helper.dart';
 import '../../utils/logger.dart';
-import '../../utils/notification_service.dart';
+import '../../utils/pdf_downloader.dart';
 import '../others/html_content_page.dart';
 import '../widgets/appointment_section_card.dart';
 import '../widgets/button_v2.dart';
@@ -89,29 +87,6 @@ class AppointmentDetails extends HookWidget {
       }
     }
 
-    Future<String> downloadFile(String url, String fileName, String dir) async {
-      HttpClient httpClient = new HttpClient();
-      File file;
-      String filePath = '';
-      String myUrl = '';
-      try {
-        myUrl = url;
-        var request = await httpClient.getUrl(Uri.parse(myUrl));
-        var response = await request.close();
-        if (response.statusCode == 200) {
-          var bytes = await consolidateHttpClientResponseBytes(response);
-          filePath = '$dir/$fileName';
-          file = File(filePath);
-          await file.writeAsBytes(bytes);
-          await NotificationService.showDownloadCompleteNotification(filePath);
-        } else
-          filePath = 'Error code: ' + response.statusCode.toString();
-      } catch (ex) {
-        filePath = 'Can not fetch url';
-      }
-      return filePath;
-    }
-
     void _downloadPrescription() async {
       if (appointment.value?.prescription?.pdfPath == null) {
         Fluttertoast.showToast(
@@ -121,50 +96,7 @@ class AppointmentDetails extends HookWidget {
         );
         return;
       }
-      // Request storage permission if denied
-      if (await Permission.storage.isDenied) {
-        await Permission.storage.request();
-      }
-
-      // Determine platform and get appropriate directory
-      Directory? baseDir;
-      if (Platform.isAndroid) {
-        baseDir = await getExternalStorageDirectory();
-      } else if (Platform.isIOS) {
-        baseDir = await getApplicationDocumentsDirectory();
-      }
-
-      if (baseDir == null) {
-        Fluttertoast.showToast(
-          msg: "Unable to access storage directory.",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-        );
-        return;
-      }
-
-      // Prepare download path
-      final pathSegments = baseDir.path.split("/");
-      final rootPath = pathSegments.take(4).join("/");
-      final outputDirectory = '$rootPath/Download/Ayureze';
-
-      // Create the download directory if it doesn't exist
-      await Directory(outputDirectory).create(recursive: true);
-
-      // Generate file name with timestamp
-      final currentTime = DateTime.now().millisecondsSinceEpoch.toString();
-      final fileName = 'Ayureze-$currentTime.pdf';
-
-      // Start downloading file
-      await downloadFile('${appointment.value!.prescription!.pdfPath!}',
-              fileName, outputDirectory)
-          .whenComplete(() {
-        Fluttertoast.showToast(
-          msg: "Download completed!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-        );
-      });
+      await downloadAndOpenPdf(appointment.value!.prescription!.pdfPath!);
     }
 
     useEffect(() {
@@ -639,7 +571,29 @@ class AppointmentDetails extends HookWidget {
                             ),
                           ),
                           SizedBox(height: 2.h),
-                          if (appointment.value?.prescription != null)
+                          if (appointment.value?.prescription != null) ...[
+                            Center(
+                              child: SizedBox(
+                                width: 50.w,
+                                child: ButtonV2(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            PrescriptionDetailScreen(
+                                          prescription:
+                                              appointment.value!.prescription!,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  label: 'View Prescription',
+                                  buttonColor: Palette.primary,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 1.h),
                             Center(
                               child: SizedBox(
                                 width: 50.w,
@@ -652,6 +606,7 @@ class AppointmentDetails extends HookWidget {
                                 ),
                               ),
                             ),
+                          ],
                           if (['approve']
                               .contains(appointment.value?.appointmentStatus))
                             Center(

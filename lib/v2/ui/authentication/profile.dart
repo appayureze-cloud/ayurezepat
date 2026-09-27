@@ -253,6 +253,11 @@ class Profile extends HookWidget {
                         icon: Icons.location_on_outlined,
                       ),
                       ProfileSectionCard(
+                        title: 'Health Record',
+                        route: 'HealthRecord',
+                        icon: Icons.folder_shared_outlined,
+                      ),
+                      ProfileSectionCard(
                         title: 'Notifications',
                         icon: Icons.notifications_none,
                         route: 'Notifications',

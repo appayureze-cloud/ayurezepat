@@ -37,4 +37,21 @@ class Env {
     'USE_MOCK_ASTRA',
     defaultValue: true,
   );
+
+  /// Shows canned demo prescription line items when the backend hasn't
+  /// populated Prescription.items yet. See docs/backend/prescriptions.md.
+  static const bool useMockPrescriptionItems = bool.fromEnvironment(
+    'USE_MOCK_PRESCRIPTION_ITEMS',
+    defaultValue: true,
+  );
+
+  static const bool useMockSmartOrders = bool.fromEnvironment(
+    'USE_MOCK_SMART_ORDERS',
+    defaultValue: true,
+  );
+
+  static const bool useMockHealthRecords = bool.fromEnvironment(
+    'USE_MOCK_HEALTH_RECORDS',
+    defaultValue: true,
+  );
 }
