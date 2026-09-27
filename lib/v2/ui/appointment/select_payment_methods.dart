@@ -1,0 +1,255 @@
+import 'package:doctro_patient/const/prefConstatnt.dart';
+import 'package:doctro_patient/const/preference.dart';
+import 'package:doctro_patient/model/v2/display_offer_model.dart';
+import 'package:doctro_patient/v2/ui/appointment/payment_result.dart';
+import 'package:doctro_patient/v2/ui/widgets/button_v2.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:sizer/sizer.dart';
+
+import '../../../api/network_api.dart';
+import '../../../api/retrofit_Api.dart';
+import '../../../const/Palette.dart';
+import '../../../model/v2/book_appointments_model.dart';
+import '../../../model/v2/make_appointment.dart';
+import '../../utils/logger.dart';
+import '../widgets/header.dart';
+import '../widgets/payment_card.dart';
+
+class SelectAppointmentPaymentMethods extends HookWidget {
+  final MakeAppointmentModal details;
+  final double fees;
+  final Coupon? coupon;
+  final double discount;
+
+  SelectAppointmentPaymentMethods(
+      {required this.details,
+      required this.fees,
+      required this.discount,
+      super.key,
+      required this.coupon});
+
+  final Razorpay razorpay = Razorpay();
+
+  final String? razorpayKey =
+      SharedPreferenceHelper.getString(Preferences.razor_key);
+  final int? isRazorEnabled = SharedPreferenceHelper.getInt(Preferences.razor);
+  final int? isCodEnabled = SharedPreferenceHelper.getInt(Preferences.cod);
+
+  @override
+  Widget build(BuildContext context) {
+    ValueNotifier<String?> selectedPaymentType =
+        useState(isRazorEnabled == 1 ? 'razorpay' : null);
+    ValueNotifier<String?> _paymentToken = useState(null);
+    ValueNotifier<bool> loading = useState(false);
+
+    Future<void> bookAppointment() async {
+      try {
+        Map<String, dynamic> body = {
+          "appointment_for": details.bookingFor,
+          "hospital_id": details.hospital.id,
+          "patient_name": details.name,
+          "illness_information": details.illness,
+          "age": details.age,
+          "patient_address": details.address.id,
+          "phone_no": details.phone,
+          "phone_code": details.phoneCode,
+          "drug_effect": details.sideEffects,
+          "appointment_type": details.type,
+          "note": details.note.isNotEmpty ? details.note : "No note",
+          "date": DateFormat("yyyy-MM-dd").format(details.date),
+          "time": DateFormat("hh:mm a").format(details.date),
+          "duration": int.tryParse('${details.doctor.timeslot}') ?? 30,
+          "payment_type": selectedPaymentType.value,
+          "payment_status": selectedPaymentType.value == 'cod' ? 0 : 1,
+          "payment_token":
+              selectedPaymentType.value == 'cod' ? '' : _paymentToken.value,
+          "amount": fees,
+          "doctor_id": details.doctor.id,
+          "report_image": "",
+          "discount_id": coupon?.id,
+          "discount_price": coupon == null ? 0 : discount,
+        };
+        // if (isInsured == true) {
+        //   body['is_insured'] = isInsured == true ? 1 : 0;
+        //   body['policy_insurer_name'] = selectInsured;
+        //   body['policy_number'] = policyNumberController.text;
+        // } else if (isInsured == false) {
+        //   body['is_insured'] = isInsured == true ? 1 : 0;
+        // }
+        logger.i(body);
+
+        loading.value = true;
+        BookingResponse response =
+            await RestClient(await RetroApi().dioData(context))
+                .bookAppointment(body);
+
+        Fluttertoast.showToast(
+          msg: '${response.msg}',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+        );
+
+        Preferences.hideDialog(context);
+        if (response.success == true)
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PaymentResult(
+                  adetails: details,
+                  tdetails: null,
+                  from: 'appointment',
+                  bookingId: response.success == true ? response.data : null),
+            ),
+          );
+      } catch (error, stacktrace) {
+        Preferences.hideDialog(context);
+        logger.e("Exception occur: $error stackTrace: $stacktrace");
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    void openCheckoutRazorPay() async {
+      loading.value = true;
+      var map = {
+        'key': SharedPreferenceHelper.getString(Preferences.razor_key),
+        'amount': fees * 100,
+        'name': 'Ayureze Healthcare',
+        'currency': SharedPreferenceHelper.getString(Preferences.currency_code),
+        'image': 'https://ayureze.org/images/upload/680ce4e79bca1.png',
+        'description': '',
+        'send_sms_hash': 'true',
+        'prefill': {
+          'contact': '${details.phone}',
+          'email':
+              '${SharedPreferenceHelper.getString(FirestoreConstants.email)}'
+        },
+      };
+      var options = map;
+      try {
+        razorpay.open(options);
+      } catch (e) {
+        logger.e('Error: e');
+        loading.value = false;
+        Fluttertoast.showToast(
+            msg: "Payment Failed", toastLength: Toast.LENGTH_SHORT);
+      }
+    }
+
+    // RazorPay Success Method //
+    void _handlePaymentSuccess(PaymentSuccessResponse response) {
+      _paymentToken.value = response.paymentId;
+      _paymentToken.value != null &&
+              _paymentToken.value != "" &&
+              _paymentToken.value!.isNotEmpty
+          ? bookAppointment()
+          : Fluttertoast.showToast(
+              msg: "Payment Failed", toastLength: Toast.LENGTH_SHORT);
+    }
+
+    // RazorPay Error Method //
+    void _handlePaymentError(PaymentFailureResponse response) {
+      loading.value = false;
+      Fluttertoast.showToast(
+          msg: "Payment Failed", toastLength: Toast.LENGTH_SHORT);
+    }
+
+    // RazorPay Wallet Method //
+    void _handleExternalWallet(ExternalWalletResponse response) {}
+
+    useEffect(() {
+      razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+      razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+      razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    }, []);
+
+    return SafeArea(
+      child: ModalProgressHUD(
+        inAsyncCall: loading.value,
+        opacity: 0.5,
+        progressIndicator: SpinKitFadingCircle(
+          color: Palette.primary,
+          size: 3.h,
+        ),
+        child: Scaffold(
+          body: Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Header_v2(
+                title: 'Payment Method',
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 2.w,
+                  vertical: 1.h,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 1.h),
+                    Text(
+                      'Select a Payment Method you want to use',
+                      style: TextStyle(
+                        color: Palette.black,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    SizedBox(height: 1.h),
+                    if (isRazorEnabled == 1)
+                      PaymentCard(
+                        selectedPaymentType: selectedPaymentType,
+                        title: 'Razorpay',
+                        value: 'razorpay',
+                      ),
+                    if (isCodEnabled == 1)
+                      PaymentCard(
+                        selectedPaymentType: selectedPaymentType,
+                        title: 'COD',
+                        value: 'cod',
+                      ),
+                    SizedBox(height: 2.h),
+                    ButtonV2(
+                      label:
+                          'Pay ${SharedPreferenceHelper.getString(Preferences.currency_symbol)} ${fees}',
+                      onPressed: () {
+                        if (selectedPaymentType.value != null) {
+                          switch (selectedPaymentType.value) {
+                            case 'razorpay':
+                              {
+                                openCheckoutRazorPay();
+                                break;
+                              }
+                            case 'cod':
+                              {
+                                loading.value = true;
+                                bookAppointment();
+                                break;
+                              }
+                          }
+                        } else {
+                          Fluttertoast.showToast(
+                              msg: "Please select payment method",
+                              toastLength: Toast.LENGTH_SHORT);
+                        }
+                        // Navigator.pushNamed(context, 'PaymentResult');
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
