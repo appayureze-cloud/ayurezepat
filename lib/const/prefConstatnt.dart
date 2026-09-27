@@ -2,11 +2,14 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import 'env.dart';
+
 class Preferences {
   Preferences._();
 
-  /// TODO Setup: Enter Your google map key here
-  static const String map_key = "AIzaSyAXDFugYY8eUpwJit334P9nYZvFDyEpg9U";
+  /// Google Maps key, supplied at build time via --dart-define (see Env),
+  /// restricted in Google Cloud Console to this app's package name/SHA-1.
+  static const String map_key = Env.googleMapsApiKey;
 
   static const String is_logged_in = "isLoggedIn";
   static const String name = "name";
@@ -52,6 +55,7 @@ class Preferences {
   static const String payStack_public_key = "payStack_public_key";
   static const String notificationPermissionDialog =
       "notificationPermissionDialog";
+  static const String activeCaseId = "active_case_id";
 
   static Future<bool> checkNetwork() async {
     var connectivityResult = await (Connectivity().checkConnectivity());

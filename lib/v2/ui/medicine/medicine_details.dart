@@ -202,9 +202,9 @@ class MedicineDetailsScreen extends HookWidget {
                               carouselController: _carouselController,
                               options: CarouselOptions(
                                 enlargeCenterPage: true,
-                                height: 35.h, 
+                                height: 35.h,
                                 autoPlay: true,
-                                viewportFraction:0.8,
+                                viewportFraction: 0.8,
                                 onPageChanged: (index, _) {
                                   _currentIndex.value = index;
                                 },

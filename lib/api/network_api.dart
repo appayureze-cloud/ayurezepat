@@ -35,6 +35,8 @@ import 'package:doctro_patient/model/v2/video_call_model.dart';
 import 'package:retrofit/http.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../features/case/data/case_dtos.dart';
+import '../features/payments/data/payment_dtos.dart';
 import '../model/v2/app_section_response.dart';
 import '../model/v2/appointment_details_response.dart';
 import '../model/v2/blog.dart';
@@ -218,6 +220,20 @@ abstract class RestClient {
 
   @GET(Apis.deleteAccount)
   Future<AccountDeleteModel> deleteAccount();
+
+  @POST(Apis.createPaymentOrder)
+  Future<CreatePaymentOrderResponse> createPaymentOrder(
+      @Body() CreatePaymentOrderRequest body);
+
+  @POST(Apis.verifyPayment)
+  Future<VerifyPaymentResponse> verifyPayment(
+      @Body() VerifyPaymentRequest body);
+
+  @POST(Apis.createCase)
+  Future<CaseResponse> createCase();
+
+  @GET(Apis.getCase)
+  Future<CaseResponse> getCase(@Path() String id);
 
 // @GET(Apis.insurers)
 // Future<InsurersResponse> callInsurers();

@@ -63,4 +63,13 @@ class Apis {
   static const String AddVideoCallHistory = "add_call_history";
   static const String ShowVideoCallHistory = "video_call_history";
   static const String deleteAccount = "delete-account";
+
+  // Server-priced Razorpay flow (Phase 0). See docs/backend/payments.md.
+  static const String createPaymentOrder = "payments/orders";
+  static const String verifyPayment = "payments/verify";
+
+  // Case lifecycle (Phase 0 foundation for the Astra flow). See
+  // docs/backend/case.md.
+  static const String createCase = "cases";
+  static const String getCase = "cases/{id}";
 }

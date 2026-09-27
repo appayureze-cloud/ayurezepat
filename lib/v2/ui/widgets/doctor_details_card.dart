@@ -37,11 +37,11 @@ class DoctorDetailsCard extends HookWidget {
                       child: CircularProgressIndicator(),
                     ),
                     errorWidget: (context, url, error) => Center(
-                        child: Image.asset(
-                          "assets/images/no_image.jpg",
-                          fit: BoxFit.fitHeight,
-                        ),
+                      child: Image.asset(
+                        "assets/images/no_image.jpg",
+                        fit: BoxFit.fitHeight,
                       ),
+                    ),
                   ),
                 ),
                 SizedBox(width: 2.w),

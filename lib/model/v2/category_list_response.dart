@@ -8,11 +8,7 @@ class CategoryListResponse {
   Meta? meta;
   String? msg;
 
-  CategoryListResponse(
-      {this.success,
-      this.data,
-      this.meta,
-      this.msg});
+  CategoryListResponse({this.success, this.data, this.meta, this.msg});
 
   CategoryListResponse.fromJson(Map<String, dynamic> json) {
     success = json['success'];

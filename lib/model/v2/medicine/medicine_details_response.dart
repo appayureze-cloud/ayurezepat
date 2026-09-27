@@ -10,7 +10,9 @@ class MedicineDetailsResponse {
 
   MedicineDetailsResponse.fromJson(Map<String, dynamic> json) {
     success = json['success'];
-    data = json['data'] != null ? new MedicineDetails.fromJson(json['data']) : null;
+    data = json['data'] != null
+        ? new MedicineDetails.fromJson(json['data'])
+        : null;
     msg = json['msg'];
   }
 
@@ -42,23 +44,23 @@ class MedicineDetails {
   bool? cartStatus;
   List<CartItem>? cartItems;
 
-  MedicineDetails(
-      {this.id,
-      this.title,
-      this.description,
-      this.image,
-      this.price,
-      this.originalPrice,
-      this.discountPercent,
-      this.variants,
-      this.options,
-      this.images,
-      this.reviews,
-      this.averageRating,
-      this.ratingsCount,
-      this.cartStatus,
-      this.cartItems,
-    });
+  MedicineDetails({
+    this.id,
+    this.title,
+    this.description,
+    this.image,
+    this.price,
+    this.originalPrice,
+    this.discountPercent,
+    this.variants,
+    this.options,
+    this.images,
+    this.reviews,
+    this.averageRating,
+    this.ratingsCount,
+    this.cartStatus,
+    this.cartItems,
+  });
 
   MedicineDetails.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -163,35 +165,35 @@ class Variants {
   int? imageId;
   String? image_url;
 
-  Variants(
-      {this.id,
-      this.productId,
-      this.title,
-      this.price,
-      this.position,
-      this.inventoryPolicy,
-      this.compareAtPrice,
-      this.option1,
-      this.option2,
-      this.option3,
-      this.createdAt,
-      this.updatedAt,
-      this.taxable,
-      this.barcode,
-      this.fulfillmentService,
-      this.grams,
-      this.inventoryManagement,
-      this.requiresShipping,
-      this.sku,
-      this.weight,
-      this.weightUnit,
-      this.inventoryItemId,
-      this.inventoryQuantity,
-      this.oldInventoryQuantity,
-      this.adminGraphqlApiId,
-      this.imageId,
-      this.image_url,
-});
+  Variants({
+    this.id,
+    this.productId,
+    this.title,
+    this.price,
+    this.position,
+    this.inventoryPolicy,
+    this.compareAtPrice,
+    this.option1,
+    this.option2,
+    this.option3,
+    this.createdAt,
+    this.updatedAt,
+    this.taxable,
+    this.barcode,
+    this.fulfillmentService,
+    this.grams,
+    this.inventoryManagement,
+    this.requiresShipping,
+    this.sku,
+    this.weight,
+    this.weightUnit,
+    this.inventoryItemId,
+    this.inventoryQuantity,
+    this.oldInventoryQuantity,
+    this.adminGraphqlApiId,
+    this.imageId,
+    this.image_url,
+  });
 
   Variants.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -263,7 +265,8 @@ class MedicineOptions {
   int? position;
   List<String>? values;
 
-  MedicineOptions({this.id, this.productId, this.name, this.position, this.values});
+  MedicineOptions(
+      {this.id, this.productId, this.name, this.position, this.values});
 
   MedicineOptions.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -284,7 +287,6 @@ class MedicineOptions {
   }
 }
 
-
 class MedicineReview {
   int? id;
   String? review;
@@ -296,7 +298,16 @@ class MedicineReview {
   String? updatedAt;
   User? user;
 
-  MedicineReview({this.id, this.review, this.rate, this.orderId, this.productId, this.userId, this.createdAt, this.updatedAt, this.user});
+  MedicineReview(
+      {this.id,
+      this.review,
+      this.rate,
+      this.orderId,
+      this.productId,
+      this.userId,
+      this.createdAt,
+      this.updatedAt,
+      this.user});
 
   MedicineReview.fromJson(Map<String, dynamic> json) {
     id = json['id'];

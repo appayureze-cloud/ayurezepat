@@ -35,7 +35,16 @@ class Data {
   String? updatedAt;
   Doctor? doctor;
 
-  Data({this.id, this.userId, this.doctorId, this.title, this.message, this.userType, this.createdAt, this.updatedAt, this.doctor});
+  Data(
+      {this.id,
+      this.userId,
+      this.doctorId,
+      this.title,
+      this.message,
+      this.userType,
+      this.createdAt,
+      this.updatedAt,
+      this.doctor});
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -46,7 +55,8 @@ class Data {
     userType = json['user_type'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    doctor = json['doctor'] != null ? new Doctor.fromJson(json['doctor']) : null;
+    doctor =
+        json['doctor'] != null ? new Doctor.fromJson(json['doctor']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -74,7 +84,8 @@ class Doctor {
   dynamic rate;
   int? review;
 
-  Doctor({this.id, this.name, this.image, this.fullImage, this.rate, this.review});
+  Doctor(
+      {this.id, this.name, this.image, this.fullImage, this.rate, this.review});
 
   Doctor.fromJson(Map<String, dynamic> json) {
     id = json['id'];

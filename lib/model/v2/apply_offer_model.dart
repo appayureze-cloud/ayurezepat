@@ -32,7 +32,15 @@ class Data {
   dynamic flatDiscount;
   int? minDiscount;
 
-  Data({this.id, this.name, this.offerCode, this.discount, this.discountType, this.isFlat, this.flatDiscount, this.minDiscount});
+  Data(
+      {this.id,
+      this.name,
+      this.offerCode,
+      this.discount,
+      this.discountType,
+      this.isFlat,
+      this.flatDiscount,
+      this.minDiscount});
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];

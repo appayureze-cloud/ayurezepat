@@ -46,3 +46,11 @@ app.*.map.json
 /android/app/.cxx/
 pubspec.lock
 android/app/.cxx/
+
+# Signing secrets - never commit these. See android/key.properties.example.
+android/key.properties
+android/app/key.properties
+*.jks
+*.keystore
+*.p12
+*.pem

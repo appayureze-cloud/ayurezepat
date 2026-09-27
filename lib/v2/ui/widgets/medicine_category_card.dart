@@ -10,9 +10,7 @@ import '../../../const/Palette.dart';
 class MedicineCategoryCard extends HookWidget {
   final PopularCategories category;
 
-  const MedicineCategoryCard(
-      {required this.category,
-      super.key});
+  const MedicineCategoryCard({required this.category, super.key});
 
   @override
   Widget build(BuildContext context) {

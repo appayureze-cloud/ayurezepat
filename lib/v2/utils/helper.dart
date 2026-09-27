@@ -1,7 +1,8 @@
 import 'dart:async' show Timer;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart' show NotificationResponse;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
+    show NotificationResponse;
 import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
 
@@ -124,9 +125,9 @@ class AlwaysDisabledFocusNode extends FocusNode {
   bool get hasFocus => false;
 }
 
-
 class NotificationHandler {
-  static final ValueNotifier<NotificationResponse?> notificationResponse = ValueNotifier(null);
+  static final ValueNotifier<NotificationResponse?> notificationResponse =
+      ValueNotifier(null);
 
   static void handle(NotificationResponse response) {
     notificationResponse.value = response;

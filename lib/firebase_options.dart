@@ -63,9 +63,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '298839588168',
     projectId: 'ayurease-healthcare',
     storageBucket: 'ayurease-healthcare.firebasestorage.app',
-    androidClientId: '298839588168-h1iiiu1396ltg1oa8hq229hiuj5rf3n6.apps.googleusercontent.com',
-    iosClientId: '298839588168-hushpnva1pukg3s4ffprl09ieth8rco3.apps.googleusercontent.com',
+    androidClientId:
+        '298839588168-h1iiiu1396ltg1oa8hq229hiuj5rf3n6.apps.googleusercontent.com',
+    iosClientId:
+        '298839588168-hushpnva1pukg3s4ffprl09ieth8rco3.apps.googleusercontent.com',
     iosBundleId: 'app.ayureze.patient',
   );
-
 }

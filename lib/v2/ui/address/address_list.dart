@@ -15,7 +15,7 @@ import 'package:sizer/sizer.dart';
 import '../../../api/base_model.dart';
 import '../../../api/server_error.dart';
 import '../../../const/Palette.dart';
-import '../../../database/form_helper.dart';
+import '../../utils/form_helper.dart';
 import 'add_address.dart';
 
 class AddressList extends StatefulWidget {

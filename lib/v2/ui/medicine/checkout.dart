@@ -3,6 +3,9 @@ import 'package:doctro_patient/api/retrofit_Api.dart';
 import 'package:doctro_patient/const/prefConstatnt.dart'
     show FirestoreConstants, Preferences;
 import 'package:doctro_patient/const/preference.dart';
+import 'package:doctro_patient/features/case/presentation/case_service.dart';
+import 'package:doctro_patient/features/payments/domain/payment_repository.dart';
+import 'package:doctro_patient/features/payments/presentation/payment_service.dart';
 import 'package:doctro_patient/model/v2/common_response.dart';
 import 'package:doctro_patient/model/v2/medicine/cart_list_response.dart';
 import 'package:doctro_patient/v2/ui/address/add_address.dart' show AddLocation;
@@ -14,7 +17,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitFadingCircle;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart'
     show ModalProgressHUD;
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../const/Palette.dart';
@@ -26,10 +28,7 @@ import '../widgets/payment_card.dart';
 
 class Checkout extends HookWidget {
   Checkout({super.key});
-  final Razorpay razorpay = Razorpay();
 
-  final String? razorpayKey =
-      SharedPreferenceHelper.getString(Preferences.razor_key);
   final int? isRazorEnabled = SharedPreferenceHelper.getInt(Preferences.razor);
   final int? isCodEnabled = SharedPreferenceHelper.getInt(Preferences.cod);
 
@@ -41,7 +40,6 @@ class Checkout extends HookWidget {
     ValueNotifier<List<Address>> addressList = useState([]);
     ValueNotifier<String?> selectedPaymentType =
         useState(isRazorEnabled == 1 ? 'razorpay' : null);
-    ValueNotifier<String?> _paymentToken = useState(null);
 
     Future<void> fetchAddresses() async {
       AddressListResponse response;
@@ -69,64 +67,27 @@ class Checkout extends HookWidget {
       }
     }
 
-    void openCheckoutRazorPay() async {
-      var map = {
-        'key': SharedPreferenceHelper.getString(Preferences.razor_key),
-        'amount': (items.value.fold(
-                0.0,
-                (sum, item) =>
-                    sum + ((item.price ?? 0.0) * (item.quantity ?? 0.0)))) *
-            100,
-        'name': 'Ayureze Healthcare',
-        'currency': SharedPreferenceHelper.getString(Preferences.currency_code),
-        'image': 'https://ayureze.org/images/upload/680ce4e79bca1.png',
-        'description': '',
-        'send_sms_hash': 'true',
-        'prefill': {
-          'contact': '${SharedPreferenceHelper.getString(Preferences.phone)}',
-          'email':
-              '${SharedPreferenceHelper.getString(FirestoreConstants.email)}'
-        },
-      };
-      var options = map;
+    Future<void> makeOrder({String? paymentReference}) async {
       try {
-        razorpay.open(options);
-      } catch (e) {
-        logger.e('Error: e');
-      }
-    }
+        final dio = await RetroApi().dioData(context);
+        final caseModel =
+            await CaseService.withDio(dio).repository.ensureActiveCase();
 
-    void makeOrder() async {
-      try {
-        List<String> a =
-            '${addressList.value.firstWhere((i) => i.id == selectedAddress.value!).address}'
-                .split(",");
         Map<String, dynamic> body = {
+          "case_id": caseModel.id,
           "line_items": List.generate(items.value.length, (i) {
             return {
               "variant_id": items.value[i].variantId!,
               "quantity": items.value[i].quantity!,
             };
           }),
-          "shipping_address": {
-            "address1":
-                a.length > 4 ? a.sublist(0, a.length - 4).join(', ') : '',
-            "city": a[a.length - 4],
-            "zip": a.last,
-            "state": a[a.length - 3],
-            "country": a[a.length - 2],
-            "phone": SharedPreferenceHelper.getString(Preferences.phone),
-          },
+          "address_id": selectedAddress.value,
           "discount_codes": [],
           "payment_mode": selectedPaymentType.value, // or "cod",
-          "payment_token": _paymentToken.value
+          "payment_reference": paymentReference,
         };
-        logger.w('$a $body');
-        // return;
         Preferences.onLoading(context);
-        CommonResponse response =
-            await RestClient(await RetroApi().dioData(context))
-                .placeOrder(body);
+        CommonResponse response = await RestClient(dio).placeOrder(body);
         if (response.success == true) {
           Fluttertoast.showToast(
             msg: '${response.msg}',
@@ -148,32 +109,40 @@ class Checkout extends HookWidget {
       } catch (error, stacktrace) {
         Preferences.hideDialog(context);
         logger.e("Exception occur: $error stackTrace: $stacktrace");
+        Fluttertoast.showToast(
+            msg: "Order failed", toastLength: Toast.LENGTH_SHORT);
       }
-      // Navigator.pushNamed(context, 'PaymentResult');
     }
 
-    // RazorPay Success Method //
-    void _handlePaymentSuccess(PaymentSuccessResponse response) {
-      _paymentToken.value = response.paymentId;
-      _paymentToken.value != null &&
-              _paymentToken.value != "" &&
-              _paymentToken.value!.isNotEmpty
-          ? makeOrder()
-          : Fluttertoast.showToast(
-              msg: "Payment Failed", toastLength: Toast.LENGTH_SHORT);
+    Future<void> payWithRazorpay() async {
+      loading.value = true;
+      try {
+        final dio = await RetroApi().dioData(context);
+        final paymentReference = await PaymentService.withDio(dio).charge(
+          purpose: PaymentRepository.purposeMedicineOrder,
+          reference: {
+            'line_items': List.generate(items.value.length, (i) {
+              return {
+                "variant_id": items.value[i].variantId!,
+                "quantity": items.value[i].quantity!,
+              };
+            }),
+          },
+          contactPhone: SharedPreferenceHelper.getString(Preferences.phone),
+          contactEmail:
+              SharedPreferenceHelper.getString(FirestoreConstants.email),
+        );
+        await makeOrder(paymentReference: paymentReference);
+      } on PaymentCancelledException {
+        loading.value = false;
+      } catch (e) {
+        loading.value = false;
+        logger.e('Payment failed: $e');
+        Fluttertoast.showToast(
+            msg: "Payment Failed", toastLength: Toast.LENGTH_SHORT);
+      }
     }
 
-    // RazorPay Error Method //
-    void _handlePaymentError(PaymentFailureResponse response) {}
-
-    // RazorPay Wallet Method //
-    void _handleExternalWallet(ExternalWalletResponse response) {}
-
-    useEffect(() {
-      razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-      razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-      razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-    }, []);
     useEffect(() {
       () async {
         loading.value = true;
@@ -313,7 +282,7 @@ class Checkout extends HookWidget {
                                 switch (selectedPaymentType.value) {
                                   case 'razorpay':
                                     {
-                                      openCheckoutRazorPay();
+                                      payWithRazorpay();
                                       break;
                                     }
                                   case 'cod':

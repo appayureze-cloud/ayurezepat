@@ -1,5 +1,8 @@
 import 'package:doctro_patient/const/prefConstatnt.dart';
 import 'package:doctro_patient/const/preference.dart';
+import 'package:doctro_patient/features/case/presentation/case_service.dart';
+import 'package:doctro_patient/features/payments/domain/payment_repository.dart';
+import 'package:doctro_patient/features/payments/presentation/payment_service.dart';
 import 'package:doctro_patient/model/v2/display_offer_model.dart';
 import 'package:doctro_patient/v2/ui/appointment/payment_result.dart';
 import 'package:doctro_patient/v2/ui/widgets/button_v2.dart';
@@ -9,7 +12,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../api/network_api.dart';
@@ -34,10 +36,6 @@ class SelectAppointmentPaymentMethods extends HookWidget {
       super.key,
       required this.coupon});
 
-  final Razorpay razorpay = Razorpay();
-
-  final String? razorpayKey =
-      SharedPreferenceHelper.getString(Preferences.razor_key);
   final int? isRazorEnabled = SharedPreferenceHelper.getInt(Preferences.razor);
   final int? isCodEnabled = SharedPreferenceHelper.getInt(Preferences.cod);
 
@@ -45,12 +43,16 @@ class SelectAppointmentPaymentMethods extends HookWidget {
   Widget build(BuildContext context) {
     ValueNotifier<String?> selectedPaymentType =
         useState(isRazorEnabled == 1 ? 'razorpay' : null);
-    ValueNotifier<String?> _paymentToken = useState(null);
     ValueNotifier<bool> loading = useState(false);
 
-    Future<void> bookAppointment() async {
+    Future<void> bookAppointment({String? paymentReference}) async {
       try {
+        final dio = await RetroApi().dioData(context);
+        final caseModel =
+            await CaseService.withDio(dio).repository.ensureActiveCase();
+
         Map<String, dynamic> body = {
+          "case_id": caseModel.id,
           "appointment_for": details.bookingFor,
           "hospital_id": details.hospital.id,
           "patient_name": details.name,
@@ -66,28 +68,15 @@ class SelectAppointmentPaymentMethods extends HookWidget {
           "time": DateFormat("hh:mm a").format(details.date),
           "duration": int.tryParse('${details.doctor.timeslot}') ?? 30,
           "payment_type": selectedPaymentType.value,
-          "payment_status": selectedPaymentType.value == 'cod' ? 0 : 1,
-          "payment_token":
-              selectedPaymentType.value == 'cod' ? '' : _paymentToken.value,
-          "amount": fees,
+          "payment_reference": paymentReference,
           "doctor_id": details.doctor.id,
           "report_image": "",
           "discount_id": coupon?.id,
-          "discount_price": coupon == null ? 0 : discount,
         };
-        // if (isInsured == true) {
-        //   body['is_insured'] = isInsured == true ? 1 : 0;
-        //   body['policy_insurer_name'] = selectInsured;
-        //   body['policy_number'] = policyNumberController.text;
-        // } else if (isInsured == false) {
-        //   body['is_insured'] = isInsured == true ? 1 : 0;
-        // }
         logger.i(body);
 
         loading.value = true;
-        BookingResponse response =
-            await RestClient(await RetroApi().dioData(context))
-                .bookAppointment(body);
+        BookingResponse response = await RestClient(dio).bookAppointment(body);
 
         Fluttertoast.showToast(
           msg: '${response.msg}',
@@ -110,64 +99,38 @@ class SelectAppointmentPaymentMethods extends HookWidget {
       } catch (error, stacktrace) {
         Preferences.hideDialog(context);
         logger.e("Exception occur: $error stackTrace: $stacktrace");
+        Fluttertoast.showToast(
+            msg: "Booking failed", toastLength: Toast.LENGTH_SHORT);
       } finally {
         loading.value = false;
       }
     }
 
-    void openCheckoutRazorPay() async {
+    Future<void> payWithRazorpay() async {
       loading.value = true;
-      var map = {
-        'key': SharedPreferenceHelper.getString(Preferences.razor_key),
-        'amount': fees * 100,
-        'name': 'Ayureze Healthcare',
-        'currency': SharedPreferenceHelper.getString(Preferences.currency_code),
-        'image': 'https://ayureze.org/images/upload/680ce4e79bca1.png',
-        'description': '',
-        'send_sms_hash': 'true',
-        'prefill': {
-          'contact': '${details.phone}',
-          'email':
-              '${SharedPreferenceHelper.getString(FirestoreConstants.email)}'
-        },
-      };
-      var options = map;
       try {
-        razorpay.open(options);
-      } catch (e) {
-        logger.e('Error: e');
+        final dio = await RetroApi().dioData(context);
+        final paymentReference = await PaymentService.withDio(dio).charge(
+          purpose: PaymentRepository.purposeAppointment,
+          reference: {
+            'doctor_id': details.doctor.id,
+            'hospital_id': details.hospital.id,
+            'discount_id': coupon?.id,
+          },
+          contactPhone: details.phone,
+          contactEmail:
+              SharedPreferenceHelper.getString(FirestoreConstants.email),
+        );
+        await bookAppointment(paymentReference: paymentReference);
+      } on PaymentCancelledException {
         loading.value = false;
+      } catch (e) {
+        loading.value = false;
+        logger.e('Payment failed: $e');
         Fluttertoast.showToast(
             msg: "Payment Failed", toastLength: Toast.LENGTH_SHORT);
       }
     }
-
-    // RazorPay Success Method //
-    void _handlePaymentSuccess(PaymentSuccessResponse response) {
-      _paymentToken.value = response.paymentId;
-      _paymentToken.value != null &&
-              _paymentToken.value != "" &&
-              _paymentToken.value!.isNotEmpty
-          ? bookAppointment()
-          : Fluttertoast.showToast(
-              msg: "Payment Failed", toastLength: Toast.LENGTH_SHORT);
-    }
-
-    // RazorPay Error Method //
-    void _handlePaymentError(PaymentFailureResponse response) {
-      loading.value = false;
-      Fluttertoast.showToast(
-          msg: "Payment Failed", toastLength: Toast.LENGTH_SHORT);
-    }
-
-    // RazorPay Wallet Method //
-    void _handleExternalWallet(ExternalWalletResponse response) {}
-
-    useEffect(() {
-      razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-      razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-      razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-    }, []);
 
     return SafeArea(
       child: ModalProgressHUD(
@@ -225,7 +188,7 @@ class SelectAppointmentPaymentMethods extends HookWidget {
                           switch (selectedPaymentType.value) {
                             case 'razorpay':
                               {
-                                openCheckoutRazorPay();
+                                payWithRazorpay();
                                 break;
                               }
                             case 'cod':
@@ -240,7 +203,6 @@ class SelectAppointmentPaymentMethods extends HookWidget {
                               msg: "Please select payment method",
                               toastLength: Toast.LENGTH_SHORT);
                         }
-                        // Navigator.pushNamed(context, 'PaymentResult');
                       },
                     ),
                   ],

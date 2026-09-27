@@ -38,7 +38,6 @@ dependencies:
   #    git:
   #      url: https://github.com/thirstyde/flutter_paystack_rahul.git
   auto_size_text: ^3.0.0
-  barcode_widget: ^2.0.3
   cached_network_image: ^3.2.3
   # carousel_slider: ^4.2.1
   carousel_slider: ^5.0.0
@@ -70,7 +69,6 @@ dependencies:
   flutter_local_notifications: ^18.0.1
 
 
-  flutter_credit_card: ^3.0.4
   flutter_custom_clippers: ^2.1.0
 
   flutter_html: ^3.0.0-alpha.6
@@ -101,8 +99,6 @@ dependencies:
 
 
   # flutter_google_places: ^0.3.0
-  # flutter_google_places_sdk: ^0.3.10
-  flutter_google_places_sdk: ^0.3.2+1
   # flutter_google_places_hoc081098: ^2.0.0
   google_places_flutter_api: ^1.0.2
 
@@ -110,7 +106,6 @@ dependencies:
   google_maps_flutter: ^2.5.3
 
   # google_maps_webservice: ^0.0.20-nullsafety.5
-  googlemaps_flutter_webservices: ^1.0.2
 
   google_sign_in: ^6.3.0
   html: ^0.15.1
@@ -118,11 +113,10 @@ dependencies:
   http: ^1.4.0
 
 
-  http_auth: ^1.0.1
   image_picker: ^1.0.2
   intl: ^0.20.2
   
-  json_annotation: ^4.7.0
+  json_annotation: ^4.9.0
   # logger: ^2.0.1
   # logger: ^2.5.0
 
@@ -148,13 +142,10 @@ dependencies:
   # shared_preferences: ^2.0.15
   shared_preferences: ^2.5.2
 
-  sqflite: ^2.2.2
   url_launcher: ^6.3.1
   # uuid: ^3.0.7
   uuid: ^4.1.0
 
-  # webview_flutter: ^4.2.2
-  webview_flutter: ^4.10.0
 
   list_tile_switch: ^1.0.0
   scroll_to_index: ^3.0.1
@@ -178,7 +169,6 @@ dependencies:
   lottie: ^3.3.1
   dropdown_button2: ^2.3.9
   open_filex: ^4.7.0
-  googleapis_auth: ^2.0.0
   readmore: ^3.0.0
   collection: ^1.19.1
 
@@ -188,6 +178,8 @@ dev_dependencies:
     sdk: flutter
   retrofit_generator: ^7.0.8
   build_runner: ^2.3.3
+  json_serializable: ^6.8.0
+  flutter_lints: ^4.0.0
 
 flutter_native_splash:
   color: "#FFFFFF"
@@ -210,13 +202,6 @@ flutter_icons:
   image_path: "assets/images/appIcon.jpg"
   android: true
   ios: true
-
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^2.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

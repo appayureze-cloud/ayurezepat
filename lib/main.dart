@@ -60,7 +60,6 @@ void main() async {
     badge: true,
     sound: true,
   );
-  HttpOverrides.global = MyHttpOverrides();
   runApp(MyApp());
 }
 
@@ -550,14 +549,5 @@ class _MyAppState extends State<MyApp> {
       ),
     );
     // }
-  }
-}
-
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
   }
 }

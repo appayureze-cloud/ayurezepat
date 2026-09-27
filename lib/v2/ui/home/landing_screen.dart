@@ -76,25 +76,25 @@ class MainLandingPage extends HookWidget {
                   icon: Icon(
                     Icons.home_outlined,
                   ),
-                  label: '',
+                  label: 'Home',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(
                     Icons.medical_services_outlined,
                   ),
-                  label: '',
+                  label: 'Doctors',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(
                     Icons.meeting_room_outlined,
                   ),
-                  label: '',
+                  label: 'Appointments',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(
                     Icons.person_outline_sharp,
                   ),
-                  label: '',
+                  label: 'Profile',
                 ),
               ],
             ),
@@ -136,24 +136,6 @@ class MainLandingPage extends HookWidget {
                     }
                   },
                 ),
-                // AI Chat Button
-                // SpeedDialChild(
-                //   child: Image.asset(
-                //     'assets/ai_chat.png',
-                //     height: 30,
-                //     width: 30,
-                //   ),
-                //   label: "AI Chat",
-                //   backgroundColor: Colors.white,
-                //   onTap: () {
-                //     // getOneSignalToken("d63f43da-5595-4865-85b8-b1146a1b1aaf");
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(
-                //           builder: (context) => AiDataCollector()),
-                //     );
-                //   },
-                // ),
               ],
             ),
           ),

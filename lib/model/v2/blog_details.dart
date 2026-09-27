@@ -30,7 +30,13 @@ class Data {
   String? blogRef;
   String? fullImage;
 
-  Data({this.id, this.image, this.title, this.desc, this.blogRef, this.fullImage});
+  Data(
+      {this.id,
+      this.image,
+      this.title,
+      this.desc,
+      this.blogRef,
+      this.fullImage});
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];

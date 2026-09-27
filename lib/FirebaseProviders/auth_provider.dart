@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctro_patient/FirebaseModels/user_chat.dart';
 import 'package:doctro_patient/const/prefConstatnt.dart';
@@ -9,7 +7,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/network_api.dart';
@@ -213,44 +210,17 @@ class AuthProvider extends ChangeNotifier {
       final User? firebaseUser = userCredential.user;
 
       if (firebaseUser != null) {
-        String? idToken = await firebaseUser.getIdToken(true); //force refresh
-        debugPrint('TOKEN:-  $idToken');
+        // Force-refresh so the token we hand the backend is current. From
+        // here on, API calls always re-pull the token from FirebaseAuth
+        // (see RetroApi._currentIdToken) rather than trusting this cached
+        // copy, so no manual refresh call against Google's REST API is
+        // needed.
+        String? idToken = await firebaseUser.getIdToken(true);
 
-        // Step 2: Call Laravel API with Firebase JWT
         if (idToken != null) {
           await SharedPreferenceHelper.setString(
               Preferences.auth_token, idToken);
 
-          final response1 = await http.post(
-            Uri.parse(
-                'https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=AIzaSyDlpw8laR5rfPfx3oQeTrIENXBfXV7CZyo'),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: json.encode({
-              'postBody':
-                  'id_token=${googleAuth.idToken}&providerId=google.com',
-              'requestUri': 'http://localhost',
-              'returnIdpCredential': true,
-              'returnSecureToken': true,
-            }),
-          );
-
-          if (response1.statusCode == 200) {
-            final data = jsonDecode(response1.body);
-            final firebaseIdToken = data['idToken'];
-            final refreshToken = data['refreshToken'];
-            final expiresIn = int.parse(data['expiresIn']);
-
-            await SharedPreferenceHelper.setString(
-                Preferences.auth_token, firebaseIdToken);
-            await SharedPreferenceHelper.setString(
-                Preferences.refresh_token, refreshToken);
-            await SharedPreferenceHelper.setInt(
-                Preferences.expiresIn, expiresIn);
-            await SharedPreferenceHelper.setInt(
-                'token_saved_at', DateTime.now().millisecondsSinceEpoch);
-          }
           CheckOtpModel response =
               await RestClient(await RetroApi().dioData(context)).googleSignIn(
                   SharedPreferenceHelper.getString(
@@ -324,6 +294,4 @@ class AuthProvider extends ChangeNotifier {
       return false;
     }
   }
-
-  notifyListeners();
 }
