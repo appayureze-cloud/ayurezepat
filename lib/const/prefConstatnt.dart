@@ -56,6 +56,8 @@ class Preferences {
   static const String notificationPermissionDialog =
       "notificationPermissionDialog";
   static const String activeCaseId = "active_case_id";
+  static const String whatsappConsentOptedIn = "whatsapp_consent_opted_in";
+  static const String whatsappConsentAt = "whatsapp_consent_at";
 
   static Future<bool> checkNetwork() async {
     var connectivityResult = await (Connectivity().checkConnectivity());

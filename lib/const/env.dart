@@ -54,4 +54,12 @@ class Env {
     'USE_MOCK_HEALTH_RECORDS',
     defaultValue: true,
   );
+
+  /// See docs/backend/whatsapp.md. The client never talks to the WhatsApp
+  /// BSP directly - only records the patient's opt-in/out choice with our
+  /// backend, which relays it to the BSP.
+  static const bool useMockWhatsappConsent = bool.fromEnvironment(
+    'USE_MOCK_WHATSAPP_CONSENT',
+    defaultValue: true,
+  );
 }

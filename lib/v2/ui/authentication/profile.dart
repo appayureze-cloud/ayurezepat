@@ -262,6 +262,11 @@ class Profile extends HookWidget {
                         icon: Icons.notifications_none,
                         route: 'Notifications',
                       ),
+                      ProfileSectionCard(
+                        title: 'WhatsApp Updates',
+                        icon: Icons.chat_outlined,
+                        route: 'WhatsAppOptIn',
+                      ),
                       GestureDetector(
                         onTap: () {
                           Navigator.push(

@@ -54,6 +54,7 @@ import 'features/astra/presentation/daily_checkin_screen.dart';
 import 'features/health_records/presentation/health_record_timeline_screen.dart';
 import 'features/prescriptions/presentation/dose_reminder_scheduler.dart';
 import 'features/smart_orders/presentation/smart_order_draft_screen.dart';
+import 'features/whatsapp_consent/presentation/whatsapp_opt_in_screen.dart';
 import 'v2/ui/authentication/edit_profile.dart';
 import 'v2/ui/medicine/order_details.dart';
 
@@ -608,6 +609,7 @@ class _MyAppState extends State<MyApp> {
               'Blogs': (context) => BlogsList(),
               'AddressList': (context) => AddressList(),
               'Notifications': (context) => Notifications(),
+              'WhatsAppOptIn': (context) => const WhatsappOptInScreen(),
               'HealthRecord': (context) => const HealthRecordTimelineScreen(),
 
               'Home': (context) => MainLandingPage(),
