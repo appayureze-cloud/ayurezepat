@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../const/Palette.dart';
@@ -9,6 +10,7 @@ import '../../../v2/ui/widgets/header.dart';
 import '../../../v2/utils/pdf_downloader.dart';
 import '../domain/entities/prescription_item.dart';
 import '../domain/prescription_items_source.dart';
+import 'dose_reminder_scheduler.dart';
 
 class PrescriptionDetailScreen extends StatelessWidget {
   final Prescription prescription;
@@ -58,6 +60,34 @@ class PrescriptionDetailScreen extends StatelessWidget {
                     prescription.treatmentRecommendation!,
                     style:
                         TextStyle(fontSize: 13.sp, color: Palette.dark_grey1),
+                  ),
+                  SizedBox(height: 1.h),
+                  ButtonV2(
+                    label: 'Book Treatment',
+                    onPressed: () => Navigator.pushNamed(
+                      context,
+                      'TherapyHome',
+                      arguments: [2, prescription.treatmentRecommendation],
+                    ),
+                  ),
+                ],
+                if (items.isNotEmpty && prescription.id != null) ...[
+                  SizedBox(height: 2.h),
+                  ButtonV2(
+                    label: 'Set Dose Reminders',
+                    onPressed: () async {
+                      final prescriptionId = prescription.id!;
+                      for (var i = 0; i < items.length; i++) {
+                        await scheduleDoseReminders(
+                          prescriptionId: prescriptionId,
+                          itemIndex: i,
+                          item: items[i],
+                        );
+                      }
+                      Fluttertoast.showToast(
+                        msg: 'Reminders set for ${items.length} medicine(s)',
+                      );
+                    },
                   ),
                 ],
                 SizedBox(height: 3.h),

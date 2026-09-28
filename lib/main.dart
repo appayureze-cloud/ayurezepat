@@ -48,7 +48,10 @@ import 'VideoCall/videoCall.dart';
 import 'const/Palette.dart';
 import 'const/prefConstatnt.dart';
 import 'firebase_options.dart';
+import 'api/retrofit_Api.dart';
+import 'features/astra/data/astra_service.dart';
 import 'features/health_records/presentation/health_record_timeline_screen.dart';
+import 'features/prescriptions/presentation/dose_reminder_scheduler.dart';
 import 'features/smart_orders/presentation/smart_order_draft_screen.dart';
 import 'v2/ui/authentication/edit_profile.dart';
 import 'v2/ui/medicine/order_details.dart';
@@ -368,6 +371,37 @@ class _MyAppState extends State<MyApp> {
           MaterialPageRoute(
             builder: (_) => OrderDetails(id: orderId),
           ),
+        );
+      }
+      return;
+    }
+
+    // Dose reminder actions (Phase 3) - see
+    // lib/features/prescriptions/presentation/dose_reminder_scheduler.dart
+    // and docs/backend/reminders.md.
+    if (screen == 'reminder_ack') {
+      final reminderId = payload['reminder_id'];
+      if (reminderId == null) return;
+      final status = switch (actionId) {
+        'reminder_taken' => 'taken',
+        'reminder_skip' => 'skipped',
+        'reminder_snooze' => 'snoozed',
+        _ => null,
+      };
+      if (status == null) return;
+      try {
+        final dio = await RetroApi().dioData(context);
+        await AstraService.withDio(dio)
+            .repository
+            .ackReminder('$reminderId', status);
+      } catch (e) {
+        logger.e('Failed to ack reminder: $e');
+      }
+      if (actionId == 'reminder_snooze') {
+        await snoozeReminder(
+          '$reminderId',
+          payload['title'] ?? 'Medicine reminder',
+          payload['body'] ?? '',
         );
       }
     }

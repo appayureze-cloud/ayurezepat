@@ -73,19 +73,19 @@ class TherapyLandingPage extends HookWidget {
                 icon: Icon(
                   Icons.home_outlined,
                 ),
-                label: '',
+                label: 'Home',
               ),
               BottomNavigationBarItem(
                 icon: Icon(
                   Icons.list,
                 ),
-                label: '',
+                label: 'Bookings',
               ),
               BottomNavigationBarItem(
                 icon: Icon(
                   Icons.search,
                 ),
-                label: '',
+                label: 'Centres',
               ),
             ],
           ),

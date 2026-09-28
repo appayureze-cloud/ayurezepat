@@ -2,16 +2,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../../main.dart' show flutterLocalNotificationsPlugin;
+import '../../../v2/utils/notification_id.dart';
 
 /// When an ignored smart order draft should re-nudge the patient. A pure
 /// function so the "24 hours later" rule is unit-testable without a real
 /// clock or the notifications plugin.
 DateTime nextRepromptTime(DateTime now) => now.add(const Duration(hours: 24));
-
-/// Dart's String.hashCode isn't guaranteed to fit the 32-bit signed range
-/// flutter_local_notifications/Android expects for a notification id -
-/// mask it down so zonedSchedule/cancel never get an out-of-range value.
-int notificationIdFor(String key) => key.hashCode & 0x7fffffff;
 
 /// Schedules a local notification reminding the patient about an ignored
 /// smart order draft. Tapping it should open the draft screen again -

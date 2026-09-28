@@ -60,19 +60,19 @@ class MedicineLandingPage extends HookWidget {
                 icon: Icon(
                   Icons.home_outlined,
                 ),
-                label: '',
+                label: 'Home',
               ),
               BottomNavigationBarItem(
                 icon: Icon(
                   Icons.search,
                 ),
-                label: '',
+                label: 'Medicines',
               ),
               BottomNavigationBarItem(
                 icon: Icon(
                   Icons.list,
                 ),
-                label: '',
+                label: 'Orders',
               ),
             ],
           ),
