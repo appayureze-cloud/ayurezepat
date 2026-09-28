@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../v2/utils/logger.dart';
@@ -8,6 +10,7 @@ import '../domain/entities/astra_reply_event.dart';
 import '../domain/entities/astra_session.dart';
 import '../domain/red_flag_detector.dart';
 import 'astra_localization.dart';
+import 'daily_checkin_reminder_scheduler.dart';
 
 /// Drives the Astra chat screen. Every outgoing user message is screened by
 /// [RedFlagDetector] before it ever reaches [repository] - a match short
@@ -49,6 +52,12 @@ class AstraChatNotifier extends ChangeNotifier {
         role: AstraMessageRole.assistant,
         text: _session!.greeting,
       ));
+      // Best-effort: a missed daily reminder isn't worth failing the whole
+      // session bootstrap over, and the local-notifications plugin isn't
+      // available in plain unit tests.
+      unawaited(scheduleDailyCheckinReminder().catchError((e) {
+        logger.e('Failed to schedule daily check-in reminder: $e');
+      }));
     } catch (e) {
       logger.e('Astra session init failed: $e');
       _error = "Astra couldn't start right now. Please try again.";

@@ -10,6 +10,7 @@ import '../data/astra_service.dart';
 import '../domain/entities/astra_message.dart';
 import 'astra_chat_notifier.dart';
 import 'astra_localization.dart';
+import 'daily_checkin_screen.dart';
 import 'voice_controller.dart';
 import 'widgets/astra_message_bubble.dart';
 
@@ -57,6 +58,14 @@ class AstraChatScreen extends HookWidget {
           Header_v2(
             title: 'Astra',
             actions: [
+              IconButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DailyCheckinScreen()),
+                ),
+                icon: Icon(Icons.checklist, color: Palette.primary),
+                tooltip: 'Daily check-in',
+              ),
               TextButton(
                 onPressed: () {
                   language.value = language.value == AstraVoiceLanguage.english

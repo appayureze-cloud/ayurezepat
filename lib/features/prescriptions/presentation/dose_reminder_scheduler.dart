@@ -12,8 +12,9 @@ import '../domain/entities/prescription_item.dart';
 /// entirely on-device from a prescription's structured items rather than
 /// coming from `GET /astra/cases/{id}/plan` (that endpoint - see
 /// docs/backend/astra.md - isn't wired into any screen yet). The backend's
-/// `POST /astra/reminders/{id}/ack` needs to accept this opaque id rather
-/// than assuming it was minted server-side; see docs/backend/reminders.md.
+/// `POST /astra/reminders/{id}/ack` needs to accept this opaque
+/// client-minted id rather than assuming it was minted server-side; see
+/// the `plan`/`checkins`/reminders section of docs/backend/astra.md.
 String reminderIdFor({
   required int prescriptionId,
   required int itemIndex,

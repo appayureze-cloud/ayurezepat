@@ -50,6 +50,7 @@ import 'const/prefConstatnt.dart';
 import 'firebase_options.dart';
 import 'api/retrofit_Api.dart';
 import 'features/astra/data/astra_service.dart';
+import 'features/astra/presentation/daily_checkin_screen.dart';
 import 'features/health_records/presentation/health_record_timeline_screen.dart';
 import 'features/prescriptions/presentation/dose_reminder_scheduler.dart';
 import 'features/smart_orders/presentation/smart_order_draft_screen.dart';
@@ -378,7 +379,7 @@ class _MyAppState extends State<MyApp> {
 
     // Dose reminder actions (Phase 3) - see
     // lib/features/prescriptions/presentation/dose_reminder_scheduler.dart
-    // and docs/backend/reminders.md.
+    // and docs/backend/astra.md.
     if (screen == 'reminder_ack') {
       final reminderId = payload['reminder_id'];
       if (reminderId == null) return;
@@ -404,6 +405,16 @@ class _MyAppState extends State<MyApp> {
           payload['body'] ?? '',
         );
       }
+      return;
+    }
+
+    // Daily check-in reminder (Phase 3) - see
+    // lib/features/astra/presentation/daily_checkin_reminder_scheduler.dart.
+    if (actionId == null && screen == 'daily_checkin') {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (_) => const DailyCheckinScreen()),
+      );
+      return;
     }
   }
 
