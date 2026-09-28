@@ -40,6 +40,34 @@ void main() {
       );
     });
 
+    test('detects anaphylaxis', () {
+      expect(
+        RedFlagDetector.detect('My throat is closing after eating peanuts'),
+        contains(RedFlag.anaphylaxis),
+      );
+    });
+
+    test('detects seizure', () {
+      expect(
+        RedFlagDetector.detect('My brother is having a seizure right now'),
+        contains(RedFlag.seizure),
+      );
+    });
+
+    test('detects severe abdominal pain', () {
+      expect(
+        RedFlagDetector.detect('I have severe abdominal pain since morning'),
+        contains(RedFlag.severeAbdominalPain),
+      );
+    });
+
+    test('detects pediatric high fever', () {
+      expect(
+        RedFlagDetector.detect('My baby has a high fever and won\'t wake up'),
+        contains(RedFlag.pediatricHighFever),
+      );
+    });
+
     test('is case-insensitive', () {
       expect(
         RedFlagDetector.detect('CHEST PAIN since an hour'),

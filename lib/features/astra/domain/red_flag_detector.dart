@@ -10,12 +10,24 @@
 /// the emergency card when it wasn't truly an emergency) are an acceptable
 /// cost; false negatives are not. Do not make this "smarter" (e.g. via an
 /// LLM call) without keeping a keyword pass as a synchronous first gate.
+///
+/// The category list and phrasing were drafted against standard
+/// emergency-triage red flags (the original five plus anaphylaxis, seizure,
+/// severe abdominal pain, and pediatric high fever - all textbook
+/// "call emergency services" criteria, not judgment calls specific to this
+/// product). This has NOT had a clinician's sign-off. Get one before real
+/// patients rely on it, and route any changes they ask for through this
+/// file.
 enum RedFlag {
   chestPain,
   strokeSigns,
   breathingDifficulty,
   suicidalThoughts,
   heavyBleeding,
+  anaphylaxis,
+  seizure,
+  severeAbdominalPain,
+  pediatricHighFever,
 }
 
 class RedFlagDetector {
@@ -62,6 +74,38 @@ class RedFlagDetector {
       'bleeding heavily',
       'blood everywhere',
       'severe blood loss',
+    ],
+    RedFlag.anaphylaxis: [
+      'throat closing',
+      'throat is closing',
+      'tongue swelling',
+      'face swelling',
+      'swelling of my face',
+      'allergic reaction',
+      'anaphylaxis',
+      'hives and difficulty',
+    ],
+    RedFlag.seizure: [
+      'seizure',
+      'having a seizure',
+      'convulsion',
+      'convulsing',
+      'fit and unconscious',
+    ],
+    RedFlag.severeAbdominalPain: [
+      'severe abdominal pain',
+      'severe stomach pain',
+      'worst stomach pain',
+      'unbearable stomach pain',
+      'rigid abdomen',
+    ],
+    RedFlag.pediatricHighFever: [
+      'baby has a high fever',
+      'infant has a high fever',
+      'baby won\'t wake up',
+      'baby is unresponsive',
+      'infant is unresponsive',
+      'baby is limp',
     ],
   };
 
