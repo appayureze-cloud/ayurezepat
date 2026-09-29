@@ -51,6 +51,7 @@ import 'firebase_options.dart';
 import 'api/retrofit_Api.dart';
 import 'features/astra/data/astra_service.dart';
 import 'features/astra/presentation/daily_checkin_screen.dart';
+import 'features/case/presentation/case_summary_screen.dart';
 import 'features/health_records/presentation/health_record_timeline_screen.dart';
 import 'features/prescriptions/presentation/dose_reminder_scheduler.dart';
 import 'features/smart_orders/presentation/smart_order_draft_screen.dart';
@@ -610,6 +611,7 @@ class _MyAppState extends State<MyApp> {
               'AddressList': (context) => AddressList(),
               'Notifications': (context) => Notifications(),
               'WhatsAppOptIn': (context) => const WhatsappOptInScreen(),
+              'CaseSummary': (context) => const CaseSummaryScreen(),
               'HealthRecord': (context) => const HealthRecordTimelineScreen(),
 
               'Home': (context) => MainLandingPage(),

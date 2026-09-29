@@ -258,6 +258,11 @@ class Profile extends HookWidget {
                         icon: Icons.folder_shared_outlined,
                       ),
                       ProfileSectionCard(
+                        title: 'My Case',
+                        route: 'CaseSummary',
+                        icon: Icons.assignment_turned_in_outlined,
+                      ),
+                      ProfileSectionCard(
                         title: 'Notifications',
                         icon: Icons.notifications_none,
                         route: 'Notifications',

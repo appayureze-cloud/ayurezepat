@@ -28,6 +28,15 @@ void main() {
           SharedPreferenceHelper.getString('active_case_id'), session.caseId);
     });
 
+    test('resolveCase marks the active case as resolved locally', () async {
+      final session = await repository.createSession();
+
+      await repository.resolveCase(session.caseId);
+
+      expect(
+          SharedPreferenceHelper.getString('active_case_status'), 'resolved');
+    });
+
     test('sendMessage for a mild symptom streams text then a tip card',
         () async {
       final events =

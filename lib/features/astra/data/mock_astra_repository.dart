@@ -150,5 +150,7 @@ class MockAstraRepository implements AstraRepository {
   @override
   Future<void> resolveCase(String caseId) async {
     await Future.delayed(const Duration(milliseconds: 100));
+    await SharedPreferenceHelper.setString(
+        Preferences.activeCaseStatus, 'resolved');
   }
 }
