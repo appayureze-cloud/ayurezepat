@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:doctro_patient/FirebaseProviders/auth_provider.dart'
     as authProvider;
 import 'package:doctro_patient/FirebaseProviders/chat_provider.dart';
@@ -63,6 +66,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPreferences.getInstance();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Off in debug so local development noise never reaches the crash
+  // dashboard; on everywhere else so real crashes are visible before
+  // launch, not discovered from user reports.
+  await FirebaseCrashlytics.instance
+      .setCrashlyticsCollectionEnabled(!kDebugMode);
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
   await SharedPreferenceHelper.init();
   // Needed for zonedSchedule (used by the smart order draft 24h re-prompt
   // and Phase 3's dose reminders).
