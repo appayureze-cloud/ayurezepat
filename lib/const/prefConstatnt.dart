@@ -57,6 +57,11 @@ class Preferences {
       "notificationPermissionDialog";
   static const String activeCaseId = "active_case_id";
   static const String activeCaseStatus = "active_case_status";
+  static const String astraGatewayAccessToken = "astra_gateway_access_token";
+  static const String astraGatewayRefreshToken = "astra_gateway_refresh_token";
+  static const String astraGatewayTokenExpiresAt =
+      "astra_gateway_token_expires_at";
+  static const String astraGatewayUserId = "astra_gateway_user_id";
   static const String whatsappConsentOptedIn = "whatsapp_consent_opted_in";
   static const String whatsappConsentAt = "whatsapp_consent_at";
 

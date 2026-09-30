@@ -1,11 +1,65 @@
 # Astra: AI health assistant
 
-The client is fully written against this contract
+The client is fully written against the contract documented below
 (`lib/features/astra/{domain,data,presentation}`), mocked by default via
-`Env.useMockAstra` until these endpoints exist. The LLM itself lives only on
-the backend - the client never calls an LLM provider directly and never
-carries an LLM API key (`google_generative_ai` is not used by the client for
-this reason; keep it that way even once these endpoints ship).
+`Env.useMockAstra`. The LLM itself lives only on the backend - the client
+never calls an LLM provider directly and never carries an LLM API key
+(`google_generative_ai` is not used by the client for this reason; keep it
+that way even once these endpoints ship).
+
+## Update: a real Astra backend exists, at a different host and contract
+
+A Phase 4 connectivity audit found that a real, live "Astra AI Unified
+Engine" backend is already deployed at **`https://astra.ayureze.in`**
+(confirmed via its published OpenAPI spec at
+`https://astra.ayureze.in/openapi.json`, 138 endpoints) - a **separate host
+and separate auth domain** from `Apis.baseUrl` (`ayureze.org`, the main app
+backend). Everything below this note describes the contract this client was
+originally written against, which does **not** match that real backend.
+
+What's now wired to the real, confirmed contract (see
+`lib/features/astra/data/astra_gateway_*.dart` and
+`AstraRepositoryImpl`'s class doc comment):
+
+- **Auth**: `POST /api/v1/auth/session` exchanges a Firebase ID token (the
+  same FirebaseAuth session `RetroApi` already uses for the main backend)
+  for an Astra-gateway JWT + refresh token. Cached locally
+  (`Preferences.astraGateway*`) and refreshed via `POST /api/v1/auth/refresh`
+  on a 401, mirroring `RetroApi.dioData`'s pattern for the main backend.
+- **`createSession`** → `POST /api/companion/journey/start` (the "AI
+  Wellness Companion" API's journey model maps onto this client's
+  session/case concept). Requires `user_id` (from the exchanged JWT's
+  `patient_id`) and `health_concern` - this client doesn't collect a concern
+  upfront, so it starts a generic journey and expects the patient's first
+  chat message to state it. Worth revisiting once real conversations show
+  whether that's good enough.
+- **`sendMessage`** → `POST /api/companion/chat`. Not streaming (the
+  original SSE contract below was never real) - the real API returns one
+  full response per call, wrapped here as a single-chunk stream to keep the
+  existing `Stream<AstraReplyEvent>` interface. Its `intervention_type`
+  field is logged but not acted on: the safety gate remains the client-side
+  `RedFlagDetector`, unconditionally, regardless of what this field means.
+- **`resolveCase`** → `PUT /api/companion/journey/{id}/status?status=resolved`
+  (query params, not a JSON body).
+
+What's **not** wired - either unused by any screen today, or the real
+gateway has no confirmed match (see per-method doc comments in
+`AstraRepositoryImpl` for the closest real candidate found): `getSession`,
+`triage`, `recommendations`, `plan`, `checkin`, `ackReminder`,
+`medicineInfo`. These still call the speculative contract documented below,
+which was never confirmed against a real backend.
+
+Also found live at astra.ayureze.in but out of scope for this client so far
+(separate feature domains, not yet wired to any screen): a Supabase-backed
+medicine-reminders API with adherence tracking and WhatsApp notifications
+(`/api/v1/api/reminders/*`), a documents/health-records API
+(`/api/v1/documents/*`), a Shopify-backed smart auto-cart
+(`/api/v1/shopify/*`), video-consultation token generation
+(`/api/v1/video/*`), and a WhatsApp companion webhook/proactive-messaging
+API (`/api/whatsapp-companion/*`). Doctor/admin/superadmin endpoints on the
+same gateway are out of scope for this patient app entirely.
+
+## Original (unconfirmed) contract
 
 ## Safety (read before changing anything here)
 

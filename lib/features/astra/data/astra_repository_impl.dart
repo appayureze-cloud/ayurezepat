@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -14,8 +13,10 @@ import '../domain/entities/care_plan.dart';
 import '../domain/entities/checkin_result.dart';
 import '../domain/entities/medicine_info.dart';
 import '../domain/entities/triage_result.dart';
-import 'astra_card_parser.dart';
 import 'astra_dtos.dart';
+import 'astra_gateway_apis.dart';
+import 'astra_gateway_client.dart';
+import 'astra_gateway_dtos.dart';
 
 class AstraException implements Exception {
   final String message;
@@ -25,22 +26,64 @@ class AstraException implements Exception {
   String toString() => message;
 }
 
-/// Talks to the real Astra endpoints. See docs/backend/astra.md.
+/// Talks to the real Astra backend. Two different contracts are in play
+/// here, both confirmed against astra.ayureze.in's live OpenAPI spec during
+/// a Phase 4 connectivity audit - see docs/backend/astra.md:
+///
+/// - [createSession], [sendMessage] and [resolveCase] call the real,
+///   confirmed "AI Wellness Companion" API on the Astra gateway
+///   (astra.ayureze.in), via [AstraGatewayClient]. `dio` (the main app's
+///   client, pointed at `Apis.baseUrl`/ayureze.org) is NOT used for these -
+///   the gateway is a different host with its own Firebase-token-exchange
+///   auth, not the app's regular bearer token.
+/// - The rest of this class's methods ([getSession], [triage],
+///   [recommendations], [plan], [checkin], [ackReminder], [medicineInfo])
+///   are not called from any screen today and still target the original
+///   speculative `{Apis.baseUrl}astra/...` contract from Phase 1, which was
+///   never confirmed against a real backend - the audit found no exact
+///   match for them on the real gateway. Each has a doc comment below
+///   naming the closest real candidate endpoint, for whoever wires them up
+///   next; don't assume the current implementation works.
 class AstraRepositoryImpl implements AstraRepository {
   final Dio dio;
+  final AstraGatewayClient _gateway;
 
-  AstraRepositoryImpl(this.dio);
+  AstraRepositoryImpl(this.dio, [AstraGatewayClient? gateway])
+      : _gateway = gateway ?? AstraGatewayClient();
 
   @override
   Future<AstraSession> createSession() async {
-    final response = await dio.post('${Apis.baseUrl}astra/sessions');
-    final parsed = CreateSessionResponse.fromJson(response.data);
-    if (parsed.success != true || parsed.data == null) {
-      throw AstraException(parsed.msg ?? 'Could not start Astra session');
+    final gatewayDio = await _gateway.dio();
+    final userId = _gateway.cachedUserId;
+    if (userId == null || userId.isEmpty) {
+      throw AstraException('Could not resolve the Astra patient id.');
     }
-    return parsed.data!.toEntity();
+    final response = await gatewayDio.post(
+      AstraGatewayApis.companionJourneyStart,
+      data: CompanionStartJourneyRequest(
+        userId: userId,
+        // The real API requires an upfront health concern to start a
+        // journey; this client doesn't collect one before opening chat, so
+        // it starts a generic journey and lets the patient state their
+        // concern as their first message instead.
+        healthConcern: 'General health query',
+      ).toJson(),
+    );
+    final parsed = CompanionStartJourneyResponse.fromJson(response.data);
+    if (parsed.success != true || parsed.journeyId == null) {
+      throw AstraException(parsed.message);
+    }
+    return AstraSession(
+      sessionId: parsed.journeyId!,
+      caseId: parsed.journeyId!,
+      greeting: parsed.welcomeMessage,
+    );
   }
 
+  /// No confirmed real endpoint - `GET /api/companion/journey/{id}`
+  /// exists on the gateway but its response has no fixed schema in the
+  /// published OpenAPI spec, so this still targets the old, unconfirmed
+  /// contract. Not called from any screen currently.
   @override
   Future<AstraSession> getSession(String sessionId) async {
     final response = await dio.get('${Apis.baseUrl}astra/sessions/$sessionId');
@@ -53,45 +96,22 @@ class AstraRepositoryImpl implements AstraRepository {
 
   @override
   Stream<AstraReplyEvent> sendMessage(String sessionId, String text) async* {
-    final response = await dio.post<ResponseBody>(
-      '${Apis.baseUrl}astra/sessions/$sessionId/messages',
-      data: {'text': text},
-      options: Options(responseType: ResponseType.stream),
+    final gatewayDio = await _gateway.dio();
+    final response = await gatewayDio.post(
+      AstraGatewayApis.companionChat,
+      data: CompanionChatRequest(journeyId: sessionId, message: text).toJson(),
     );
-
-    final stream = response.data!.stream
-        .cast<List<int>>()
-        .transform(utf8.decoder)
-        .transform(const LineSplitter());
-
-    var buffer = '';
-    await for (final line in stream) {
-      if (line.isEmpty) continue;
-      if (!line.startsWith('data:')) continue;
-      buffer = line.substring(5).trim();
-      if (buffer.isEmpty) continue;
-      try {
-        final json = jsonDecode(buffer) as Map<String, dynamic>;
-        final event = _parseEvent(json);
-        if (event != null) yield event;
-      } catch (e) {
-        logger.e('Failed to parse Astra SSE event: $e');
-      }
+    final parsed = CompanionChatResponse.fromJson(response.data);
+    if (parsed.success != true) {
+      throw AstraException('Astra could not reply right now.');
     }
-  }
-
-  AstraReplyEvent? _parseEvent(Map<String, dynamic> json) {
-    final type = json['type'] as String?;
-    if (type == 'chunk') {
-      return AstraTextChunk(json['text'] as String? ?? '');
+    if (parsed.interventionType != null) {
+      // Logged, not acted on: the real meaning of this field's values
+      // isn't confirmed yet, and the client-side RedFlagDetector - not this
+      // field - is the non-negotiable safety gate (see red_flag_detector.dart).
+      logger.d('Astra companion intervention_type: ${parsed.interventionType}');
     }
-    if (type == 'card') {
-      final cardJson = json['card'] as Map<String, dynamic>?;
-      if (cardJson == null) return null;
-      final card = parseAstraCard(cardJson);
-      return card == null ? null : AstraCardEvent(card);
-    }
-    return null;
+    yield AstraTextChunk(parsed.response);
   }
 
   @override
@@ -110,6 +130,11 @@ class AstraRepositoryImpl implements AstraRepository {
     return parsed.toEntity();
   }
 
+  /// No confirmed real endpoint. Closest candidate:
+  /// `POST /api/v1/brain/analyze_safety` ("Performs medical risk analysis")
+  /// on the gateway, but its response has no fixed schema in the published
+  /// spec, so the actual result shape isn't known. Not called from any
+  /// screen currently.
   @override
   Future<TriageResult> triage(String caseId) async {
     final response =
@@ -121,6 +146,7 @@ class AstraRepositoryImpl implements AstraRepository {
     return parsed.data!.toEntity();
   }
 
+  /// No confirmed real endpoint. Not called from any screen currently.
   @override
   Future<AstraRecommendations> recommendations(String caseId) async {
     final response =
@@ -132,6 +158,7 @@ class AstraRepositoryImpl implements AstraRepository {
     return parsed.data;
   }
 
+  /// No confirmed real endpoint. Not called from any screen currently.
   @override
   Future<CarePlan> plan(String caseId) async {
     final response = await dio.get('${Apis.baseUrl}astra/cases/$caseId/plan');
@@ -142,6 +169,12 @@ class AstraRepositoryImpl implements AstraRepository {
     return parsed.data!.toEntity();
   }
 
+  /// No confirmed real endpoint - the closest candidate is
+  /// `PUT /api/companion/case/progress` on the gateway, but its request
+  /// schema wasn't checked closely enough to be confident it maps to a
+  /// symptom-score check-in rather than something else (milestone
+  /// progress?). Wires DailyCheckinScreen today via the old, unconfirmed
+  /// contract.
   @override
   Future<CheckinResult> checkin(String caseId,
       {required int symptomScore}) async {
@@ -156,6 +189,14 @@ class AstraRepositoryImpl implements AstraRepository {
     return parsed.data!.toEntity();
   }
 
+  /// No confirmed real endpoint. The closest candidate,
+  /// `POST /api/v1/api/reminders/adherence/log` (Supabase-backed medicine
+  /// reminders), uses server-generated reminder ids, not the locally
+  /// synthesized ones `reminderIdFor()` mints for this app's fully local,
+  /// client-scheduled reminders (see dose_reminder_scheduler.dart) - the id
+  /// spaces don't match, so this can't be wired as a drop-in swap. Wires
+  /// main.dart's reminder Taken/Skip/Snooze handling today via the old,
+  /// unconfirmed contract.
   @override
   Future<void> ackReminder(String reminderId, String status) async {
     await dio.post(
@@ -164,6 +205,7 @@ class AstraRepositoryImpl implements AstraRepository {
     );
   }
 
+  /// No confirmed real endpoint. Not called from any screen currently.
   @override
   Future<MedicineInfo> medicineInfo(String medicineId) async {
     final response =
@@ -175,8 +217,16 @@ class AstraRepositoryImpl implements AstraRepository {
     return parsed.data!.toEntity();
   }
 
+  /// Confirmed real endpoint: `PUT /api/companion/journey/{id}/status`
+  /// ("Update journey status (active, monitoring, resolved, etc.)"), with
+  /// `status` and `resolution_notes` as query parameters rather than a
+  /// JSON body.
   @override
   Future<void> resolveCase(String caseId) async {
-    await dio.post('${Apis.baseUrl}astra/cases/$caseId/resolve');
+    final gatewayDio = await _gateway.dio();
+    await gatewayDio.put(
+      AstraGatewayApis.companionJourneyStatus(caseId),
+      queryParameters: {'status': 'resolved'},
+    );
   }
 }
