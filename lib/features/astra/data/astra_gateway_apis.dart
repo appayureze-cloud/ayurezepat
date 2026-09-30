@@ -23,4 +23,11 @@ class AstraGatewayApis {
   static const String remindersAdherenceLog =
       'api/v1/api/reminders/adherence/log';
   static const String remindersSnooze = 'api/v1/api/reminders/snooze';
+
+  /// Document storage (lab reports, x-rays, prescriptions). Also
+  /// `security: none` in the published spec.
+  static String documentsForPatient(String patientId) =>
+      'api/v1/documents/patient/$patientId';
+  static String documentDownload(String documentId) =>
+      'api/v1/documents/download/$documentId';
 }

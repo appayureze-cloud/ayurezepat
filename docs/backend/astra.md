@@ -79,13 +79,34 @@ default) - but **additively**, alongside the existing fully local
 - Not wired: `GET .../patient/{id}`, `GET .../pending/now`,
   `PUT/DELETE .../{id}` - no current screen needs them.
 
+### Documents (`/api/v1/documents/*`) - wired (read-only), additive
+
+`lib/features/documents/`, gated by `Env.useMockDocuments` (mocked by
+default). `HealthRecordTimelineScreen` best-effort merges
+`GET /api/v1/documents/patient/{patient_id}` results into the existing
+timeline (from the main backend) as `ReportEntry` items, alongside
+encounters/prescriptions/reports - additively, same pattern as medicine
+reminders. Tapping a report tile now opens its URL via `url_launcher`.
+
+- **The list response has no fixed schema** in the published spec.
+  `DocumentRepositoryImpl` parses each item defensively (`document_id`/`id`,
+  `description`/`doc_type`, `created_at`/`uploaded_at`) and never relies on
+  a URL field from the list response - it always constructs the download
+  URL from the confirmed `GET /api/v1/documents/download/{id}` route
+  instead, since a document's id (not its listing shape) is the one thing
+  guaranteed by the spec.
+- Not wired: `POST .../upload` (no screen lets a patient upload a
+  document yet - this is additive, not something to bolt on without a
+  file-picker UI), `.../share-link`, `.../metadata`, `DELETE .../{id}`,
+  `.../share-whatsapp`.
+
 ## Found live but not yet wired to any feature
 
-A documents/health-records API (`/api/v1/documents/*`), a Shopify-backed
-smart auto-cart (`/api/v1/shopify/*`), video-consultation token generation
-(`/api/v1/video/*`), and a WhatsApp companion webhook/proactive-messaging
-API (`/api/whatsapp-companion/*`). Doctor/admin/superadmin endpoints on the
-same gateway are out of scope for this patient app entirely.
+A Shopify-backed smart auto-cart (`/api/v1/shopify/*`), video-consultation
+token generation (`/api/v1/video/*`), and a WhatsApp companion webhook/
+proactive-messaging API (`/api/whatsapp-companion/*`). Doctor/admin/
+superadmin endpoints on the same gateway are out of scope for this patient
+app entirely.
 
 ## Original (unconfirmed) contract
 

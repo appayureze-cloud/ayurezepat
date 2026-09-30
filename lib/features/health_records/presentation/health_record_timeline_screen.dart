@@ -4,13 +4,16 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../api/retrofit_Api.dart';
 import '../../../const/Palette.dart';
 import '../../../v2/ui/widgets/button_v2.dart';
 import '../../../v2/ui/widgets/header.dart';
 import '../../../v2/utils/logger.dart';
+import '../../astra/data/astra_gateway_auth.dart';
 import '../../case/presentation/case_service.dart';
+import '../../documents/presentation/document_service.dart';
 import '../data/health_record_service.dart';
 import '../domain/entities/health_record_entry.dart';
 
@@ -29,8 +32,31 @@ class HealthRecordTimelineScreen extends HookWidget {
       try {
         final dio = await RetroApi().dioData(context);
         final caseModel = await CaseService.withDio(dio).ensureActiveCase();
-        entries.value =
-            await HealthRecordService.withDio(dio).getTimeline(caseModel.id);
+        final timeline = List<HealthRecordEntry>.of(
+            await HealthRecordService.withDio(dio).getTimeline(caseModel.id));
+
+        // Best-effort: merge in documents from the real Astra gateway
+        // documents API, if a patient id is available. A failure here
+        // (or no Astra session yet) never blocks the rest of the timeline.
+        final patientId = AstraGatewayAuth().cachedUserId;
+        if (patientId != null && patientId.isNotEmpty) {
+          try {
+            final documents =
+                await DocumentService.create().getPatientDocuments(patientId);
+            timeline.addAll(documents.map((d) => ReportEntry(
+                  // An undated document sorts to the bottom, not the top -
+                  // matching DocumentRepositoryImpl's own ordering, rather
+                  // than defaulting to "now" and jumping the queue.
+                  at: d.createdAt ?? DateTime(0),
+                  title: d.title,
+                  url: d.downloadUrl,
+                )));
+            timeline.sort((a, b) => b.at.compareTo(a.at));
+          } catch (e) {
+            logger.e('Failed to load documents: $e');
+          }
+        }
+        entries.value = timeline;
       } catch (e) {
         logger.e('Failed to load health record timeline: $e');
         error.value = 'Could not load your health record';
@@ -107,36 +133,47 @@ class _TimelineTile extends StatelessWidget {
       ReportEntry e => (Icons.description_outlined, e.title, ''),
     };
 
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 0.75.h),
-      padding: EdgeInsets.all(3.w),
-      decoration: BoxDecoration(
-        border: Border.all(color: Palette.lightGrey),
-        borderRadius: BorderRadius.circular(2.w),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Palette.primary, size: 6.w),
-          SizedBox(width: 3.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 13.sp)),
-                if (subtitle.isNotEmpty)
-                  Text(subtitle,
-                      style:
-                          TextStyle(fontSize: 11.sp, color: Palette.dark_grey)),
-                Text(
-                  DateFormat('d MMM yyyy').format(entry.at),
-                  style: TextStyle(fontSize: 11.sp, color: Palette.dark_grey),
-                ),
-              ],
+    final currentEntry = entry;
+    final reportUrl = currentEntry is ReportEntry && currentEntry.url.isNotEmpty
+        ? currentEntry.url
+        : null;
+
+    return GestureDetector(
+      onTap: reportUrl == null
+          ? null
+          : () => launchUrl(Uri.parse(reportUrl),
+              mode: LaunchMode.externalApplication),
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 0.75.h),
+        padding: EdgeInsets.all(3.w),
+        decoration: BoxDecoration(
+          border: Border.all(color: Palette.lightGrey),
+          borderRadius: BorderRadius.circular(2.w),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Palette.primary, size: 6.w),
+            SizedBox(width: 3.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 13.sp)),
+                  if (subtitle.isNotEmpty)
+                    Text(subtitle,
+                        style: TextStyle(
+                            fontSize: 11.sp, color: Palette.dark_grey)),
+                  Text(
+                    DateFormat('d MMM yyyy').format(entry.at),
+                    style: TextStyle(fontSize: 11.sp, color: Palette.dark_grey),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

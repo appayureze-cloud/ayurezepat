@@ -73,4 +73,14 @@ class Env {
     'USE_MOCK_SERVER_REMINDERS',
     defaultValue: true,
   );
+
+  /// The real documents API on the Astra gateway
+  /// (astra.ayureze.in/api/v1/documents/*, confirmed live in a Phase 4
+  /// audit - see docs/backend/astra.md). Merged into the health record
+  /// timeline alongside encounters/prescriptions/reports from the main
+  /// backend. Defaults to mock.
+  static const bool useMockDocuments = bool.fromEnvironment(
+    'USE_MOCK_DOCUMENTS',
+    defaultValue: true,
+  );
 }
