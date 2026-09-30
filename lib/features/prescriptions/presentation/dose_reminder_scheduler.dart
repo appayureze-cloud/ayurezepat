@@ -1,10 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../../const/prefConstatnt.dart';
+import '../../../const/preference.dart';
 import '../../../main.dart' show flutterLocalNotificationsPlugin;
+import '../../../v2/utils/logger.dart';
 import '../../../v2/utils/notification_id.dart';
+import '../../astra/data/astra_gateway_auth.dart';
+import '../../medicine_reminders/presentation/medicine_reminder_service.dart';
 import '../domain/dose_schedule.dart';
 import '../domain/entities/prescription_item.dart';
 
@@ -23,10 +29,35 @@ String reminderIdFor({
 }) =>
     'presc$prescriptionId-item$itemIndex-day$day-dose$doseIndex';
 
+final _localReminderIdPattern =
+    RegExp(r'^presc(\d+)-item(\d+)-day\d+-dose\d+$');
+
+String _serverReminderCacheKey(int prescriptionId, int itemIndex) =>
+    '${Preferences.serverReminderIdPrefix}$prescriptionId-item$itemIndex';
+
+/// Looks up the server-side reminder id (see medicine_reminder_service.dart)
+/// created for the medicine a local reminder notification belongs to, by
+/// parsing the prescription/item out of its locally-synthesized id. Returns
+/// null if no server reminder was created for it (e.g. it predates this
+/// feature, or creation failed).
+String? serverReminderIdFor(String localReminderId) {
+  final match = _localReminderIdPattern.firstMatch(localReminderId);
+  if (match == null) return null;
+  final key = _serverReminderCacheKey(
+      int.parse(match.group(1)!), int.parse(match.group(2)!));
+  final id = SharedPreferenceHelper.getString(key);
+  return (id == null || id.isEmpty) ? null : id;
+}
+
 /// Schedules one local notification per dose, per day, for the item's
 /// `duration_days`, starting today. Each carries Taken/Skip/Snooze actions;
 /// main.dart's notification handler posts the result to
-/// `AstraRepository.ackReminder`.
+/// `AstraRepository.ackReminder`. Also best-effort registers the medicine
+/// with the real server-side reminders API (see
+/// medicine_reminder_service.dart) so WhatsApp reminders/adherence
+/// tracking work too, once Env.useMockServerReminders is flipped - a
+/// failure here never blocks the local notifications, which are the
+/// reminder mechanism this app actually depends on today.
 Future<void> scheduleDoseReminders({
   required int prescriptionId,
   required int itemIndex,
@@ -34,6 +65,14 @@ Future<void> scheduleDoseReminders({
 }) async {
   final doseTimes = defaultDoseTimesFor(timesPerDayFor(item.frequency));
   final now = DateTime.now();
+
+  unawaited(_createServerReminder(
+    prescriptionId: prescriptionId,
+    itemIndex: itemIndex,
+    item: item,
+    doseTimes: doseTimes,
+    now: now,
+  ));
 
   for (var day = 0; day < item.durationDays; day++) {
     for (var doseIndex = 0; doseIndex < doseTimes.length; doseIndex++) {
@@ -94,6 +133,56 @@ Future<void> scheduleDoseReminders({
     }
   }
 }
+
+Future<void> _createServerReminder({
+  required int prescriptionId,
+  required int itemIndex,
+  required PrescriptionItem item,
+  required List<DoseTime> doseTimes,
+  required DateTime now,
+}) async {
+  try {
+    final cacheKey = _serverReminderCacheKey(prescriptionId, itemIndex);
+    final existing = SharedPreferenceHelper.getString(cacheKey);
+    if (existing != null && existing.isNotEmpty) {
+      // Already registered (e.g. the "Set Dose Reminders" button was
+      // tapped twice, or the screen was revisited) - creating again would
+      // duplicate the server-side reminder and orphan the old one, since
+      // there's no cancel/delete call here.
+      return;
+    }
+    final patientId = AstraGatewayAuth().cachedUserId;
+    if (patientId == null || patientId.isEmpty) {
+      // No Astra session yet (patient hasn't opened Astra chat), so there's
+      // no patient id to register this reminder against on the gateway.
+      // The local notifications above still work regardless.
+      return;
+    }
+    final endDate = now.add(Duration(days: item.durationDays));
+    final id = await MedicineReminderService.create().createReminder(
+      patientId: patientId,
+      patientName: SharedPreferenceHelper.getString(Preferences.name),
+      patientPhone: SharedPreferenceHelper.getString(Preferences.phone),
+      medicineName: item.name,
+      dosage: item.dose,
+      frequency: item.frequency,
+      times: doseTimes.map((t) => t.toString()).toList(),
+      startDate: _isoDate(now),
+      endDate: _isoDate(endDate),
+      instructions: item.instructions,
+    );
+    if (id != null) {
+      await SharedPreferenceHelper.setString(
+          _serverReminderCacheKey(prescriptionId, itemIndex), id);
+    }
+  } catch (e) {
+    logger.e('Failed to register server-side reminder: $e');
+  }
+}
+
+String _isoDate(DateTime date) => '${date.year.toString().padLeft(4, '0')}-'
+    '${date.month.toString().padLeft(2, '0')}-'
+    '${date.day.toString().padLeft(2, '0')}';
 
 /// Reschedules a single reminder 15 minutes from now, for the "Snooze"
 /// action.

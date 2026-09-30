@@ -49,12 +49,40 @@ gateway has no confirmed match (see per-method doc comments in
 `medicineInfo`. These still call the speculative contract documented below,
 which was never confirmed against a real backend.
 
-Also found live at astra.ayureze.in but out of scope for this client so far
-(separate feature domains, not yet wired to any screen): a Supabase-backed
-medicine-reminders API with adherence tracking and WhatsApp notifications
-(`/api/v1/api/reminders/*`), a documents/health-records API
-(`/api/v1/documents/*`), a Shopify-backed smart auto-cart
-(`/api/v1/shopify/*`), video-consultation token generation
+### Medicine reminders (`/api/v1/api/reminders/*`) - wired, additive
+
+The Supabase-backed reminders API is now wired
+(`lib/features/medicine_reminders/`, `Env.useMockServerReminders`, mocked by
+default) - but **additively**, alongside the existing fully local
+`flutter_local_notifications`-based dose reminders
+(`dose_reminder_scheduler.dart`), not as a replacement:
+
+- `scheduleDoseReminders()` still schedules the local notifications exactly
+  as before (that's the reminder mechanism this app actually depends on),
+  and now also best-effort calls `POST /api/v1/api/reminders/create` once
+  per medicine (not per dose - the request covers the whole course via a
+  `times` array and `start_date`/`end_date`), caching the returned id
+  locally. This call is skipped silently if no Astra session has been
+  started yet (no patient id to register against), and any failure is
+  logged, never surfaced to the patient or allowed to block the local
+  reminders.
+- `main.dart`'s Taken/Skip/Snooze handler now also best-effort calls
+  `POST /api/v1/api/reminders/adherence/log` or
+  `POST /api/v1/api/reminders/snooze` against that cached server reminder
+  id, alongside the existing (unconfirmed-contract) `ackReminder` call.
+- These routes are marked `security: none` in the published spec - no
+  bearer token required, unlike the companion chat API.
+- **The create endpoint's response has no fixed schema** in the published
+  OpenAPI spec. `MedicineReminderRepositoryImpl._extractReminderId` guesses
+  at `reminder_id`/`id`/`data.reminder_id` and logs a warning if none are
+  found - confirm the actual key with the backend before relying on this.
+- Not wired: `GET .../patient/{id}`, `GET .../pending/now`,
+  `PUT/DELETE .../{id}` - no current screen needs them.
+
+## Found live but not yet wired to any feature
+
+A documents/health-records API (`/api/v1/documents/*`), a Shopify-backed
+smart auto-cart (`/api/v1/shopify/*`), video-consultation token generation
 (`/api/v1/video/*`), and a WhatsApp companion webhook/proactive-messaging
 API (`/api/whatsapp-companion/*`). Doctor/admin/superadmin endpoints on the
 same gateway are out of scope for this patient app entirely.

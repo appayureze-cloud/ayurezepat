@@ -62,6 +62,7 @@ class Preferences {
   static const String astraGatewayTokenExpiresAt =
       "astra_gateway_token_expires_at";
   static const String astraGatewayUserId = "astra_gateway_user_id";
+  static const String serverReminderIdPrefix = "server_reminder_id_";
   static const String whatsappConsentOptedIn = "whatsapp_consent_opted_in";
   static const String whatsappConsentAt = "whatsapp_consent_at";
 

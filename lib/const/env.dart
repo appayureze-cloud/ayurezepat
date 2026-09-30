@@ -62,4 +62,15 @@ class Env {
     'USE_MOCK_WHATSAPP_CONSENT',
     defaultValue: true,
   );
+
+  /// The real Supabase-backed medicine reminders API on the Astra gateway
+  /// (astra.ayureze.in/api/v1/api/reminders/*, confirmed live in a Phase 4
+  /// audit - see docs/backend/astra.md) sends reminders over WhatsApp and
+  /// tracks adherence server-side - a different mechanism from this app's
+  /// local, flutter_local_notifications-based dose reminders. Defaults to
+  /// mock so flipping this on is a deliberate choice, not an accident.
+  static const bool useMockServerReminders = bool.fromEnvironment(
+    'USE_MOCK_SERVER_REMINDERS',
+    defaultValue: true,
+  );
 }

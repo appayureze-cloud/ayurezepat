@@ -56,6 +56,7 @@ import 'features/astra/data/astra_service.dart';
 import 'features/astra/presentation/daily_checkin_screen.dart';
 import 'features/case/presentation/case_summary_screen.dart';
 import 'features/health_records/presentation/health_record_timeline_screen.dart';
+import 'features/medicine_reminders/presentation/medicine_reminder_service.dart';
 import 'features/prescriptions/presentation/dose_reminder_scheduler.dart';
 import 'features/smart_orders/presentation/smart_order_draft_screen.dart';
 import 'features/whatsapp_consent/presentation/whatsapp_opt_in_screen.dart';
@@ -412,6 +413,25 @@ class _MyAppState extends State<MyApp> {
             .ackReminder('$reminderId', status);
       } catch (e) {
         logger.e('Failed to ack reminder: $e');
+      }
+      // Best-effort: also log adherence against the real server-side
+      // reminder for this medicine, if one was registered when the local
+      // reminders were scheduled (see dose_reminder_scheduler.dart).
+      final serverReminderId = serverReminderIdFor('$reminderId');
+      if (serverReminderId != null) {
+        try {
+          final reminderService = MedicineReminderService.create();
+          if (actionId == 'reminder_snooze') {
+            await reminderService.snooze(reminderId: serverReminderId);
+          } else {
+            await reminderService.logAdherence(
+              reminderId: serverReminderId,
+              taken: actionId == 'reminder_taken',
+            );
+          }
+        } catch (e) {
+          logger.e('Failed to sync reminder adherence to server: $e');
+        }
       }
       if (actionId == 'reminder_snooze') {
         await snoozeReminder(
