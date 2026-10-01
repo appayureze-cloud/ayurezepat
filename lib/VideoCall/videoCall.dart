@@ -11,9 +11,8 @@ import 'package:doctro_patient/api/server_error.dart';
 import 'package:doctro_patient/const/Palette.dart';
 import 'package:doctro_patient/const/prefConstatnt.dart';
 import 'package:doctro_patient/const/preference.dart';
+import 'package:doctro_patient/features/video_calls/data/video_call_repository_impl.dart';
 import 'package:doctro_patient/model/v2/user_detail_model.dart';
-import 'package:doctro_patient/model/v2/video_call_model.dart'
-    show VideoCallModel;
 import 'package:doctro_patient/v2/ui/home/landing_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -356,22 +355,17 @@ class _VideoCallState extends State<VideoCall> {
   }
 
   Future<void> callApiVideoCallToken() async {
-    VideoCallModel response;
-    Map<String, dynamic> body = {
-      "to_id": widget.doctorId,
-    };
+    // Was: POST {Apis.baseUrl}generateAgoraToken on the main Laravel
+    // backend. That backend is unreachable (see docs/backend/astra.md) -
+    // restored via the real Astra gateway's video API instead, which was
+    // confirmed to use the same request shape.
     try {
-      response = await RestClient(await RetroApi().dioData(context))
-          .videoCallRequest(body);
-      log("body = $body, main response = ${response.data?.toJson()}");
-
-      if (response.success == true) {
-        channelName = response.data!.cn;
-        token = response.data!.token;
-        log("channelName = $channelName, token = $token");
-
-        await initAgora();
-      }
+      final result = await VideoCallRepositoryImpl()
+          .generateToken(toId: '${widget.doctorId}');
+      channelName = result.channelName;
+      token = result.token;
+      log("channelName = $channelName, token = $token");
+      await initAgora();
       setState(() {});
     } catch (error, stacktrace) {
       log("Exception occur: $error stackTrace: $stacktrace");

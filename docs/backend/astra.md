@@ -100,13 +100,43 @@ reminders. Tapping a report tile now opens its URL via `url_launcher`.
   file-picker UI), `.../share-link`, `.../metadata`, `DELETE .../{id}`,
   `.../share-whatsapp`.
 
+### Video (`/api/v1/video/generate-token`) - **replaces** the old (now dead) backend call
+
+Unlike every other integration in this file, this one is a straight
+**replacement**, not an additive merge: `lib/VideoCall/videoCall.dart`'s
+`callApiVideoCallToken()` used to call
+`POST {Apis.baseUrl}generateAgoraToken` on the main Laravel backend
+(`ayureze.org`), which is currently unreachable (see the top of this file
+and the connectivity-audit findings). It now calls
+`POST /api/v1/video/generate-token` on the Astra gateway instead, via
+`lib/features/video_calls/data/video_call_repository_impl.dart`.
+
+This was judged a safe swap, not a guess, because the real gateway's
+`TokenRequest` schema (`{to_id, uid}`) matches the old Laravel endpoint's
+request body field-for-field (`to_id`), and its `CallHistoryRequest`
+schema mirrors the old `video_call_history` endpoint's shape closely
+enough to read as a deliberate 1:1 reimplementation of the same feature on
+new infrastructure, not a coincidentally similar unrelated one. Still,
+this endpoint requires `HTTPBearer` (unlike reminders/documents), so it
+only works once a patient has an Astra session (Firebase token exchanged).
+
+- The response schema isn't fixed in the published spec, so the channel
+  name/token are extracted defensively (`cn`/`channel_name`/`channel`,
+  `token`/`rtc_token`/`agora_token`).
+- Not touched: the Agora App ID (`Preferences.agoraAppId`, set from the
+  main backend's `/setting` response - also currently unreachable, so this
+  will be stale/empty until that's addressed separately), the
+  incoming-call path (`callApiUserProfile`, a different, pre-existing
+  contract), and call-history posting/listing
+  (`add-call-history`/`.../history`, `video_call_history` screen) - none
+  of these were touched, only the one call that was actively broken.
+
 ## Found live but not yet wired to any feature
 
-A Shopify-backed smart auto-cart (`/api/v1/shopify/*`), video-consultation
-token generation (`/api/v1/video/*`), and a WhatsApp companion webhook/
-proactive-messaging API (`/api/whatsapp-companion/*`). Doctor/admin/
-superadmin endpoints on the same gateway are out of scope for this patient
-app entirely.
+A Shopify-backed smart auto-cart (`/api/v1/shopify/*`) and a WhatsApp
+companion webhook/proactive-messaging API (`/api/whatsapp-companion/*`).
+Doctor/admin/superadmin endpoints on the same gateway are out of scope for
+this patient app entirely.
 
 ## Original (unconfirmed) contract
 

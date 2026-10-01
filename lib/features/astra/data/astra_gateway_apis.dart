@@ -30,4 +30,9 @@ class AstraGatewayApis {
       'api/v1/documents/patient/$patientId';
   static String documentDownload(String documentId) =>
       'api/v1/documents/download/$documentId';
+
+  /// Video consultation tokens (Agora, same provider the app already uses -
+  /// see lib/VideoCall/videoCall.dart). Requires HTTPBearer, unlike the
+  /// reminders/documents routes above.
+  static const String videoGenerateToken = 'api/v1/video/generate-token';
 }
