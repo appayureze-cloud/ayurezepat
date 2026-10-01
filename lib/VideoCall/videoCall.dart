@@ -11,6 +11,7 @@ import 'package:doctro_patient/api/server_error.dart';
 import 'package:doctro_patient/const/Palette.dart';
 import 'package:doctro_patient/const/prefConstatnt.dart';
 import 'package:doctro_patient/const/preference.dart';
+import 'package:doctro_patient/features/astra/data/astra_gateway_auth.dart';
 import 'package:doctro_patient/features/video_calls/data/video_call_repository_impl.dart';
 import 'package:doctro_patient/model/v2/user_detail_model.dart';
 import 'package:doctro_patient/v2/ui/home/landing_screen.dart';
@@ -359,14 +360,39 @@ class _VideoCallState extends State<VideoCall> {
     // backend. That backend is unreachable (see docs/backend/astra.md) -
     // restored via the real Astra gateway's video API instead, which was
     // confirmed to use the same request shape.
+    final repository = VideoCallRepositoryImpl();
     try {
-      final result = await VideoCallRepositoryImpl()
-          .generateToken(toId: '${widget.doctorId}');
+      // Was: Preferences.agoraAppId, set from the main backend's /setting
+      // response - also unreachable, so this is fetched fresh instead. A
+      // failure here falls back to the (likely stale/empty) cached value
+      // rather than aborting the call entirely.
+      try {
+        appId = await repository.getAppId();
+      } catch (e) {
+        log("Could not fetch video config, falling back to cached appId: $e");
+      }
+
+      final result = await repository.generateToken(toId: '${widget.doctorId}');
       channelName = result.channelName;
       token = result.token;
       log("channelName = $channelName, token = $token");
       await initAgora();
       setState(() {});
+
+      // Best-effort - a failure here never blocks the call itself.
+      final patientId = AstraGatewayAuth().cachedUserId;
+      if (patientId != null && patientId.isNotEmpty) {
+        unawaited(repository
+            .addCallHistory(
+          doctorId: '${widget.doctorId}',
+          patientId: patientId,
+          channelName: channelName!,
+          startTime: DateTime.now(),
+        )
+            .catchError((e) {
+          log("Failed to post call history: $e");
+        }));
+      }
     } catch (error, stacktrace) {
       log("Exception occur: $error stackTrace: $stacktrace");
     }

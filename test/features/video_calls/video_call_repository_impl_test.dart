@@ -30,4 +30,30 @@ void main() {
           throwsA(isA<VideoCallException>()));
     });
   });
+
+  group('parseVideoConfigAppId', () {
+    test('parses agora_app_id (matching the old /setting response field)', () {
+      expect(parseVideoConfigAppId({'agora_app_id': 'app-1'}), 'app-1');
+    });
+
+    test('falls back to app_id/appId if agora_app_id is absent', () {
+      expect(parseVideoConfigAppId({'app_id': 'app-2'}), 'app-2');
+      expect(parseVideoConfigAppId({'appId': 'app-3'}), 'app-3');
+    });
+
+    test('throws VideoCallException when no app id field is present', () {
+      expect(() => parseVideoConfigAppId({'unrelated': 'field'}),
+          throwsA(isA<VideoCallException>()));
+    });
+
+    test('throws VideoCallException when the app id is an empty string', () {
+      expect(() => parseVideoConfigAppId({'agora_app_id': ''}),
+          throwsA(isA<VideoCallException>()));
+    });
+
+    test('throws VideoCallException when the response is not a map', () {
+      expect(() => parseVideoConfigAppId('not a map'),
+          throwsA(isA<VideoCallException>()));
+    });
+  });
 }

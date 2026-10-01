@@ -40,6 +40,34 @@ class VideoCallRepositoryImpl implements VideoCallRepository {
     );
     return parseVideoCallTokenResponse(response.data);
   }
+
+  @override
+  Future<String> getAppId() async {
+    final dio = await _gateway.dio();
+    final response = await dio.get(AstraGatewayApis.videoConfig);
+    return parseVideoConfigAppId(response.data);
+  }
+
+  @override
+  Future<void> addCallHistory({
+    required String doctorId,
+    required String patientId,
+    required String channelName,
+    required DateTime startTime,
+    String status = 'initiated',
+  }) async {
+    final dio = await _gateway.dio();
+    await dio.post(
+      AstraGatewayApis.videoAddCallHistory,
+      data: {
+        'doctor_id': doctorId,
+        'patient_id': patientId,
+        'channel_name': channelName,
+        'start_time': startTime.toIso8601String(),
+        'status': status,
+      },
+    );
+  }
 }
 
 /// The response schema isn't fixed in the published spec; `cn` matches the
@@ -61,4 +89,20 @@ VideoCallToken parseVideoCallTokenResponse(dynamic data) {
     channelName: channelName.toString(),
     token: token.toString(),
   );
+}
+
+/// Same unconfirmed-schema situation as the token response. `agora_app_id`
+/// matches the field name the main backend's `/setting` response already
+/// used (`lib/model/v2/detail_setting_model.dart`); `app_id`/`appId` are
+/// other plausible names for the same thing.
+String parseVideoConfigAppId(dynamic data) {
+  if (data is! Map) {
+    throw VideoCallException('Unexpected video config response: $data');
+  }
+  final appId = data['agora_app_id'] ?? data['app_id'] ?? data['appId'];
+  if (appId == null || appId.toString().isEmpty) {
+    logger.w('Video config response missing app id: $data');
+    throw VideoCallException('Could not load video call configuration.');
+  }
+  return appId.toString();
 }

@@ -123,13 +123,26 @@ only works once a patient has an Astra session (Firebase token exchanged).
 - The response schema isn't fixed in the published spec, so the channel
   name/token are extracted defensively (`cn`/`channel_name`/`channel`,
   `token`/`rtc_token`/`agora_token`).
-- Not touched: the Agora App ID (`Preferences.agoraAppId`, set from the
-  main backend's `/setting` response - also currently unreachable, so this
-  will be stale/empty until that's addressed separately), the
-  incoming-call path (`callApiUserProfile`, a different, pre-existing
-  contract), and call-history posting/listing
-  (`add-call-history`/`.../history`, `video_call_history` screen) - none
-  of these were touched, only the one call that was actively broken.
+- **Also now wired**: the Agora App ID, which used to come from
+  `Preferences.agoraAppId` (set by the main backend's now-unreachable
+  `/setting` response), is fetched fresh from
+  `GET /api/v1/video/config` on every call attempt
+  (`VideoCallRepositoryImpl.getAppId`, parsed defensively from
+  `agora_app_id`/`app_id`/`appId`). A failure falls back to the cached
+  Preferences value rather than aborting the call. Call-history is also
+  now posted best-effort via `POST /api/v1/video/add-call-history`
+  (`CallHistoryRequest`'s confirmed `doctor_id`/`patient_id`/
+  `channel_name`/`start_time`/`status` shape) right after a token is
+  obtained.
+- **Still not wired, no confirmed contract exists for either**: the
+  incoming-call path (`callApiUserProfile`, which gets `channelName`/
+  `agoraToken` from the main backend's `userDetailRequest` - there's no
+  equivalent "pending incoming call" endpoint on the Astra gateway's video
+  API, only outgoing-call token generation), and reading call history back
+  (`GET .../history`, the `video_call_history`/`VideoCallHistory` screen -
+  its response has no fixed schema and nothing currently depends on it
+  working). Both remain broken while the main backend is unreachable; this
+  needs a real backend contract, not a client-side guess.
 
 ## Found live but not yet wired to any feature
 

@@ -35,4 +35,6 @@ class AstraGatewayApis {
   /// see lib/VideoCall/videoCall.dart). Requires HTTPBearer, unlike the
   /// reminders/documents routes above.
   static const String videoGenerateToken = 'api/v1/video/generate-token';
+  static const String videoConfig = 'api/v1/video/config';
+  static const String videoAddCallHistory = 'api/v1/video/add-call-history';
 }
