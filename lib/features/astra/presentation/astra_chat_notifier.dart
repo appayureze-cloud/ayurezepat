@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../v2/utils/logger.dart';
+import '../data/astra_gateway_auth.dart';
+import '../data/astra_gateway_notifications.dart';
 import '../domain/astra_repository.dart';
 import '../domain/entities/astra_card.dart';
 import '../domain/entities/astra_message.dart';
@@ -58,6 +60,14 @@ class AstraChatNotifier extends ChangeNotifier {
       unawaited(scheduleDailyCheckinReminder().catchError((e) {
         logger.e('Failed to schedule daily check-in reminder: $e');
       }));
+      // Best-effort: register this device for the Astra gateway's own
+      // push notifications, independent of the main backend.
+      final patientId = AstraGatewayAuth().cachedUserId;
+      if (patientId != null && patientId.isNotEmpty) {
+        unawaited(storeFcmTokenWithGateway(patientId).catchError((e) {
+          logger.e('Failed to register FCM token with Astra gateway: $e');
+        }));
+      }
     } catch (e) {
       logger.e('Astra session init failed: $e');
       _error = "Astra couldn't start right now. Please try again.";

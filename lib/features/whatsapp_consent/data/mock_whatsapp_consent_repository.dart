@@ -3,10 +3,11 @@ import '../../../const/preference.dart';
 import '../domain/entities/whatsapp_consent.dart';
 import '../domain/whatsapp_consent_repository.dart';
 
-/// Stands in for `POST /consents/whatsapp` until the backend ships (see
-/// docs/backend/whatsapp.md), gated by Env.useMockWhatsappConsent. The
-/// choice is still a real local consent record - just not synced anywhere -
-/// so opting out actually sticks across app restarts in demos.
+/// Stands in for the real `POST/GET /api/v1/autopilot/consent|status`
+/// endpoints on the Astra gateway (see docs/backend/astra.md), gated by
+/// Env.useMockWhatsappConsent. The choice is still a real local consent
+/// record - just not synced anywhere - so opting out actually sticks across
+/// app restarts in demos.
 class MockWhatsappConsentRepository implements WhatsappConsentRepository {
   @override
   Future<WhatsappConsent> getConsent() async {

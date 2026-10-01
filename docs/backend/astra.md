@@ -176,12 +176,56 @@ product catalog during the audit (confirmed with both a found-medicine and
 a not-found case), so `ShopifyRepositoryImpl` parses it with a normal
 typed DTO rather than defensive field-guessing.
 
+### Autopilot consent (`/api/v1/autopilot/*`) - replaces the speculative WhatsApp consent contract
+
+`lib/features/whatsapp_consent/` (screen stays "WhatsApp Updates" in the
+UI, since that's the patient-facing framing) now talks to
+`POST /api/v1/autopilot/consent` / `GET /api/v1/autopilot/status/{id}`
+instead of the originally speculative `/consents/whatsapp` from Phase 3.
+`security: none`, and - unlike most of this file - **both the request and
+response shapes are confirmed live**, not guessed:
+`{patient_id, is_enabled, care_journey_stage, last_check, pending_action}`
+was observed directly against the real gateway.
+
+"Autopilot" (proactive AI follow-up, not literally "WhatsApp") is the
+closest real, confirmed consent toggle found on the gateway - there's no
+endpoint named anything like `/consents/whatsapp`. `is_enabled` maps to
+this client's `optedIn`, `last_check` to `consentedAt`. Needs an Astra
+session (a patient id) to call - the opt-in screen fails with a clear
+error if a patient hasn't opened Astra chat yet, same as every other
+gateway-backed feature in this app.
+
+### Push notifications (`/api/v1/notifications/store-fcm-token`) - wired, additive
+
+`lib/features/astra/data/astra_gateway_notifications.dart`. Best-effort,
+called whenever an Astra session starts
+(`AstraChatNotifier.init()`), alongside the daily check-in reminder
+scheduling. Registers this device's existing FCM token (already fetched
+at login for the main backend, `Preferences.notificationRegisterKey`)
+with the gateway too, so its own notification system - confirmed
+`operational` via `GET .../notifications/service-status` - can push to
+this device independent of the main (unreachable) backend. Request shape
+confirmed (`patient_id`, `fcm_token`); response shape not fixed in the
+spec, so the call result isn't parsed, just awaited for errors.
+
 ## Found live but not yet wired to any feature
 
-A WhatsApp
-companion webhook/proactive-messaging API (`/api/whatsapp-companion/*`).
-Doctor/admin/superadmin endpoints on the same gateway are out of scope for
-this patient app entirely.
+A patient-registration API (`POST /api/v1/patients/register` -
+**deliberately not wired**: it's a real record-creating action on a live
+system, its response schema isn't fixed in the published spec so there's
+no confirmed way to read back the new patient id, and nothing in this app
+currently fails outright without it - every gateway-backed feature here
+already surfaces a clear, caught error (not a crash) when
+`AstraGatewayAuth().cachedUserId` is empty, rather than guessing at a
+patient id; only the FCM-token registration in the previous section skips
+silently, since it's purely best-effort), prescription/order history
+(`/api/v1/orders/*`, response shapes confirmed live but nothing currently
+reads them), and a WhatsApp companion webhook/proactive-messaging API
+(`/api/whatsapp-companion/*` - checked during the audit, no safe
+patient-initiated action exists there: the webhook is Meta-to-gateway,
+`send-proactive` is system/admin-triggered outbound messaging, and `stats`
+is admin analytics). Doctor/admin/superadmin endpoints on the same gateway
+are out of scope for this patient app entirely.
 
 ## Original (unconfirmed) contract
 

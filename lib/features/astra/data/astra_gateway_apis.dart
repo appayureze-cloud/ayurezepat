@@ -42,4 +42,16 @@ class AstraGatewayApis {
   /// confirmed live (not guessed) during the Phase 4 audit.
   static String shopifyProductSearch(String medicineName) =>
       'api/v1/shopify/products/search/${Uri.encodeComponent(medicineName)}';
+
+  /// AI "autopilot" (proactive follow-up) consent + status. `security:
+  /// none`. Response shapes confirmed live during the Phase 4 audit, not
+  /// guessed.
+  static const String autopilotConsent = 'api/v1/autopilot/consent';
+  static String autopilotStatus(String patientId) =>
+      'api/v1/autopilot/status/$patientId';
+
+  /// FCM push token registration. `security: none`. Confirmed request
+  /// schema, unconfirmed response schema.
+  static const String notificationsStoreFcmToken =
+      'api/v1/notifications/store-fcm-token';
 }
