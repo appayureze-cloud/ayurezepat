@@ -37,4 +37,9 @@ class AstraGatewayApis {
   static const String videoGenerateToken = 'api/v1/video/generate-token';
   static const String videoConfig = 'api/v1/video/config';
   static const String videoAddCallHistory = 'api/v1/video/add-call-history';
+
+  /// Shopify medicine catalog lookups. `security: none`. Response shape
+  /// confirmed live (not guessed) during the Phase 4 audit.
+  static String shopifyProductSearch(String medicineName) =>
+      'api/v1/shopify/products/search/${Uri.encodeComponent(medicineName)}';
 }

@@ -83,4 +83,15 @@ class Env {
     'USE_MOCK_DOCUMENTS',
     defaultValue: true,
   );
+
+  /// The real Shopify medicine-catalog lookup on the Astra gateway
+  /// (astra.ayureze.in/api/v1/shopify/products/search/*, confirmed live
+  /// with a real product catalog in a Phase 4 audit - see
+  /// docs/backend/astra.md). Defaults to mock. Deliberately scoped to the
+  /// read-only lookup only - draft-order/real-order-cod (which place
+  /// actual orders) are not wired.
+  static const bool useMockShopify = bool.fromEnvironment(
+    'USE_MOCK_SHOPIFY',
+    defaultValue: true,
+  );
 }

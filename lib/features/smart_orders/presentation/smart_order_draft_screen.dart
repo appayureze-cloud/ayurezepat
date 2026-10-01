@@ -12,6 +12,8 @@ import '../../../v2/ui/medicine/cart.dart';
 import '../../../v2/ui/widgets/button_v2.dart';
 import '../../../v2/ui/widgets/header.dart';
 import '../../../v2/utils/logger.dart';
+import '../../shopify/domain/entities/medicine_availability.dart';
+import '../../shopify/presentation/shopify_service.dart';
 import '../data/smart_order_service.dart';
 import '../domain/entities/smart_order_draft.dart';
 import 'smart_order_reprompt_scheduler.dart';
@@ -26,12 +28,27 @@ class SmartOrderDraftScreen extends HookWidget {
     final draft = useState<SmartOrderDraft?>(null);
     final loading = useState(true);
     final busy = useState(false);
+    final availability = useState<Map<String, MedicineAvailability>>({});
 
     Future<void> load() async {
       loading.value = true;
       try {
         final dio = await RetroApi().dioData(context);
         draft.value = await SmartOrderService.withDio(dio).getDraft(draftId);
+
+        // Best-effort, informational only - never blocks Buy/Ignore. A
+        // failure for one item just leaves it unbadged. Guarded by
+        // context.mounted since the user may navigate away (buy/ignore)
+        // before a slow lookup resolves, which would otherwise write to a
+        // disposed ValueNotifier.
+        for (final item in draft.value!.items) {
+          ShopifyService.create().checkAvailability(item.name).then((result) {
+            if (!context.mounted) return;
+            availability.value = {...availability.value, item.name: result};
+          }).catchError((e) {
+            logger.e('Failed to check availability for ${item.name}: $e');
+          });
+        }
       } catch (e) {
         logger.e('Failed to load smart order draft: $e');
         Fluttertoast.showToast(msg: 'Could not load this order');
@@ -115,21 +132,43 @@ class SmartOrderDraftScreen extends HookWidget {
                                 border: Border.all(color: Palette.lightGrey),
                                 borderRadius: BorderRadius.circular(2.w),
                               ),
-                              child: Row(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: Text(
-                                      '${item.name} x${item.quantity}',
-                                      style: TextStyle(fontSize: 13.sp),
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          '${item.name} x${item.quantity}',
+                                          style: TextStyle(fontSize: 13.sp),
+                                        ),
+                                      ),
+                                      Text(
+                                        '${SharedPreferenceHelper.getString(Preferences.currency_symbol)} ${item.price * item.quantity}',
+                                        style: TextStyle(
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    '${SharedPreferenceHelper.getString(Preferences.currency_symbol)} ${item.price * item.quantity}',
-                                    style: TextStyle(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w600,
+                                  if (availability.value[item.name] != null)
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 0.5.h),
+                                      child: Text(
+                                        availability
+                                                .value[item.name]!.isAvailable
+                                            ? 'In stock at our pharmacy'
+                                            : 'Not available at our pharmacy',
+                                        style: TextStyle(
+                                          fontSize: 10.sp,
+                                          color: availability
+                                                  .value[item.name]!.isAvailable
+                                              ? Palette.primary
+                                              : Palette.dark_grey,
+                                        ),
+                                      ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ),

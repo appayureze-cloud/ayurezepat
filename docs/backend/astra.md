@@ -144,9 +144,41 @@ only works once a patient has an Astra session (Firebase token exchanged).
   working). Both remain broken while the main backend is unreachable; this
   needs a real backend contract, not a client-side guess.
 
+### Shopify (`/api/v1/shopify/products/search/*`) - wired (read-only availability check), additive
+
+`lib/features/shopify/`, gated by `Env.useMockShopify` (mocked by
+default). `SmartOrderDraftScreen` best-effort checks each prescribed
+medicine against the real pharmacy catalog and shows an "In stock" /
+"Not available" badge - informational only, never blocks Buy/Ignore.
+
+Deliberately scoped to this one read-only lookup, per an explicit decision
+to avoid the mutating/risky parts of this API on a system with real
+production data:
+
+- `POST .../draft-order` and `POST .../real-order-cod` are **not wired** -
+  both require `HTTPBearer` and the latter places an actual
+  cash-on-delivery order. Neither should be wired without a human
+  deciding "yes, actually place real orders from this flow."
+- `POST .../validate-prescription` and `POST .../ai-shop-assist` are not
+  wired either - the former needs a doctor/company-metadata payload this
+  patient app doesn't have on hand (built for the doctor-facing
+  prescription workflow, not a quick availability check), and the
+  latter's purpose/semantics weren't verified.
+- `GET .../products/available` (the full ~600-item catalog) is not
+  wired - `products/search/{medicine_name}` already does what the one
+  current use case (per-item availability) needs, without fetching and
+  filtering a large list client-side.
+
+Unlike most of this file, **the response shape here is not a guess** -
+`{medicine_name, shopify_variant_id, shopify_product_title, is_available,
+suggested_alternatives}` was observed directly against the live, real
+product catalog during the audit (confirmed with both a found-medicine and
+a not-found case), so `ShopifyRepositoryImpl` parses it with a normal
+typed DTO rather than defensive field-guessing.
+
 ## Found live but not yet wired to any feature
 
-A Shopify-backed smart auto-cart (`/api/v1/shopify/*`) and a WhatsApp
+A WhatsApp
 companion webhook/proactive-messaging API (`/api/whatsapp-companion/*`).
 Doctor/admin/superadmin endpoints on the same gateway are out of scope for
 this patient app entirely.
