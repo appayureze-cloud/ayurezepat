@@ -17,6 +17,8 @@ class AstraGatewayApis {
   static const String companionChat = 'api/companion/chat';
   static String companionJourneyStatus(String journeyId) =>
       'api/companion/journey/$journeyId/status';
+  static String companionCaseHealthRecords(String caseId) =>
+      'api/companion/case/$caseId/health_records';
 
   /// Supabase-backed medicine reminders. Unlike the companion endpoints
   /// above, these are marked `security: none` in the published spec.

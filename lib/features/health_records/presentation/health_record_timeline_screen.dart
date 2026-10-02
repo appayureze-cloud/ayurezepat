@@ -11,9 +11,7 @@ import '../../../const/Palette.dart';
 import '../../../v2/ui/widgets/button_v2.dart';
 import '../../../v2/ui/widgets/header.dart';
 import '../../../v2/utils/logger.dart';
-import '../../astra/data/astra_gateway_auth.dart';
 import '../../case/presentation/case_service.dart';
-import '../../documents/presentation/document_service.dart';
 import '../data/health_record_service.dart';
 import '../domain/entities/health_record_entry.dart';
 
@@ -32,30 +30,13 @@ class HealthRecordTimelineScreen extends HookWidget {
       try {
         final dio = await RetroApi().dioData(context);
         final caseModel = await CaseService.withDio(dio).ensureActiveCase();
-        final timeline = List<HealthRecordEntry>.of(
-            await HealthRecordService.withDio(dio).getTimeline(caseModel.id));
-
-        // Best-effort: merge in documents from the real Astra gateway
-        // documents API, if a patient id is available. A failure here
-        // (or no Astra session yet) never blocks the rest of the timeline.
-        final patientId = AstraGatewayAuth().cachedUserId;
-        if (patientId != null && patientId.isNotEmpty) {
-          try {
-            final documents =
-                await DocumentService.create().getPatientDocuments(patientId);
-            timeline.addAll(documents.map((d) => ReportEntry(
-                  // An undated document sorts to the bottom, not the top -
-                  // matching DocumentRepositoryImpl's own ordering, rather
-                  // than defaulting to "now" and jumping the queue.
-                  at: d.createdAt ?? DateTime(0),
-                  title: d.title,
-                  url: d.downloadUrl,
-                )));
-            timeline.sort((a, b) => b.at.compareTo(a.at));
-          } catch (e) {
-            logger.e('Failed to load documents: $e');
-          }
-        }
+        // The real backend (GET /api/companion/case/{id}/health_records)
+        // already aggregates encounters, prescriptions and the patient's
+        // uploaded documents server-side - no separate client-side merge
+        // needed (removed here; it used to duplicate what the backend
+        // now returns).
+        final timeline =
+            await HealthRecordService.create().getTimeline(caseModel.id);
         entries.value = timeline;
       } catch (e) {
         logger.e('Failed to load health record timeline: $e');

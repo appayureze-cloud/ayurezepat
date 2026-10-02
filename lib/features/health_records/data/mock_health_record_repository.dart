@@ -11,19 +11,19 @@ class MockHealthRecordRepository implements HealthRecordRepository {
         at: now.subtract(const Duration(days: 1)),
         doctorName: 'Dr. Anita Rao',
         specialty: 'General Medicine',
-        appointmentId: 1,
+        appointmentId: '1',
       ),
       PrescriptionEntry(
         at: now.subtract(const Duration(days: 1)),
-        prescriptionId: 1,
-        appointmentId: 1,
+        prescriptionId: '1',
+        appointmentId: '1',
         doctorName: 'Dr. Anita Rao',
       ),
       EncounterEntry(
         at: now.subtract(const Duration(days: 10)),
         doctorName: 'Dr. Vikram Shah',
         specialty: 'Ayurveda',
-        appointmentId: 2,
+        appointmentId: '2',
       ),
     ];
   }

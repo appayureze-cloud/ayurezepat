@@ -13,14 +13,14 @@ HealthRecordEntry? parseHealthRecordEntry(Map<String, dynamic> json) {
       return EncounterEntry(
         at: at,
         doctorName: json['doctor_name'] as String? ?? '',
-        appointmentId: json['appointment_id'] as int? ?? 0,
+        appointmentId: json['appointment_id']?.toString() ?? '',
         specialty: json['specialty'] as String?,
       );
     case 'prescription':
       return PrescriptionEntry(
         at: at,
-        prescriptionId: json['prescription_id'] as int? ?? 0,
-        appointmentId: json['appointment_id'] as int? ?? 0,
+        prescriptionId: json['prescription_id']?.toString() ?? '',
+        appointmentId: json['appointment_id']?.toString() ?? '',
         doctorName: json['doctor_name'] as String? ?? '',
       );
     case 'report':
