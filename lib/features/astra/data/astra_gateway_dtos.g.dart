@@ -88,6 +88,40 @@ Map<String, dynamic> _$CompanionStartJourneyResponseToJson(
       'welcome_message': instance.welcomeMessage,
     };
 
+CompanionCreateCaseRequest _$CompanionCreateCaseRequestFromJson(
+        Map<String, dynamic> json) =>
+    CompanionCreateCaseRequest(
+      journeyId: json['journey_id'] as String,
+      userId: json['user_id'] as String,
+      doctorId: json['doctor_id'] as String,
+      diagnosis: json['diagnosis'] as String,
+    );
+
+Map<String, dynamic> _$CompanionCreateCaseRequestToJson(
+        CompanionCreateCaseRequest instance) =>
+    <String, dynamic>{
+      'journey_id': instance.journeyId,
+      'user_id': instance.userId,
+      'doctor_id': instance.doctorId,
+      'diagnosis': instance.diagnosis,
+    };
+
+CompanionCreateCaseResponse _$CompanionCreateCaseResponseFromJson(
+        Map<String, dynamic> json) =>
+    CompanionCreateCaseResponse(
+      success: json['success'] as bool,
+      caseId: json['case_id'] as String?,
+      message: json['message'] as String,
+    );
+
+Map<String, dynamic> _$CompanionCreateCaseResponseToJson(
+        CompanionCreateCaseResponse instance) =>
+    <String, dynamic>{
+      'success': instance.success,
+      'case_id': instance.caseId,
+      'message': instance.message,
+    };
+
 CompanionChatRequest _$CompanionChatRequestFromJson(
         Map<String, dynamic> json) =>
     CompanionChatRequest(

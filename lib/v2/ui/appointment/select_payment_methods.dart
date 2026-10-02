@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:doctro_patient/const/prefConstatnt.dart';
 import 'package:doctro_patient/const/preference.dart';
+import 'package:doctro_patient/features/astra/data/astra_consultation_link.dart';
 import 'package:doctro_patient/features/case/presentation/case_service.dart';
 import 'package:doctro_patient/features/payments/domain/payment_repository.dart';
 import 'package:doctro_patient/features/payments/presentation/payment_service.dart';
@@ -86,7 +89,20 @@ class SelectAppointmentPaymentMethods extends HookWidget {
         );
 
         Preferences.hideDialog(context);
-        if (response.success == true)
+        if (response.success == true) {
+          // Best-effort: link this booking to an Astra companion case so the
+          // AI companion and video-call channel naming are tied to a real
+          // consultation from the moment it's booked, not set up manually.
+          // Never blocks or fails the booking itself.
+          final doctorId = details.doctor.id;
+          if (doctorId != null) {
+            unawaited(linkAppointmentToAstra(
+              doctorId: doctorId,
+              healthConcern: details.illness,
+            ).catchError((e) {
+              logger.e('Failed to link appointment to Astra: $e');
+            }));
+          }
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -97,6 +113,7 @@ class SelectAppointmentPaymentMethods extends HookWidget {
                   bookingId: response.success == true ? response.data : null),
             ),
           );
+        }
       } catch (error, stacktrace) {
         Preferences.hideDialog(context);
         logger.e("Exception occur: $error stackTrace: $stacktrace");

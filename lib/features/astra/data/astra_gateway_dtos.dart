@@ -111,6 +111,51 @@ class CompanionStartJourneyResponse {
   Map<String, dynamic> toJson() => _$CompanionStartJourneyResponseToJson(this);
 }
 
+/// `POST /api/companion/case/create` request - binds a patient's companion
+/// journey to a specific doctor, confirmed live during the doctor/patient
+/// unification testing (see docs/backend/astra_doctor_patient_flow.md).
+@JsonSerializable()
+class CompanionCreateCaseRequest {
+  @JsonKey(name: 'journey_id')
+  final String journeyId;
+  @JsonKey(name: 'user_id')
+  final String userId;
+  @JsonKey(name: 'doctor_id')
+  final String doctorId;
+  final String diagnosis;
+
+  CompanionCreateCaseRequest({
+    required this.journeyId,
+    required this.userId,
+    required this.doctorId,
+    required this.diagnosis,
+  });
+
+  factory CompanionCreateCaseRequest.fromJson(Map<String, dynamic> json) =>
+      _$CompanionCreateCaseRequestFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CompanionCreateCaseRequestToJson(this);
+}
+
+@JsonSerializable()
+class CompanionCreateCaseResponse {
+  final bool success;
+  @JsonKey(name: 'case_id')
+  final String? caseId;
+  final String message;
+
+  CompanionCreateCaseResponse({
+    required this.success,
+    this.caseId,
+    required this.message,
+  });
+
+  factory CompanionCreateCaseResponse.fromJson(Map<String, dynamic> json) =>
+      _$CompanionCreateCaseResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CompanionCreateCaseResponseToJson(this);
+}
+
 /// `POST /api/companion/chat` request.
 @JsonSerializable()
 class CompanionChatRequest {

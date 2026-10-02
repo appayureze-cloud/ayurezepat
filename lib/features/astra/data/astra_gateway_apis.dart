@@ -13,6 +13,7 @@ class AstraGatewayApis {
   static const String authSession = 'api/v1/auth/session';
   static const String authRefresh = 'api/v1/auth/refresh';
   static const String companionJourneyStart = 'api/companion/journey/start';
+  static const String companionCaseCreate = 'api/companion/case/create';
   static const String companionChat = 'api/companion/chat';
   static String companionJourneyStatus(String journeyId) =>
       'api/companion/journey/$journeyId/status';
