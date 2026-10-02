@@ -1,6 +1,5 @@
 import '../../../v2/utils/logger.dart';
 import 'astra_gateway_apis.dart';
-import 'astra_gateway_auth.dart';
 import 'astra_gateway_client.dart';
 import 'astra_gateway_dtos.dart';
 
@@ -24,11 +23,15 @@ Future<void> linkAppointmentToAstra({
   required int doctorId,
   required String healthConcern,
 }) async {
-  final patientId = AstraGatewayAuth().cachedUserId;
-  if (patientId == null || patientId.isEmpty) return;
-
   final gateway = AstraGatewayClient();
+  // Must come first: this is what actually performs the Firebase->Astra
+  // session exchange and populates cachedUserId below. A patient who hasn't
+  // opened the Astra chat tab yet has no cached id until this runs - reading
+  // cachedUserId before this call would always bail out for them.
   final dio = await gateway.dio();
+
+  final patientId = gateway.cachedUserId;
+  if (patientId == null || patientId.isEmpty) return;
 
   final journeyResponse = await dio.post(
     AstraGatewayApis.companionJourneyStart,
