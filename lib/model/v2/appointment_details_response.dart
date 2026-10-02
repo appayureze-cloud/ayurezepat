@@ -67,6 +67,8 @@ class Appointment {
   Hospital? hospital;
   AppointmentReview? reviewDetails;
   Prescription? prescription;
+  // Not returned by the backend yet - see Apis.link_appointment_astra_case.
+  String? astraCaseId;
 
   Appointment({
     this.id,
@@ -109,6 +111,7 @@ class Appointment {
     this.review,
     this.hospital,
     this.reviewDetails,
+    this.astraCaseId,
   });
 
   Appointment.fromJson(Map<String, dynamic> json) {
@@ -161,6 +164,7 @@ class Appointment {
     prescription = json['prescription'] != null
         ? new Prescription.fromJson(json['prescription'])
         : null;
+    astraCaseId = json['astra_case_id'];
   }
 
   Map<String, dynamic> toJson() {
@@ -215,6 +219,7 @@ class Appointment {
     if (this.prescription != null) {
       data['prescription'] = this.prescription!.toJson();
     }
+    data['astra_case_id'] = this.astraCaseId;
     return data;
   }
 }

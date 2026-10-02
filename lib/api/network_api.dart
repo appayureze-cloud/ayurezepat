@@ -134,6 +134,10 @@ abstract class RestClient {
   @GET(Apis.get_appointment)
   Future<AppointmentDetailsResponse> getAppointmentDetails(@Path() int? id);
 
+  // Not live on the backend yet - see Apis.link_appointment_astra_case.
+  @POST(Apis.link_appointment_astra_case)
+  Future<CommonResponse> linkAppointmentAstraCase(@Body() body);
+
   @GET(Apis.get_therapy_booking)
   Future<TherapyBookingDetailsResponse> getTherapyBookingDetails(
       @Path() int? id);

@@ -663,6 +663,33 @@ class _RestClient implements RestClient {
   }
 
   @override
+  Future<CommonResponse> linkAppointmentAstraCase(dynamic body) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = body;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<CommonResponse>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'link_appointment_astra_case',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = CommonResponse.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<TherapyBookingDetailsResponse> getTherapyBookingDetails(
       int? id) async {
     const _extra = <String, dynamic>{};

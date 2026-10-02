@@ -99,6 +99,8 @@ class SelectAppointmentPaymentMethods extends HookWidget {
             unawaited(linkAppointmentToAstra(
               doctorId: doctorId,
               healthConcern: details.illness,
+              appointmentId: response.data,
+              laravelDio: dio,
             ).catchError((e) {
               logger.e('Failed to link appointment to Astra: $e');
             }));
