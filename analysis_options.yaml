@@ -1,0 +1,32 @@
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+#
+# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
+# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
+# invoked from the command line by running `flutter analyze`.
+
+# The following line activates a set of recommended lints for Flutter apps,
+# packages, and plugins designed to encourage good coding practices.
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+include: package:flutter_lints/flutter.yaml
+
+# This is a large, pre-existing codebase being migrated to a layered
+# structure incrementally (see CLAUDE-facing instructions: "refactor old
+# screens only where you touch them"). `flutter analyze` will surface a
+# lot of pre-existing style warnings/infos on untouched legacy screens;
+# those are non-fatal (only analyzer *errors* fail CI) and get cleaned up
+# opportunistically as each screen is touched, not in one sweep.
+linter:
+  rules:
+    # Legacy screens use positional/optional constructor params heavily;
+    # revisit per-file as they're touched rather than blanket-fixing now.
+    prefer_const_constructors: false
+    prefer_const_literals_to_create_immutables: false
+    use_key_in_widget_constructors: false
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options

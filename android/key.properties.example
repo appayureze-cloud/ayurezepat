@@ -1,0 +1,11 @@
+# Copy this file to android/key.properties for local release builds.
+# key.properties is gitignored - never commit real values.
+#
+# In CI, do not use this file at all: set the equivalent environment
+# variables instead (ANDROID_KEYSTORE_PATH, ANDROID_KEYSTORE_STORE_PASSWORD,
+# ANDROID_KEYSTORE_KEY_ALIAS, ANDROID_KEYSTORE_KEY_PASSWORD) as repository
+# secrets. build.gradle prefers the env vars over this file when both exist.
+storePassword=changeme
+keyPassword=changeme
+keyAlias=ayureze_patient
+storeFile=ayureze_patient.jks
