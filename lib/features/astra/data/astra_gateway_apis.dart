@@ -46,6 +46,18 @@ class AstraGatewayApis {
   static String shopifyProductSearch(String medicineName) =>
       'api/v1/shopify/products/search/${Uri.encodeComponent(medicineName)}';
 
+  /// Smart order drafts (one auto-created per prescription - see
+  /// docs/backend/smart-orders.md). The originally speculated
+  /// `{Apis.baseUrl}smart_orders/{id}` (Laravel) routes return a genuine
+  /// 404, never implemented there; the real backend lives in Astra's
+  /// unified_prescription_workflow.py / smart_auto_cart.py instead.
+  /// Patient-authenticated (HTTPBearer), unlike most routes in this file.
+  static String smartOrderGet(String id) => 'api/v1/shopify/smart-orders/$id';
+  static String smartOrderBought(String id) =>
+      'api/v1/shopify/smart-orders/$id/bought';
+  static String smartOrderIgnore(String id) =>
+      'api/v1/shopify/smart-orders/$id/ignore';
+
   /// AI "autopilot" (proactive follow-up) consent + status. `security:
   /// none`. Response shapes confirmed live during the Phase 4 audit, not
   /// guessed.
