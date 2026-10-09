@@ -20,6 +20,14 @@ class AstraGatewayApis {
   static String companionCaseHealthRecords(String caseId) =>
       'api/companion/case/$caseId/health_records';
 
+  /// Patient-self-service case bootstrap - distinct from companionCaseCreate
+  /// above, which requires a doctor_id + diagnosis already known (it's for
+  /// a doctor to open a case after seeing a patient). This is for opening a
+  /// case BEFORE any doctor is involved, to thread a case_id through
+  /// bookings/orders/therapy (see app/companion_api.py's open_patient_case).
+  static const String companionCaseOpen = 'api/companion/case/open';
+  static String companionCaseGet(String caseId) => 'api/companion/case/$caseId';
+
   /// Supabase-backed medicine reminders. Unlike the companion endpoints
   /// above, these are marked `security: none` in the published spec.
   static const String remindersCreate = 'api/v1/api/reminders/create';
@@ -46,6 +54,10 @@ class AstraGatewayApis {
   static String shopifyProductSearch(String medicineName) =>
       'api/v1/shopify/products/search/${Uri.encodeComponent(medicineName)}';
 
+  /// Full Shopify product catalog (619 items confirmed live) - `security:
+  /// none`, same as the single-item search above.
+  static const String shopifyProductsAvailable = 'api/v1/shopify/products/available';
+
   /// Smart order drafts (one auto-created per prescription - see
   /// docs/backend/smart-orders.md). The originally speculated
   /// `{Apis.baseUrl}smart_orders/{id}` (Laravel) routes return a genuine
@@ -69,4 +81,34 @@ class AstraGatewayApis {
   /// schema, unconfirmed response schema.
   static const String notificationsStoreFcmToken =
       'api/v1/notifications/store-fcm-token';
+
+  /// Appointment booking (app/appointment_routes.py) - real doctor
+  /// availability/slots + an explicit booking/cancel action, decoupled from
+  /// payment. HTTPBearer (Astra JWT), same as the finance routes below.
+  static const String appointmentsDoctors = 'api/v1/appointments/doctors';
+  static String appointmentsDoctorSlots(String doctorId) =>
+      'api/v1/appointments/doctors/$doctorId/slots';
+  static const String appointmentsBook = 'api/v1/appointments/book';
+  static const String appointmentsMy = 'api/v1/appointments/my';
+  static String appointmentsCancel(String consultationId) =>
+      'api/v1/appointments/$consultationId/cancel';
+
+  /// Consultation payment (app/finance_routes.py) - a dedicated, server-priced
+  /// Razorpay order tied to a specific consultation_id, distinct from the
+  /// main app backend's generic purpose/reference payment endpoint that
+  /// PaymentService (lib/features/payments) talks to.
+  static const String financeCreateOrder =
+      'api/v1/finance/payments/create-order';
+  static const String financeVerifyPayment = 'api/v1/finance/payments/verify';
+
+  /// Patient cart & checkout (app/cart_routes.py) - add/remove items,
+  /// checkout via a Shopify draft order + this same in-app Razorpay flow,
+  /// verify payment, order history.
+  static const String cartGet = 'api/v1/cart';
+  static const String cartAddItem = 'api/v1/cart/items';
+  static String cartRemoveItem(String productId) =>
+      'api/v1/cart/items/$productId';
+  static const String cartCheckout = 'api/v1/cart/checkout';
+  static const String cartVerifyPayment = 'api/v1/cart/verify-payment';
+  static const String cartOrders = 'api/v1/cart/orders';
 }

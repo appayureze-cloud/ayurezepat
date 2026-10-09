@@ -28,9 +28,11 @@ class Env {
     defaultValue: true,
   );
 
+  /// CaseRepositoryImpl is Astra-backed (POST /api/companion/case/open +
+  /// GET /api/companion/case/{id}), confirmed live - defaults to real.
   static const bool useMockCases = bool.fromEnvironment(
     'USE_MOCK_CASES',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   static const bool useMockAstra = bool.fromEnvironment(
@@ -50,9 +52,11 @@ class Env {
     defaultValue: true,
   );
 
+  /// HealthRecordRepositoryImpl is Astra-backed (GET /api/companion/case/{id}/health_records),
+  /// confirmed live - defaults to real.
   static const bool useMockHealthRecords = bool.fromEnvironment(
     'USE_MOCK_HEALTH_RECORDS',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   /// See docs/backend/whatsapp.md. The client never talks to the WhatsApp

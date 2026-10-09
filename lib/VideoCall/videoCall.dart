@@ -27,7 +27,13 @@ class VideoCall extends StatefulWidget {
   final int? doctorId;
   final String? flag;
 
-  VideoCall({this.doctorId, this.flag});
+  /// Astra's doctor_id (e.g. "DOC-7"), not a Laravel numeric id - set this
+  /// instead of [doctorId] when starting a call for an Astra-backed
+  /// appointment (see features/appointments). Purely additive: every
+  /// existing call site keeps using [doctorId] unchanged.
+  final String? astraDoctorId;
+
+  VideoCall({this.doctorId, this.flag, this.astraDoctorId});
 
   @override
   _VideoCallState createState() => _VideoCallState();
@@ -372,7 +378,8 @@ class _VideoCallState extends State<VideoCall> {
         log("Could not fetch video config, falling back to cached appId: $e");
       }
 
-      final result = await repository.generateToken(toId: '${widget.doctorId}');
+      final toId = widget.astraDoctorId ?? '${widget.doctorId}';
+      final result = await repository.generateToken(toId: toId);
       channelName = result.channelName;
       token = result.token;
       log("channelName = $channelName, token = $token");
@@ -384,7 +391,7 @@ class _VideoCallState extends State<VideoCall> {
       if (patientId != null && patientId.isNotEmpty) {
         unawaited(repository
             .addCallHistory(
-          doctorId: '${widget.doctorId}',
+          doctorId: toId,
           patientId: patientId,
           channelName: channelName!,
           startTime: DateTime.now(),

@@ -70,17 +70,19 @@ class VideoCallRepositoryImpl implements VideoCallRepository {
   }
 }
 
-/// The response schema isn't fixed in the published spec; `cn` matches the
-/// old Laravel response field name, `channel_name`/`channel` are other
-/// plausible names for the same thing. Pulled out as a top-level function
-/// so the defensive field-extraction can be unit tested without a real
-/// network call.
+/// Confirmed live (app/agora_routes.py's generate_token): the response is
+/// `{"success": true, "data": {"token": ..., "cn": ..., "uid": ...}}` -
+/// fields nested under `data`, not top-level. `channel_name`/`channel` and
+/// `rtc_token`/`agora_token` are kept as fallbacks in case that ever
+/// changes. Pulled out as a top-level function so the defensive
+/// field-extraction can be unit tested without a real network call.
 VideoCallToken parseVideoCallTokenResponse(dynamic data) {
   if (data is! Map) {
     throw VideoCallException('Unexpected video token response: $data');
   }
-  final channelName = data['cn'] ?? data['channel_name'] ?? data['channel'];
-  final token = data['token'] ?? data['rtc_token'] ?? data['agora_token'];
+  final payload = data['data'] is Map ? data['data'] as Map : data;
+  final channelName = payload['cn'] ?? payload['channel_name'] ?? payload['channel'];
+  final token = payload['token'] ?? payload['rtc_token'] ?? payload['agora_token'];
   if (channelName == null || token == null) {
     logger.w('Video token response missing channel/token: $data');
     throw VideoCallException('Could not start the video call.');
