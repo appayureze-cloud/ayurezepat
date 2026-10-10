@@ -185,6 +185,14 @@ dev_dependencies:
   json_serializable: ^6.8.0
   flutter_lints: ^4.0.0
 
+# flutter_html 3.0.0 (final stable release) was built/tested against
+# html ^0.15.5 - pub currently resolves the project's loose html
+# constraints to 0.15.7, which removed/changed an API flutter_html's
+# own source calls, breaking the build. Pinning back to the version
+# flutter_html actually targets fixes it without touching app code.
+dependency_overrides:
+  html: 0.15.5
+
 flutter_native_splash:
   color: "#FFFFFF"
   # image: assets/images/sp.png
