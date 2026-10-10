@@ -49,14 +49,23 @@ void main() {
       expect(cardEvents.single.card, isA<TipCard>());
     });
 
-    test('sendMessage for a non-mild symptom streams a doctor card', () async {
+    test(
+        'sendMessage for a non-mild symptom streams a tip card, not a '
+        'directly-bookable doctor card', () async {
+      // Deliberately not a DoctorRecommendationCard: that card type always
+      // carries a real Doctor object that DoctorInfoCard_v2's "book" tap
+      // sends straight through to the real booking endpoint with no
+      // re-validation (see mock_astra_repository.dart's sendMessage for
+      // the full reasoning) - a fake mock doctor id must never be
+      // directly bookable.
       final events = await repository
           .sendMessage('s1', 'I have severe abdominal pain for a week')
           .toList();
 
       final cardEvents = events.whereType<AstraCardEvent>().toList();
       expect(cardEvents, hasLength(1));
-      expect(cardEvents.single.card, isA<DoctorRecommendationCard>());
+      expect(cardEvents.single.card, isA<TipCard>());
+      expect(cardEvents.single.card, isNot(isA<DoctorRecommendationCard>()));
     });
   });
 }
