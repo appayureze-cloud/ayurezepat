@@ -1,4 +1,4 @@
-import '../../appointments/domain/entities/doctor_summary.dart';
+import '../../../appointments/domain/entities/doctor_summary.dart';
 
 /// The five card kinds the backend contract defines for
 /// `POST /astra/sessions/{id}/messages`. Phase 1 renders [tip], [doctor]
