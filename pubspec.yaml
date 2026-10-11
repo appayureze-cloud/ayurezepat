@@ -180,8 +180,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  retrofit_generator: ^7.0.8
-  build_runner: ^2.3.3
+  retrofit_generator: ^10.2.11
+  build_runner: ^2.16.2
   json_serializable: ^6.8.0
   flutter_lints: ^4.0.0
 
@@ -190,15 +190,8 @@ dev_dependencies:
 # constraints to 0.15.7, which removed/changed an API flutter_html's
 # own source calls, breaking the build. Pinning back to the version
 # flutter_html actually targets fixes it without touching app code.
-#
-# analyzer 6.4.1 is the version retrofit_generator 7.0.8 (the final
-# 7.x release) is actually built/tested against (its constraint is
-# >=5.13.0 <7.0.0). Without this pin, pub is free to resolve a newer
-# analyzer in that range whose stricter diagnostics make the
-# generator's own source fail to precompile.
 dependency_overrides:
   html: 0.15.5
-  analyzer: 6.4.1
 
 flutter_native_splash:
   color: "#FFFFFF"
