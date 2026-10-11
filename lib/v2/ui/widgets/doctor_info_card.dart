@@ -5,8 +5,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../const/Palette.dart';
-import '../../features/appointments/domain/entities/doctor_summary.dart';
-import '../../features/appointments/presentation/doctor_booking_screen.dart';
+import '../../../features/appointments/domain/entities/doctor_summary.dart';
+import '../../../features/appointments/presentation/doctor_booking_screen.dart';
 import 'button_v2.dart';
 
 class DoctorInfoCard_v2 extends HookWidget {

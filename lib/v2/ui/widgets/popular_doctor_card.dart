@@ -4,8 +4,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../const/Palette.dart';
-import '../../features/appointments/domain/entities/doctor_summary.dart';
-import '../../features/appointments/presentation/doctor_booking_screen.dart';
+import '../../../features/appointments/domain/entities/doctor_summary.dart';
+import '../../../features/appointments/presentation/doctor_booking_screen.dart';
 
 class PopularDoctorCard extends HookWidget {
   final DoctorSummary doctor;
