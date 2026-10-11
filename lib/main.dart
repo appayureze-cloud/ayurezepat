@@ -26,6 +26,7 @@ import 'package:doctro_patient/v2/ui/home/landing_screen.dart';
 import 'package:doctro_patient/v2/ui/medicine/cart.dart';
 import 'package:doctro_patient/v2/ui/medicine/checkout.dart';
 import 'package:doctro_patient/v2/ui/medicine/landing_screen.dart';
+import 'package:doctro_patient/features/cart/presentation/shop_screen.dart';
 import 'package:doctro_patient/v2/ui/others/blog_list.dart' show BlogsList;
 import 'package:doctro_patient/v2/ui/others/notifications.dart';
 import 'package:doctro_patient/v2/ui/therapy/landing_screen.dart';
@@ -639,7 +640,10 @@ class _MyAppState extends State<MyApp> {
               'SignIn': (context) => Login(),
               'PhoneVerification': (context) => OTPVerification(),
               'EditProfile': (context) => EditProfile(),
-              'MedicineHome': (context) => MedicineLandingPage(),
+              // Retargeted to the Astra-native cart feature's product
+              // catalog - the Laravel medicine_home/cart/checkout screens it
+              // used to point to are now unreachable dead code.
+              'MedicineHome': (context) => const ShopScreen(),
               'Blogs': (context) => BlogsList(),
               'AddressList': (context) => AddressList(),
               'Notifications': (context) => Notifications(),

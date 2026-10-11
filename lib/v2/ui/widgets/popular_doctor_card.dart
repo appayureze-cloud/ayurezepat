@@ -1,14 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:doctro_patient/model/v2/home_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../const/Palette.dart';
-import '../appointment/make_appointment.dart';
+import '../../features/appointments/domain/entities/doctor_summary.dart';
+import '../../features/appointments/presentation/doctor_booking_screen.dart';
 
 class PopularDoctorCard extends HookWidget {
-  final Doctor doctor;
+  final DoctorSummary doctor;
 
   const PopularDoctorCard({required this.doctor, super.key});
 
@@ -17,7 +17,7 @@ class PopularDoctorCard extends HookWidget {
     return GestureDetector(
       onTap: () {
         Navigator.push(context,
-            MaterialPageRoute(builder: (_) => MakeAppointment(doctor: doctor)));
+            MaterialPageRoute(builder: (_) => DoctorBookingScreen(doctor: doctor)));
       },
       child: Card(
         margin: EdgeInsets.symmetric(
@@ -33,7 +33,7 @@ class PopularDoctorCard extends HookWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(4.w),
                 child: CachedNetworkImage(
-                  imageUrl: doctor.fullImage ?? '',
+                  imageUrl: doctor.photoUrl ?? '',
                   fit: BoxFit.fitWidth,
                   height: 12.h,
                   width: 45.w,
@@ -57,68 +57,40 @@ class PopularDoctorCard extends HookWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${doctor.name}',
+                      'Dr. ${doctor.name}',
                       style: TextStyle(
                         color: Palette.black,
                         fontSize: 16.sp,
                       ),
                     ),
                     SizedBox(height: 0.5.h),
-                    Text(
-                      '${doctor.category?.name}',
-                      style: TextStyle(
-                        color: Palette.grey,
-                        fontSize: 15.sp,
-                      ),
-                    ),
-                    if ((doctor.education?.length ?? 0) > 0)
-                      SizedBox(height: 0.5.h),
-                    if ((doctor.education?.length ?? 0) > 0)
+                    if ((doctor.specialization ?? '').isNotEmpty)
                       Text(
-                        '${doctor.education?.map((e) => e.degree!.toUpperCase()).join(', ')}',
+                        doctor.specialization!,
                         style: TextStyle(
-                          color: Palette.grey.withValues(alpha: .8),
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w400,
+                          color: Palette.grey,
+                          fontSize: 15.sp,
                         ),
                       ),
-                    SizedBox(height: 1.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(width: 1.w),
-                        Icon(
-                          Icons.work,
-                          size: 16.sp,
-                          color: Palette.primary,
-                        ),
-                        SizedBox(width: 1.w),
-                        Text(
-                          '${doctor.experience} Years',
-                          style: TextStyle(
-                            color: Palette.grey,
-                            fontSize: 13.sp,
+                    if (doctor.isVerified) SizedBox(height: 0.5.h),
+                    if (doctor.isVerified)
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.verified,
+                            size: 14.sp,
+                            color: Palette.primary,
                           ),
-                        ),
-                        SizedBox(width: 2.w),
-                        Spacer(),
-                        Icon(
-                          Icons.star,
-                          size: 16.sp,
-                          color: Palette.rating,
-                        ),
-                        SizedBox(width: 1.w),
-                        Text(
-                          '${doctor.rate} (${doctor.review})',
-                          style: TextStyle(
-                            color: Palette.grey,
-                            fontSize: 13.sp,
+                          SizedBox(width: 1.w),
+                          Text(
+                            'Verified',
+                            style: TextStyle(
+                              color: Palette.grey,
+                              fontSize: 12.sp,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 1.w),
-                      ],
-                    ),
+                        ],
+                      ),
                   ],
                 ),
               ),

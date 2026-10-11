@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:doctro_patient/model/v2/home_response.dart' as hr;
@@ -24,6 +26,8 @@ import '../../../api/retrofit_Api.dart';
 import '../../../const/Palette.dart';
 import '../../../const/prefConstatnt.dart';
 import '../../../const/preference.dart';
+import '../../../features/appointments/domain/entities/doctor_summary.dart';
+import '../../../features/appointments/presentation/appointment_service.dart';
 import '../../../model/v2/blog.dart';
 import '../../../model/v2/user_detail_model.dart';
 import '../../utils/logger.dart';
@@ -42,12 +46,23 @@ class MainHome extends HookWidget {
     final _showSearch = useState(false);
     final blogs = useState<List<Blogs>>([]);
     final categories = useState<List<hr.DoctorCategory>>([]);
-    final doctors = useState<List<hr.Doctor>>([]);
+    final doctors = useState<List<DoctorSummary>>([]);
     final banners = useState<List<hr.Banner>>([]);
     final loading = useState(true);
     final _isRequestingPermission = useState(false);
     final userDetails = useState<UserDetail?>(null);
     final place = useState<Placemark?>(null);
+
+    Future<void> loadDoctors() async {
+      // Sourced from the real Astra/Supabase doctors table, not the Laravel
+      // home response - Laravel doctor ids and Astra doctor_ids are not the
+      // same identity space, so this can't come from appointmentHomeData().
+      try {
+        doctors.value = await AppointmentService().listDoctors();
+      } catch (e) {
+        logger.e('Error fetching doctors from Astra: $e');
+      }
+    }
 
     Future<void> callApiForUserDetail() async {
       try {
@@ -125,7 +140,6 @@ class MainHome extends HookWidget {
         if (response.success == true) {
           blogs.value = response.data?.blogs ?? [];
           categories.value = response.data?.categories ?? [];
-          doctors.value = response.data?.doctors ?? [];
           banners.value = response.data?.banner ?? [];
 
           if (response.data?.settings != null) {
@@ -149,6 +163,7 @@ class MainHome extends HookWidget {
           }
         }
         await callApiForUserDetail();
+        unawaited(loadDoctors());
         loading.value = false;
         landingLoader.value = false;
       } catch (e, stacktrace) {
