@@ -77,9 +77,22 @@ class MockAstraRepository implements AstraRepository {
             'See a doctor if symptoms last more than 3 days or get worse.',
       ));
     } else {
-      yield AstraCardEvent(DoctorRecommendationCard(
-        doctor: _mockDoctor(),
-        reason: 'General physician, available today',
+      // Deliberately a TipCard, not a DoctorRecommendationCard: that card
+      // type always carries a real, directly-bookable Doctor object (see
+      // astra_card.dart), and DoctorInfoCard_v2's "book" tap passes it
+      // straight through to MakeAppointment with no re-fetch or
+      // validation against the real doctor list - select_payment_methods
+      // .dart sends doctor.id verbatim as the booking's doctor_id. A fake
+      // mock Doctor.id here would reach the real Laravel booking endpoint
+      // and could silently collide with an unrelated real doctor's id -
+      // confirmed during a doctor-assignment audit this mock predates.
+      // Point the patient at the real Doctors tab instead of fabricating
+      // a bookable doctor.
+      yield const AstraCardEvent(TipCard(
+        title: 'Worth seeing a doctor',
+        body: "Based on what you've described, I'd recommend speaking "
+            'with a doctor rather than self-treating. Check the Doctors '
+            'tab to find and book one.',
       ));
     }
   }
