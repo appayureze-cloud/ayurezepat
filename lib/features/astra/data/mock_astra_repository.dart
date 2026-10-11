@@ -3,7 +3,7 @@ import 'dart:math';
 
 import '../../../const/prefConstatnt.dart';
 import '../../../const/preference.dart';
-import '../../../model/v2/home_response.dart';
+import '../../appointments/domain/entities/doctor_summary.dart';
 import '../domain/astra_repository.dart';
 import '../domain/entities/astra_card.dart';
 import '../domain/entities/astra_recommendations.dart';
@@ -84,14 +84,11 @@ class MockAstraRepository implements AstraRepository {
     }
   }
 
-  Doctor _mockDoctor() => Doctor(
-        id: 1,
+  DoctorSummary _mockDoctor() => const DoctorSummary(
+        doctorId: 'mock_doctor_1',
         name: 'Dr. Anita Rao',
-        appointmentFees: '500',
-        timeslot: '30',
-        experience: '8 years',
-        rate: 5,
-        review: 120,
+        specialization: 'General Physician',
+        isVerified: true,
       );
 
   @override
