@@ -45,9 +45,20 @@ What's now wired to the real, confirmed contract (see
 What's **not** wired - either unused by any screen today, or the real
 gateway has no confirmed match (see per-method doc comments in
 `AstraRepositoryImpl` for the closest real candidate found): `getSession`,
-`triage`, `recommendations`, `plan`, `checkin`, `ackReminder`,
-`medicineInfo`. These still call the speculative contract documented below,
-which was never confirmed against a real backend.
+`triage`, `recommendations`, `plan`, `medicineInfo`. These still call the
+speculative contract documented below, which was never confirmed against
+a real backend.
+
+`checkin` and `ackReminder` were confirmed, during a later
+doctor-assignment audit, to have live callers (`DailyCheckinScreen`,
+`main.dart`'s reminder Taken/Skip/Snooze handler) despite targeting this
+same never-built speculative contract - i.e. actually broken, not merely
+unused. `checkin`'s escalation decision is now computed client-side (no
+backend call at all - see its doc comment in `AstraRepositoryImpl`;
+there's no real endpoint shaped like a daily symptom-score check-in to
+call instead). `ackReminder`'s one call site was removed from
+`main.dart` entirely - the real medicine-reminder sync described below
+already covered its actual job.
 
 ### Medicine reminders (`/api/v1/api/reminders/*`) - wired, additive
 
@@ -66,10 +77,12 @@ default) - but **additively**, alongside the existing fully local
   started yet (no patient id to register against), and any failure is
   logged, never surfaced to the patient or allowed to block the local
   reminders.
-- `main.dart`'s Taken/Skip/Snooze handler now also best-effort calls
+- `main.dart`'s Taken/Skip/Snooze handler best-effort calls
   `POST /api/v1/api/reminders/adherence/log` or
   `POST /api/v1/api/reminders/snooze` against that cached server reminder
-  id, alongside the existing (unconfirmed-contract) `ackReminder` call.
+  id. The old `ackReminder` call this used to run alongside (targeting
+  the never-built speculative contract above) was removed - this is the
+  only adherence sync that has ever actually worked.
 - These routes are marked `security: none` in the published spec - no
   bearer token required, unlike the companion chat API.
 - **The create endpoint's response has no fixed schema** in the published
@@ -355,9 +368,20 @@ recommended doctor with no extra mapping.
 ## `GET /astra/cases/{id}/plan`, `POST /astra/cases/{id}/checkins`, `POST /astra/reminders/{id}/ack`, `GET /astra/medicines/{id}/info`, `POST /astra/cases/{id}/resolve`
 
 Modeled in the client's `AstraRepository` interface now (so it matches the
-full contract), not yet called from any Phase 1 screen - `plan` and
-`checkins`/reminders drive Phase 3's daily follow-up and dose-reminder
-screens; `resolve` drives Phase 4's case-closure flow.
+full contract). `plan`, `medicineInfo` and this literal `resolve` path
+are still not called from any screen (the real case-resolution flow uses
+the confirmed `resolveCase()` -> `PUT /api/companion/journey/{id}/status`
+instead, see above).
+
+`checkins` and `reminders/{id}/ack` were never actually built on any
+real backend (confirmed: `Apis.baseUrl` is the Laravel app, which has no
+`astra/` namespace), yet `checkin`/`ackReminder` did have live callers
+(`DailyCheckinScreen`'s daily follow-up, `main.dart`'s dose-reminder
+Taken/Skip/Snooze) - a real bug, not just unused speculative code. Fixed:
+`checkin`'s escalation decision is now computed client-side with no
+network call; `ackReminder`'s call site was removed since the real
+medicine-reminder sync (`/api/v1/api/reminders/*`, see above) already
+covered dose reminders for real.
 
 ## Events (backend-only, no client involvement)
 

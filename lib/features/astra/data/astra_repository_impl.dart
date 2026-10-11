@@ -169,24 +169,33 @@ class AstraRepositoryImpl implements AstraRepository {
     return parsed.data!.toEntity();
   }
 
-  /// No confirmed real endpoint - the closest candidate is
-  /// `PUT /api/companion/case/progress` on the gateway, but its request
-  /// schema wasn't checked closely enough to be confident it maps to a
-  /// symptom-score check-in rather than something else (milestone
-  /// progress?). Wires DailyCheckinScreen today via the old, unconfirmed
-  /// contract.
+  /// No real backend round-trip: confirmed (during the doctor-assignment
+  /// audit this class predates) that `POST /astra/cases/{id}/checkins`
+  /// was never built - `Apis.baseUrl` is the Laravel app, which has no
+  /// `astra/` namespace at all, so this always 404'd. There's no suitable
+  /// real replacement either: the gateway's closest candidate,
+  /// `PUT /api/companion/case/progress`, takes a numeric
+  /// progress_percentage/adherence_score (coarse treatment-progress
+  /// tracking), not a daily 1-5 symptom score, and has no escalate/
+  /// continue decision in its response - and separately, the `caseId`
+  /// this method receives is actually a journey_id (see createSession()
+  /// above), not the companion-case id that endpoint expects, so even a
+  /// best-effort fire-and-forget call would risk hitting the wrong
+  /// record.
+  ///
+  /// The escalation decision itself needs no backend: it's the same
+  /// fixed, deterministic threshold [MockAstraRepository] already used
+  /// (and the existing tests in daily_checkin_notifier_test.dart already
+  /// assert), matching this app's own RedFlagDetector pattern of never
+  /// gating a safety-relevant decision on an unconfirmed network call.
   @override
   Future<CheckinResult> checkin(String caseId,
       {required int symptomScore}) async {
-    final response = await dio.post(
-      '${Apis.baseUrl}astra/cases/$caseId/checkins',
-      data: CheckinRequest(symptomScore: symptomScore).toJson(),
+    final escalate = symptomScore > 3;
+    return CheckinResult(
+      nextAction: escalate ? 'escalate_to_doctor' : 'continue_plan',
+      escalate: escalate,
     );
-    final parsed = CheckinResponse.fromJson(response.data);
-    if (parsed.success != true || parsed.data == null) {
-      throw AstraException(parsed.msg ?? 'Check-in failed');
-    }
-    return parsed.data!.toEntity();
   }
 
   /// No confirmed real endpoint. The closest candidate,

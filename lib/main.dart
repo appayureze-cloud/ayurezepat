@@ -51,8 +51,6 @@ import 'VideoCall/videoCall.dart';
 import 'const/Palette.dart';
 import 'const/prefConstatnt.dart';
 import 'firebase_options.dart';
-import 'api/retrofit_Api.dart';
-import 'features/astra/data/astra_service.dart';
 import 'features/astra/presentation/daily_checkin_screen.dart';
 import 'features/case/presentation/case_summary_screen.dart';
 import 'features/health_records/presentation/health_record_timeline_screen.dart';
@@ -406,17 +404,21 @@ class _MyAppState extends State<MyApp> {
         _ => null,
       };
       if (status == null) return;
-      try {
-        final dio = await RetroApi().dioData(context);
-        await AstraService.withDio(dio)
-            .repository
-            .ackReminder('$reminderId', status);
-      } catch (e) {
-        logger.e('Failed to ack reminder: $e');
-      }
-      // Best-effort: also log adherence against the real server-side
-      // reminder for this medicine, if one was registered when the local
-      // reminders were scheduled (see dose_reminder_scheduler.dart).
+      // AstraRepository.ackReminder() is deliberately not called here: it
+      // only ever targeted a speculative `POST /astra/reminders/{id}/ack`
+      // contract that was never built (confirmed against the real backend
+      // source during a later audit - Apis.baseUrl is the Laravel app, which
+      // has no `astra/` namespace at all), and its request even assumed a
+      // server-minted reminder id, not the locally-synthesized ones this
+      // app actually uses (see reminderIdFor() in dose_reminder_scheduler
+      // .dart). The block below, against the real, confirmed
+      // MedicineReminderService endpoints with the real server-side
+      // reminder id looked up via serverReminderIdFor(), is the only
+      // adherence sync that has ever actually worked.
+      //
+      // Best-effort: log adherence against the real server-side reminder
+      // for this medicine, if one was registered when the local reminders
+      // were scheduled (see dose_reminder_scheduler.dart).
       final serverReminderId = serverReminderIdFor('$reminderId');
       if (serverReminderId != null) {
         try {
