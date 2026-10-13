@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctro_patient/FirebaseModels/user_chat.dart';
 import 'package:doctro_patient/const/prefConstatnt.dart';
 import 'package:doctro_patient/const/preference.dart';
+import 'package:doctro_patient/features/astra/data/astra_patient_registration.dart';
 import 'package:doctro_patient/model/v2/check_otp_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +60,18 @@ class AuthProvider extends ChangeNotifier {
 
   bool check = false;
 
+  /// Best-effort: see [registerPatientWithAstra]. Called right after a
+  /// Firebase session exists (both the new-account and existing-account
+  /// branches of [handleSignIn]), since that's what the Astra call needs.
+  void _registerWithAstraBestEffort() {
+    unawaited(registerPatientWithAstra(
+      name: SharedPreferenceHelper.getString(FirestoreConstants.nickname) ??
+          '',
+      email: SharedPreferenceHelper.getString(FirestoreConstants.email),
+      phone: SharedPreferenceHelper.getString(Preferences.phone),
+    ));
+  }
+
   Future<bool> handleSignIn() async {
     _status = Status.authenticating;
     notifyListeners();
@@ -106,6 +121,7 @@ class AuthProvider extends ChangeNotifier {
           await prefs.setString(FirestoreConstants.userType, userChat.userType);
         }
         _status = Status.authenticated;
+        _registerWithAstraBestEffort();
         notifyListeners();
         return check = true;
       } else {
@@ -164,6 +180,7 @@ class AuthProvider extends ChangeNotifier {
           }
 
           _status = Status.authenticated;
+          _registerWithAstraBestEffort();
           notifyListeners();
 
           return check = true;
@@ -247,6 +264,11 @@ class AuthProvider extends ChangeNotifier {
                 response.data!.phoneCode?.toString() ?? '+91');
             int? verify = response.data!.verify;
             int? id = response.data!.id;
+            unawaited(registerPatientWithAstra(
+              name: response.data!.name ?? '',
+              email: response.data!.email,
+              phone: response.data!.phone?.toString(),
+            ));
             SharedPreferenceHelper.setBoolean(Preferences.is_logged_in, true);
             Preferences.hideDialog(context);
             Fluttertoast.showToast(

@@ -111,4 +111,10 @@ class AstraGatewayApis {
   static const String cartCheckout = 'api/v1/cart/checkout';
   static const String cartVerifyPayment = 'api/v1/cart/verify-payment';
   static const String cartOrders = 'api/v1/cart/orders';
+
+  /// Supabase-backed patient profile creation (app/patients module) -
+  /// requires HTTPBearer (Astra JWT), unlike most routes in this file.
+  /// Confirmed in the published OpenAPI spec; not yet exercised from this
+  /// client before the patient-registration best-effort call that uses it.
+  static const String patientsRegister = 'api/v1/patients/register';
 }
