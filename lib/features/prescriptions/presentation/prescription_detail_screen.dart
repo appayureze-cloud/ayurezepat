@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../const/Palette.dart';
 import '../../../const/env.dart';
 import '../../../model/v2/prescription_response.dart';
-import '../../../v2/ui/widgets/button_v2.dart';
+import '../../../theme.dart';
 import '../../../v2/ui/widgets/header.dart';
 import '../../../v2/utils/pdf_downloader.dart';
 import '../domain/entities/prescription_item.dart';
 import '../domain/prescription_items_source.dart';
 import 'dose_reminder_scheduler.dart';
 
+/// Matches the Stitch "Structured Prescription" screen
+/// (ayureze_structured_prescription/code.html): a clean item list, with
+/// the treatment-recommendation / dose-reminders actions styled as calm
+/// callout cards rather than plain buttons.
 class PrescriptionDetailScreen extends StatelessWidget {
   final Prescription prescription;
 
@@ -25,23 +27,23 @@ class PrescriptionDetailScreen extends StatelessWidget {
     final items = source.itemsFor(prescription);
 
     return Scaffold(
+      backgroundColor: AppColors.creamSurface,
       body: Column(
         children: [
-          Header_v2(title: 'Prescription'),
+          const Header_v2(title: 'Prescription'),
           Expanded(
             child: ListView(
-              padding: EdgeInsets.all(4.w),
+              padding: const EdgeInsets.all(16),
               children: [
                 if (items.isEmpty)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 4.h),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 32),
                     child: Center(
                       child: Text(
                         'A structured breakdown isn\'t available for this '
                         'prescription yet. Use the PDF below.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Palette.dark_grey, fontSize: 13.sp),
+                        style: TextStyle(color: AppColors.slateTextMuted),
                       ),
                     ),
                   )
@@ -49,52 +51,84 @@ class PrescriptionDetailScreen extends StatelessWidget {
                   for (final item in items) _PrescriptionItemCard(item: item),
                 if (prescription.treatmentRecommendation != null &&
                     prescription.treatmentRecommendation!.isNotEmpty) ...[
-                  SizedBox(height: 2.h),
-                  Text(
-                    'Treatment recommendation',
-                    style:
-                        TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
-                  ),
-                  SizedBox(height: 1.h),
-                  Text(
-                    prescription.treatmentRecommendation!,
-                    style:
-                        TextStyle(fontSize: 13.sp, color: Palette.dark_grey1),
-                  ),
-                  SizedBox(height: 1.h),
-                  ButtonV2(
-                    label: 'Book Treatment',
-                    onPressed: () => Navigator.pushNamed(
-                      context,
-                      'TherapyHome',
-                      arguments: [2, prescription.treatmentRecommendation],
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.sagePrimarySubtle,
+                      borderRadius: AppRadius.roundedLg,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Treatment recommendation',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 6),
+                        Text(
+                          prescription.treatmentRecommendation!,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          onPressed: () => Navigator.pushNamed(
+                            context,
+                            'TherapyHome',
+                            arguments: [
+                              2,
+                              prescription.treatmentRecommendation
+                            ],
+                          ),
+                          child: const Text('Book treatment'),
+                        ),
+                      ],
                     ),
                   ),
                 ],
                 if (items.isNotEmpty && prescription.id != null) ...[
-                  SizedBox(height: 2.h),
-                  ButtonV2(
-                    label: 'Set Dose Reminders',
-                    onPressed: () async {
-                      final prescriptionId = prescription.id!;
-                      for (var i = 0; i < items.length; i++) {
-                        await scheduleDoseReminders(
-                          prescriptionId: prescriptionId,
-                          itemIndex: i,
-                          item: items[i],
-                        );
-                      }
-                      Fluttertoast.showToast(
-                        msg: 'Reminders set for ${items.length} medicine(s)',
-                      );
-                    },
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.creamSurfaceLowest,
+                      border: Border.all(color: AppColors.slateBorder),
+                      borderRadius: AppRadius.roundedLg,
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.notifications_active_outlined,
+                            color: AppColors.sagePrimary),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                            child: Text('Get reminded to take each dose')),
+                        TextButton(
+                          onPressed: () async {
+                            final prescriptionId = prescription.id!;
+                            for (var i = 0; i < items.length; i++) {
+                              await scheduleDoseReminders(
+                                prescriptionId: prescriptionId,
+                                itemIndex: i,
+                                item: items[i],
+                              );
+                            }
+                            Fluttertoast.showToast(
+                              msg:
+                                  'Reminders set for ${items.length} medicine(s)',
+                            );
+                          },
+                          child: const Text('Set reminders'),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
-                SizedBox(height: 3.h),
+                const SizedBox(height: 24),
                 if (prescription.pdfPath != null)
-                  ButtonV2(
-                    label: 'View PDF',
+                  OutlinedButton.icon(
                     onPressed: () => downloadAndOpenPdf(prescription.pdfPath!),
+                    icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                    label: const Text('View PDF'),
                   ),
               ],
             ),
@@ -114,31 +148,48 @@ class _PrescriptionItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(vertical: 0.75.h),
-      padding: EdgeInsets.all(3.w),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        border: Border.all(color: Palette.lightGrey),
-        borderRadius: BorderRadius.circular(2.w),
+        color: AppColors.creamSurfaceLowest,
+        border: Border.all(color: AppColors.slateBorder),
+        borderRadius: AppRadius.roundedLg,
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            item.name,
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
-          ),
-          SizedBox(height: 0.5.h),
-          Text(
-            '${item.dose} · ${item.frequency} · ${item.durationDays} days · ${item.timing}',
-            style: TextStyle(fontSize: 12.sp, color: Palette.dark_grey),
-          ),
-          if (item.instructions != null) ...[
-            SizedBox(height: 0.5.h),
-            Text(
-              item.instructions!,
-              style: TextStyle(fontSize: 12.sp, color: Palette.dark_grey1),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              color: AppColors.sagePrimarySubtle,
+              shape: BoxShape.circle,
             ),
-          ],
+            child: const Icon(Icons.medication_outlined,
+                size: 18, color: AppColors.sagePrimary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item.name,
+                    style: Theme.of(context).textTheme.headlineSmall),
+                const SizedBox(height: 2),
+                Text(
+                  '${item.dose} · ${item.frequency} · ${item.durationDays} days · ${item.timing}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                if (item.instructions != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    item.instructions!,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );
