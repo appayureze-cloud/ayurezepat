@@ -10,6 +10,8 @@ import '../data/astra_service.dart';
 import '../domain/entities/astra_message.dart';
 import 'astra_chat_notifier.dart';
 import 'astra_localization.dart';
+import 'companion_journey_screen.dart';
+import 'companion_voice_mode_screen.dart';
 import 'daily_checkin_screen.dart';
 import 'voice_controller.dart';
 import 'widgets/astra_message_bubble.dart';
@@ -58,6 +60,15 @@ class AstraChatScreen extends HookWidget {
           Header_v2(
             title: 'Astra',
             actions: [
+              IconButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const CompanionJourneyScreen()),
+                ),
+                icon: Icon(Icons.timeline, color: AppColors.sagePrimary),
+                tooltip: 'Your journey',
+              ),
               IconButton(
                 onPressed: () => Navigator.push(
                   context,
@@ -229,6 +240,21 @@ class AstraChatBody extends HookWidget {
                   IconButton(
                     onPressed: notifier.sending ? null : send,
                     icon: const Icon(Icons.send, color: AppColors.sagePrimary),
+                  ),
+                  IconButton(
+                    tooltip: 'Voice mode',
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CompanionVoiceModeScreen(
+                          notifier: notifier,
+                          voice: voice,
+                          language: language.value,
+                        ),
+                      ),
+                    ),
+                    icon: const Icon(Icons.graphic_eq,
+                        color: AppColors.sagePrimary),
                   ),
                   GestureDetector(
                     onLongPressStart: (_) async {
