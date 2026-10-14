@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../const/Palette.dart';
+import '../../../../theme.dart';
 import '../../domain/entities/astra_card.dart';
 
 /// The one hardcoded, non-negotiable card in Astra: shown for red-flag
 /// symptoms, before or instead of any LLM reply. Never dismiss this
 /// silently or replace its call-to-action with anything softer than
-/// "call emergency services now".
+/// "call emergency services now". Styled per the design brief's one
+/// exception to the calm palette: genuine medical urgency keeps the
+/// clay/alert tone, unlike every other alert in the app.
 class EmergencyCardWidget extends StatelessWidget {
   final EmergencyCard card;
 
@@ -18,49 +19,58 @@ class EmergencyCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(vertical: 0.5.h),
-      padding: EdgeInsets.all(3.w),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Palette.red_bg,
-        borderRadius: BorderRadius.circular(2.w),
-        border: Border.all(color: Palette.red, width: 1.5),
+        color: AppColors.clayAlertContainer,
+        borderRadius: AppRadius.roundedLg,
+        border: Border.all(color: AppColors.clayAlert.withOpacity(0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.warning_rounded, color: Palette.red, size: 5.w),
-              SizedBox(width: 2.w),
-              Expanded(
+              Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  color: AppColors.amberWarningContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.warning_rounded,
+                    color: AppColors.clayAlert, size: 20),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
                 child: Text(
-                  'This may be a medical emergency',
+                  'Clinical Safety Advisory',
                   style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15.sp,
-                    color: Palette.red,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: AppColors.clayAlert,
                   ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 1.h),
+          const SizedBox(height: 10),
           Text(
             card.message,
-            style: TextStyle(fontSize: 13.sp, color: Palette.black),
+            style: const TextStyle(
+                fontSize: 13.5, color: AppColors.slateTextSecondary),
           ),
-          SizedBox(height: 1.5.h),
+          const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Palette.red,
-                foregroundColor: Palette.white,
-                padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                backgroundColor: AppColors.clayAlert,
+                foregroundColor: AppColors.clayOnAlert,
               ),
               onPressed: () => launchUrl(Uri.parse('tel:112')),
               icon: const Icon(Icons.call),
-              label: Text('Call 112 now', style: TextStyle(fontSize: 14.sp)),
+              label: const Text('Call 112 now'),
             ),
           ),
         ],

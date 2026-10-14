@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:doctro_patient/const/Palette.dart';
+import 'package:doctro_patient/theme.dart';
 import 'package:doctro_patient/v2/ui/others/html_content_page.dart';
 import 'package:doctro_patient/v2/ui/widgets/header.dart';
 import 'package:doctro_patient/v2/ui/widgets/no_data.dart';
@@ -76,8 +76,8 @@ class Profile extends HookWidget {
               msg: '${response.message}',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.BOTTOM,
-              backgroundColor: Palette.primary,
-              textColor: Palette.white,
+              backgroundColor: AppColors.sagePrimary,
+              textColor: AppColors.sageOnPrimary,
             );
           }
           logoutUser();
@@ -87,8 +87,8 @@ class Profile extends HookWidget {
               msg: '${response.message}',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.BOTTOM,
-              backgroundColor: Palette.primary,
-              textColor: Palette.white,
+              backgroundColor: AppColors.sagePrimary,
+              textColor: AppColors.sageOnPrimary,
             );
           }
         }
@@ -128,35 +128,21 @@ class Profile extends HookWidget {
     return ModalProgressHUD(
       inAsyncCall: loading.value,
       opacity: 0.5,
-      progressIndicator: SpinKitFadingCircle(
-        color: Palette.primary,
-        size: 3.h,
+      progressIndicator: const SpinKitFadingCircle(
+        color: AppColors.sagePrimary,
+        size: 36,
       ),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Header_v2(
-              color: Palette.primary,
-              title: '',
-            ),
+            const Header_v2(title: 'Profile'),
             SharedPreferenceHelper.getBoolean(Preferences.is_logged_in) &&
                     userDetails.value != null
                 ? Column(
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Palette.primary,
-                          borderRadius: BorderRadius.only(
-                            bottomRight: Radius.circular(2.h),
-                            bottomLeft: Radius.circular(2.h),
-                          ),
-                        ),
-                        width: 100.w,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 3.w,
-                          vertical: 2.h,
-                        ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
                         child: Row(
                           children: [
                             CachedNetworkImage(
@@ -167,61 +153,51 @@ class Profile extends HookWidget {
                                   : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D',
                               imageBuilder: (context, imageProvider) =>
                                   CircleAvatar(
-                                radius: 7.w,
-                                backgroundColor: Palette.white,
+                                radius: 32,
+                                backgroundColor: AppColors.sagePrimaryContainer,
                                 child: CircleAvatar(
-                                  radius: 6.5.w,
+                                  radius: 29,
                                   backgroundImage: imageProvider,
                                 ),
                               ),
                               placeholder: (context, url) =>
-                                  SpinKitFadingCircle(color: Palette.primary),
+                                  const SpinKitFadingCircle(
+                                      color: AppColors.sagePrimary),
                               errorWidget: (context, url, error) => ClipRRect(
                                 borderRadius: BorderRadius.circular(50),
                                 child: Image.asset(
                                   "assets/images/no_image.jpg",
                                   fit: BoxFit.fitHeight,
-                                  width: 12.w,
-                                  height: 12.w,
+                                  width: 48,
+                                  height: 48,
                                 ),
                               ),
                             ),
-                            SizedBox(width: 3.w),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '${userDetails.value!.name}',
-                                      style: TextStyle(
-                                        fontSize: 18.sp,
-                                        color: Palette.white,
-                                        fontWeight: FontWeight.normal,
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.keyboard_arrow_down_sharp,
-                                      size: 21.sp,
-                                      color: Palette.white,
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  '${userDetails.value!.email}',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    color: Palette.white,
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${userDetails.value!.name}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineLarge,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${userDetails.value!.email}',
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 1.h),
+                      const SizedBox(height: 4),
                       ProfileSectionCard(
                         title: 'Edit Profile',
                         route: 'EditProfile',
@@ -381,7 +357,7 @@ class Profile extends HookWidget {
                         child: Text(
                           'Please login!',
                           style: TextStyle(
-                            color: Palette.black,
+                            color: AppColors.slateTextPrimary,
                             fontSize: 18.sp,
                           ),
                         ),

@@ -3,10 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../const/Palette.dart';
-import '../../../v2/ui/widgets/button_v2.dart';
+import '../../../theme.dart';
 import '../../../v2/ui/widgets/header.dart';
 import '../../../v2/utils/logger.dart';
 import '../domain/entities/doctor_summary.dart';
@@ -19,6 +17,9 @@ import 'appointment_service.dart';
 // what Razorpay actually charges (via POST /finance/payments/create-order).
 const int _defaultConsultationFeeRupees = 500;
 
+/// Matches the Stitch "Doctor Detail / Booking" screen
+/// (ayureze_doctor_detail_booking/code.html): date strip, slot-chip grid,
+/// sticky bottom "Book appointment" pill button showing the fee.
 class DoctorBookingScreen extends HookWidget {
   final DoctorSummary doctor;
 
@@ -34,7 +35,7 @@ class DoctorBookingScreen extends HookWidget {
     final booking = useState(false);
 
     final dates =
-        List.generate(7, (i) => DateTime.now().add(Duration(days: i)));
+        List.generate(14, (i) => DateTime.now().add(Duration(days: i)));
 
     Future<void> loadSlots() async {
       loadingSlots.value = true;
@@ -81,34 +82,70 @@ class DoctorBookingScreen extends HookWidget {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.creamSurface,
       body: Column(
         children: [
-          Header_v2(title: doctor.name),
+          Header_v2(title: 'Dr. ${doctor.name}'),
           Expanded(
             child: ListView(
-              padding: EdgeInsets.all(4.w),
+              padding: const EdgeInsets.all(20),
               children: [
-                if ((doctor.specialization ?? '').isNotEmpty)
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 2.h),
-                    child: Text(doctor.specialization!,
-                        style: TextStyle(
-                            fontSize: 13.sp, color: Palette.dark_grey)),
-                  ),
-                Text('Consultation fee: ₹$_defaultConsultationFeeRupees',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 13.sp)),
-                SizedBox(height: 2.h),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: const BoxDecoration(
+                        color: AppColors.sagePrimaryContainer,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.person,
+                          color: AppColors.sagePrimary, size: 28),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text('Dr. ${doctor.name}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineLarge),
+                              ),
+                              if (doctor.isVerified)
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 4),
+                                  child: Icon(Icons.verified,
+                                      size: 18, color: AppColors.sagePrimary),
+                                ),
+                            ],
+                          ),
+                          if ((doctor.specialization ?? '').isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(doctor.specialization!,
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
                 Text('Select date',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 13.sp)),
-                SizedBox(height: 1.h),
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 10),
                 SizedBox(
-                  height: 9.h,
+                  height: 68,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: dates.length,
-                    separatorBuilder: (_, __) => SizedBox(width: 2.w),
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
                     itemBuilder: (context, i) {
                       final d = dates[i];
                       final isSelected = DateFormat('yyyy-MM-dd').format(d) ==
@@ -116,12 +153,16 @@ class DoctorBookingScreen extends HookWidget {
                       return GestureDetector(
                         onTap: () => selectedDate.value = d,
                         child: Container(
-                          width: 16.w,
+                          width: 60,
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? Palette.primary
-                                : Palette.lightGrey,
-                            borderRadius: BorderRadius.circular(2.w),
+                                ? AppColors.sagePrimary
+                                : AppColors.creamSurfaceLowest,
+                            border: Border.all(
+                                color: isSelected
+                                    ? AppColors.sagePrimary
+                                    : AppColors.slateBorder),
+                            borderRadius: AppRadius.roundedMd,
                           ),
                           alignment: Alignment.center,
                           child: Column(
@@ -129,17 +170,18 @@ class DoctorBookingScreen extends HookWidget {
                             children: [
                               Text(DateFormat('EEE').format(d),
                                   style: TextStyle(
-                                      fontSize: 10.sp,
+                                      fontSize: 11,
                                       color: isSelected
-                                          ? Colors.white
-                                          : Palette.dark_grey)),
+                                          ? AppColors.sageOnPrimary
+                                          : AppColors.slateTextMuted)),
+                              const SizedBox(height: 2),
                               Text(DateFormat('d MMM').format(d),
                                   style: TextStyle(
-                                      fontSize: 11.sp,
+                                      fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                       color: isSelected
-                                          ? Colors.white
-                                          : Colors.black)),
+                                          ? AppColors.sageOnPrimary
+                                          : AppColors.slateTextPrimary)),
                             ],
                           ),
                         ),
@@ -147,48 +189,51 @@ class DoctorBookingScreen extends HookWidget {
                     },
                   ),
                 ),
-                SizedBox(height: 2.h),
+                const SizedBox(height: 24),
                 Text('Available times',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 13.sp)),
-                SizedBox(height: 1.h),
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 10),
                 if (loadingSlots.value)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 2.h),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
                     child: Center(
                         child: SpinKitFadingCircle(
-                            color: Palette.primary, size: 5.h)),
+                            color: AppColors.sagePrimary, size: 36)),
                   )
                 else if (slots.value.isEmpty)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 2.h),
-                    child: const Text('No open slots on this date'),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Text('No open slots on this date',
+                        style: TextStyle(color: AppColors.slateTextMuted)),
                   )
                 else
                   Wrap(
-                    spacing: 2.w,
-                    runSpacing: 1.h,
+                    spacing: 10,
+                    runSpacing: 10,
                     children: slots.value.map((slot) {
                       final isSelected = slot == selectedSlot.value;
                       return GestureDetector(
                         onTap: () => selectedSlot.value = slot,
                         child: Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 4.w, vertical: 1.5.h),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
                           decoration: BoxDecoration(
-                            color: isSelected ? Palette.primary : Colors.white,
+                            color: isSelected
+                                ? AppColors.sagePrimary
+                                : AppColors.creamSurfaceLowest,
                             border: Border.all(
                                 color: isSelected
-                                    ? Palette.primary
-                                    : Palette.lightGrey),
-                            borderRadius: BorderRadius.circular(2.w),
+                                    ? AppColors.sagePrimary
+                                    : AppColors.slateBorder),
+                            borderRadius: AppRadius.roundedPill,
                           ),
                           child: Text(slot,
                               style: TextStyle(
-                                  fontSize: 12.sp,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
                                   color: isSelected
-                                      ? Colors.white
-                                      : Colors.black)),
+                                      ? AppColors.sageOnPrimary
+                                      : AppColors.slateTextPrimary)),
                         ),
                       );
                     }).toList(),
@@ -196,14 +241,39 @@ class DoctorBookingScreen extends HookWidget {
               ],
             ),
           ),
-          Padding(
-            padding: EdgeInsets.all(4.w),
-            child: ButtonV2(
-              label: booking.value ? 'Booking…' : 'Book & Pay',
-              width: 100.w,
-              onPressed: selectedSlot.value == null || booking.value
-                  ? null
-                  : confirmBooking,
+          SafeArea(
+            top: false,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+              decoration: BoxDecoration(
+                color: AppColors.creamSurfaceLowest,
+                boxShadow: AppShadows.floatingNav,
+              ),
+              child: Row(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Consultation fee',
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.slateTextMuted)),
+                      Text('₹$_defaultConsultationFeeRupees',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(color: AppColors.sagePrimary)),
+                    ],
+                  ),
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: selectedSlot.value == null || booking.value
+                        ? null
+                        : confirmBooking,
+                    child:
+                        Text(booking.value ? 'Booking...' : 'Book appointment'),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

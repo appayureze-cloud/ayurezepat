@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../../const/Palette.dart';
+import '../../../../theme.dart';
 import '../../../../v2/ui/widgets/doctor_info_card.dart';
 import '../../domain/entities/astra_card.dart';
 
@@ -20,12 +19,12 @@ class DoctorRecommendationCardWidget extends StatelessWidget {
       children: [
         if (card.reason != null)
           Padding(
-            padding: EdgeInsets.only(bottom: 0.5.h),
+            padding: const EdgeInsets.only(bottom: 6),
             child: Text(
               card.reason!,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: Palette.dark_grey,
+              style: const TextStyle(
+                fontSize: 12.5,
+                color: AppColors.slateTextSecondary,
                 fontStyle: FontStyle.italic,
               ),
             ),

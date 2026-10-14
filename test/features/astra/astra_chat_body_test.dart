@@ -67,7 +67,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.send));
     await tester.pump();
 
-    expect(find.text('This may be a medical emergency'), findsOneWidget);
+    expect(find.text('Clinical Safety Advisory'), findsOneWidget);
     expect(find.widgetWithText(ElevatedButton, 'Call 112 now'), findsOneWidget);
   });
 

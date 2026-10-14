@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../../const/Palette.dart';
+import '../../../../theme.dart';
 import '../../domain/entities/astra_message.dart';
 import 'astra_card_widget.dart';
 
+/// Matches the Stitch chat bubbles (ayureze_astra_ai_chat/code.html):
+/// AI bubble on cream with a sharp top-left corner, patient bubble on
+/// sage with a sharp top-right corner.
 class AstraMessageBubble extends StatelessWidget {
   final AstraMessage message;
   final VoidCallback? onSpeak;
@@ -17,12 +19,22 @@ class AstraMessageBubble extends StatelessWidget {
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        constraints: BoxConstraints(maxWidth: 80.w),
-        margin: EdgeInsets.symmetric(vertical: 0.5.h),
-        padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.2.h),
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isUser ? Palette.primary : Palette.lightGrey2,
-          borderRadius: BorderRadius.circular(3.w),
+          color: isUser
+              ? AppColors.sagePrimaryContainer
+              : AppColors.creamSurfaceLowest,
+          border:
+              isUser ? null : Border.all(color: AppColors.slateBorderSubtle),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(isUser ? AppRadius.lg : 4),
+            topRight: Radius.circular(isUser ? 4 : AppRadius.lg),
+            bottomLeft: const Radius.circular(AppRadius.lg),
+            bottomRight: const Radius.circular(AppRadius.lg),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,24 +48,27 @@ class AstraMessageBubble extends StatelessWidget {
                     child: Text(
                       message.text,
                       style: TextStyle(
-                        color: isUser ? Palette.white : Palette.black,
-                        fontSize: 13.5.sp,
+                        color: isUser
+                            ? AppColors.sageOnPrimaryContainer
+                            : AppColors.slateTextPrimary,
+                        fontSize: 14.5,
+                        height: 1.4,
                       ),
                     ),
                   ),
                   if (!isUser && onSpeak != null)
                     InkWell(
                       onTap: onSpeak,
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 1.5.w),
+                      child: const Padding(
+                        padding: EdgeInsets.only(left: 6),
                         child: Icon(Icons.volume_up,
-                            size: 4.w, color: Palette.dark_grey),
+                            size: 18, color: AppColors.slateTextMuted),
                       ),
                     ),
                 ],
               ),
             for (final card in message.cards) ...[
-              if (message.text.isNotEmpty) SizedBox(height: 1.h),
+              if (message.text.isNotEmpty) const SizedBox(height: 8),
               AstraCardWidget(card: card),
             ],
           ],
