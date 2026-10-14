@@ -62,9 +62,12 @@ void main() {
     )));
 
     // The red-flag path is fully synchronous (no repository call), so a
-    // plain tap + pump is enough here.
+    // plain tap + pump is enough here - a second pump is just a safety
+    // margin for the rebuild to flush on a slower CI runner (this flaked
+    // intermittently in CI, never locally, with a single pump).
     await tester.enterText(find.byType(TextField), 'I have chest pain');
     await tester.tap(find.byIcon(Icons.send));
+    await tester.pump();
     await tester.pump();
 
     expect(find.text('Clinical Safety Advisory'), findsOneWidget);
