@@ -4,6 +4,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../api/retrofit_Api.dart';
+import '../../../const/prefConstatnt.dart';
+import '../../../const/preference.dart';
 import '../../../theme.dart';
 import '../../../v2/ui/widgets/header.dart';
 import '../data/astra_service.dart';
@@ -23,7 +25,11 @@ class AstraChatScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final language = useState(AstraVoiceLanguage.english);
+    final language = useState(
+      SharedPreferenceHelper.getString(Preferences.app_language) == 'hi'
+          ? AstraVoiceLanguage.hindi
+          : AstraVoiceLanguage.english,
+    );
     final loc = useState(AstraLocalization.empty());
     final notifier = useState<AstraChatNotifier?>(null);
     final voice = useMemoized(() => VoiceController(), []);

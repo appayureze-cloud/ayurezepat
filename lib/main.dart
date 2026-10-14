@@ -29,6 +29,12 @@ import 'package:doctro_patient/v2/ui/medicine/cart.dart';
 import 'package:doctro_patient/v2/ui/medicine/checkout.dart';
 import 'package:doctro_patient/features/cart/presentation/shop_screen.dart';
 import 'package:doctro_patient/features/documents/presentation/documents_screen.dart';
+import 'package:doctro_patient/features/settings/presentation/account_settings_screen.dart';
+import 'package:doctro_patient/features/settings/presentation/help_support_screen.dart';
+import 'package:doctro_patient/features/settings/presentation/language_preferences_screen.dart';
+import 'package:doctro_patient/features/settings/presentation/notification_preferences_screen.dart';
+import 'package:doctro_patient/features/settings/presentation/privacy_data_screen.dart';
+import 'package:doctro_patient/features/settings/presentation/settings_home_screen.dart';
 import 'package:doctro_patient/features/vault/presentation/vault_lock_screen.dart';
 import 'package:doctro_patient/v2/ui/others/blog_list.dart' show BlogsList;
 import 'package:doctro_patient/v2/ui/others/notifications.dart';
@@ -609,6 +615,14 @@ class _MyAppState extends State<MyApp> {
               'HealthRecord': (context) => const HealthRecordTimelineScreen(),
               'Documents': (context) => const DocumentsScreen(),
               'VaultLock': (context) => const VaultLockScreen(),
+              'SettingsHome': (context) => const SettingsHomeScreen(),
+              'SettingsAccount': (context) => const AccountSettingsScreen(),
+              'SettingsNotifications': (context) =>
+                  const NotificationPreferencesScreen(),
+              'SettingsPrivacy': (context) => const PrivacyDataScreen(),
+              'SettingsLanguage': (context) =>
+                  const LanguagePreferencesScreen(),
+              'SettingsSupport': (context) => const HelpSupportScreen(),
 
               'Home': (context) => MainLandingPage(),
               // 'Home22': (context) => MedicineLandingPage(),
