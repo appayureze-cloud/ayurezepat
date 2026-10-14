@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:sizer/sizer.dart';
 
 import '../../../api/retrofit_Api.dart';
-import '../../../const/Palette.dart';
 import '../../../const/prefConstatnt.dart';
 import '../../../const/preference.dart';
+import '../../../theme.dart';
 import '../../../v2/ui/widgets/header.dart';
 import 'whatsapp_consent_service.dart';
 
+/// Matches the Stitch "WhatsApp Consent" screen
+/// (ayureze_whatsapp_consent/code.html): a single calm card explaining
+/// what gets sent, a toggle, and a short privacy note.
+///
 /// Lets the patient opt in/out of WhatsApp updates (order status, dose
 /// reminders, appointment confirmations). The app never messages the
 /// WhatsApp BSP directly - this only records the choice with our backend
@@ -71,61 +74,98 @@ class WhatsappOptInScreen extends HookWidget {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.creamSurface,
       body: Column(
         children: [
           const Header_v2(title: 'WhatsApp Updates'),
           Expanded(
             child: loading.value
-                ? Center(
-                    child:
-                        SpinKitFadingCircle(color: Palette.primary, size: 6.h),
+                ? const Center(
+                    child: SpinKitFadingCircle(
+                        color: AppColors.sagePrimary, size: 36),
                   )
                 : Padding(
-                    padding: EdgeInsets.all(4.w),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          value: optedIn.value,
-                          onChanged:
-                              saving.value || phone.isEmpty ? null : toggle,
-                          activeColor: Palette.primary,
-                          title: Text(
-                            'Get updates on WhatsApp',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 14.sp),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.creamSurfaceLowest,
+                            border: Border.all(color: AppColors.slateBorder),
+                            borderRadius: AppRadius.roundedLg,
                           ),
-                          subtitle: Text(
-                            phone.isNotEmpty
-                                ? 'Sent to $phone'
-                                : 'Add a phone number in Edit Profile first',
-                            style: TextStyle(
-                                fontSize: 12.sp, color: Palette.dark_grey),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.sagePrimarySubtle,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.chat_outlined,
+                                        color: AppColors.sagePrimary),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Get updates on WhatsApp',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .headlineSmall),
+                                        Text(
+                                          phone.isNotEmpty
+                                              ? 'Sent to $phone'
+                                              : 'Add a phone number in Edit Profile first',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Switch(
+                                    value: optedIn.value,
+                                    onChanged: saving.value || phone.isEmpty
+                                        ? null
+                                        : toggle,
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(height: 1.h),
+                        const SizedBox(height: 16),
                         Text(
                           'We\'ll send order status, dose reminders and '
                           'appointment confirmations to your WhatsApp number. '
                           'You can turn this off at any time. Astra will '
                           'never send diagnoses or prescriptions over '
                           'WhatsApp.',
-                          style: TextStyle(
-                              fontSize: 12.sp, color: Palette.dark_grey1),
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                         if (consentedAt.value != null) ...[
-                          SizedBox(height: 1.h),
+                          const SizedBox(height: 10),
                           Text(
                             'Last updated: ${consentedAt.value}',
-                            style: TextStyle(
-                                fontSize: 11.sp, color: Palette.dark_grey),
+                            style: const TextStyle(
+                                fontSize: 11, color: AppColors.slateTextMuted),
                           ),
                         ],
                         if (error.value != null) ...[
-                          SizedBox(height: 2.h),
+                          const SizedBox(height: 14),
                           Text(error.value!,
-                              style: TextStyle(color: Palette.red)),
+                              style:
+                                  const TextStyle(color: AppColors.clayAlert)),
                         ],
                       ],
                     ),

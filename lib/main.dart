@@ -28,6 +28,7 @@ import 'package:doctro_patient/v2/ui/home/landing_screen.dart';
 import 'package:doctro_patient/v2/ui/medicine/cart.dart';
 import 'package:doctro_patient/v2/ui/medicine/checkout.dart';
 import 'package:doctro_patient/features/cart/presentation/shop_screen.dart';
+import 'package:doctro_patient/features/documents/presentation/documents_screen.dart';
 import 'package:doctro_patient/v2/ui/others/blog_list.dart' show BlogsList;
 import 'package:doctro_patient/v2/ui/others/notifications.dart';
 import 'package:doctro_patient/v2/ui/therapy/landing_screen.dart';
@@ -605,6 +606,7 @@ class _MyAppState extends State<MyApp> {
               'WhatsAppOptIn': (context) => const WhatsappOptInScreen(),
               'CaseSummary': (context) => const CaseSummaryScreen(),
               'HealthRecord': (context) => const HealthRecordTimelineScreen(),
+              'Documents': (context) => const DocumentsScreen(),
 
               'Home': (context) => MainLandingPage(),
               // 'Home22': (context) => MedicineLandingPage(),
