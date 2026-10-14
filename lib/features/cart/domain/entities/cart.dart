@@ -77,6 +77,7 @@ class CartOrder {
         status: json['status'] as String? ?? '',
         totalAmount: (json['total_amount'] as num?)?.toInt() ?? 0,
         invoiceUrl: json['invoice_url'] as String?,
-        updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
+        updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ??
+            DateTime.now(),
       );
 }

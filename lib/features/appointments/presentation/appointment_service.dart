@@ -29,7 +29,8 @@ class AppointmentService {
 
   Future<List<Appointment>> myAppointments() => _repository.myAppointments();
 
-  Future<void> cancel(String consultationId) => _repository.cancel(consultationId);
+  Future<void> cancel(String consultationId) =>
+      _repository.cancel(consultationId);
 
   /// Books the slot, then runs the full pay flow (price, Razorpay checkout,
   /// server verification). Throws [AppointmentPaymentCancelledException] if
@@ -77,7 +78,8 @@ class AppointmentService {
     final appointments = await myAppointments();
     return appointments.firstWhere(
       (a) => a.consultationId == consultationId,
-      orElse: () => throw AppointmentException('Booked, but could not reload appointment'),
+      orElse: () => throw AppointmentException(
+          'Booked, but could not reload appointment'),
     );
   }
 
@@ -102,7 +104,8 @@ class AppointmentService {
         if (r.code == Razorpay.PAYMENT_CANCELLED) {
           completer.completeError(AppointmentPaymentCancelledException());
         } else {
-          completer.completeError(AppointmentException(r.message ?? 'Payment failed'));
+          completer.completeError(
+              AppointmentException(r.message ?? 'Payment failed'));
         }
       }
     });

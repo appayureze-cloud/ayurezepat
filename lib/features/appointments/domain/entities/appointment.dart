@@ -31,8 +31,9 @@ class Appointment {
         consultationId: json['consultation_id']?.toString() ?? '',
         doctorId: json['doctor_id']?.toString() ?? '',
         doctorName: json['doctor_name'] as String? ?? 'Doctor',
-        appointmentDate: DateTime.tryParse(json['appointment_date'] as String? ?? '') ??
-            DateTime.now(),
+        appointmentDate:
+            DateTime.tryParse(json['appointment_date'] as String? ?? '') ??
+                DateTime.now(),
         consultationType: json['consultation_type'] as String? ?? 'video',
         status: json['status'] as String? ?? 'booked_unpaid',
         paymentStatus: json['payment_status'] as String? ?? 'pending',

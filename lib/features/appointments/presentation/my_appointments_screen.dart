@@ -139,7 +139,8 @@ class _AppointmentTile extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(appointment.doctorName,
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 13.sp)),
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.4.h),
@@ -158,7 +159,8 @@ class _AppointmentTile extends StatelessWidget {
           ),
           SizedBox(height: 0.5.h),
           Text(
-            DateFormat('d MMM yyyy, h:mm a').format(appointment.appointmentDate),
+            DateFormat('d MMM yyyy, h:mm a')
+                .format(appointment.appointmentDate),
             style: TextStyle(fontSize: 11.sp, color: Palette.dark_grey),
           ),
           if (appointment.totalFee != null)
@@ -174,16 +176,19 @@ class _AppointmentTile extends StatelessWidget {
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => VideoCall(astraDoctorId: appointment.doctorId),
+                      builder: (_) =>
+                          VideoCall(astraDoctorId: appointment.doctorId),
                     ),
                   ),
                   icon: const Icon(Icons.videocam, color: Colors.green),
-                  label: const Text('Join call', style: TextStyle(color: Colors.green)),
+                  label: const Text('Join call',
+                      style: TextStyle(color: Colors.green)),
                 ),
               if (canCancel)
                 TextButton(
                   onPressed: () => onCancel(appointment),
-                  child: const Text('Cancel', style: TextStyle(color: Colors.red)),
+                  child:
+                      const Text('Cancel', style: TextStyle(color: Colors.red)),
                 ),
             ],
           ),

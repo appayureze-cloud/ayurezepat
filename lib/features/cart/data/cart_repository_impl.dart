@@ -20,7 +20,9 @@ class CartRepositoryImpl implements CartRepository {
     final response = await dio.get(AstraGatewayApis.shopifyProductsAvailable);
     final data = response.data as Map<String, dynamic>;
     final medicines = (data['medicines'] as List<dynamic>? ?? []);
-    return medicines.map((m) => Product.fromJson(m as Map<String, dynamic>)).toList();
+    return medicines
+        .map((m) => Product.fromJson(m as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -85,6 +87,8 @@ class CartRepositoryImpl implements CartRepository {
     final response = await dio.get(AstraGatewayApis.cartOrders);
     final data = response.data as Map<String, dynamic>;
     final orders = (data['orders'] as List<dynamic>? ?? []);
-    return orders.map((o) => CartOrder.fromJson(o as Map<String, dynamic>)).toList();
+    return orders
+        .map((o) => CartOrder.fromJson(o as Map<String, dynamic>))
+        .toList();
   }
 }

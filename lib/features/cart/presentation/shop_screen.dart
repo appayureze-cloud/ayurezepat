@@ -45,7 +45,8 @@ class ShopScreen extends HookWidget {
     final filtered = query.value.trim().isEmpty
         ? const <Product>[]
         : allProducts.value
-            .where((p) => p.name.toLowerCase().contains(query.value.trim().toLowerCase()))
+            .where((p) =>
+                p.name.toLowerCase().contains(query.value.trim().toLowerCase()))
             .take(50)
             .toList();
 
@@ -82,7 +83,8 @@ class ShopScreen extends HookWidget {
               decoration: InputDecoration(
                 hintText: 'Search medicines…',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(2.w)),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(2.w)),
               ),
             ),
           ),
@@ -96,7 +98,8 @@ class ShopScreen extends HookWidget {
             Expanded(child: Center(child: Text(error.value!)))
           else if (query.value.trim().isEmpty)
             const Expanded(
-              child: Center(child: Text('Search for a medicine to get started')),
+              child:
+                  Center(child: Text('Search for a medicine to get started')),
             )
           else if (filtered.isEmpty)
             const Expanded(child: Center(child: Text('No matching medicines')))
@@ -122,24 +125,33 @@ class ShopScreen extends HookWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(product.name,
-                                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
-                              Text('₹${product.priceNumeric.toStringAsFixed(2)}',
-                                  style: TextStyle(fontSize: 12.sp, color: Palette.dark_grey)),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13.sp)),
+                              Text(
+                                  '₹${product.priceNumeric.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: Palette.dark_grey)),
                               if (!product.available)
                                 Text('Out of stock',
-                                    style: TextStyle(fontSize: 10.sp, color: Colors.red)),
+                                    style: TextStyle(
+                                        fontSize: 10.sp, color: Colors.red)),
                             ],
                           ),
                         ),
                         if (product.available)
                           IconButton(
-                            onPressed: isAdding ? null : () => addToCart(product),
+                            onPressed:
+                                isAdding ? null : () => addToCart(product),
                             icon: isAdding
                                 ? SizedBox(
                                     width: 4.w,
                                     height: 4.w,
-                                    child: const CircularProgressIndicator(strokeWidth: 2))
-                                : Icon(Icons.add_shopping_cart, color: Palette.primary),
+                                    child: const CircularProgressIndicator(
+                                        strokeWidth: 2))
+                                : Icon(Icons.add_shopping_cart,
+                                    color: Palette.primary),
                           ),
                       ],
                     ),

@@ -110,9 +110,10 @@ class _DoctorTile extends StatelessWidget {
             CircleAvatar(
               radius: 6.w,
               backgroundColor: Palette.lightGrey,
-              backgroundImage: (doctor.photoUrl != null && doctor.photoUrl!.isNotEmpty)
-                  ? NetworkImage(doctor.photoUrl!)
-                  : null,
+              backgroundImage:
+                  (doctor.photoUrl != null && doctor.photoUrl!.isNotEmpty)
+                      ? NetworkImage(doctor.photoUrl!)
+                      : null,
               child: (doctor.photoUrl == null || doctor.photoUrl!.isEmpty)
                   ? Icon(Icons.person, color: Palette.dark_grey, size: 6.w)
                   : null,
@@ -135,7 +136,8 @@ class _DoctorTile extends StatelessWidget {
                   ),
                   if ((doctor.specialization ?? '').isNotEmpty)
                     Text(doctor.specialization!,
-                        style: TextStyle(fontSize: 11.sp, color: Palette.dark_grey)),
+                        style: TextStyle(
+                            fontSize: 11.sp, color: Palette.dark_grey)),
                 ],
               ),
             ),

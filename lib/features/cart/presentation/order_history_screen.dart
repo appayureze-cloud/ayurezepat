@@ -82,29 +82,40 @@ class OrderHistoryScreen extends HookWidget {
                             Expanded(
                               child: Text(
                                 order.items.map((i) => i.name).join(', '),
-                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.sp),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12.sp),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             Text('₹${order.totalAmount}',
-                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.sp)),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12.sp)),
                           ],
                         ),
                         SizedBox(height: 0.5.h),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(DateFormat('d MMM yyyy').format(order.updatedAt),
-                                style: TextStyle(fontSize: 10.sp, color: Palette.dark_grey)),
+                            Text(
+                                DateFormat('d MMM yyyy')
+                                    .format(order.updatedAt),
+                                style: TextStyle(
+                                    fontSize: 10.sp, color: Palette.dark_grey)),
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.3.h),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 2.w, vertical: 0.3.h),
                               decoration: BoxDecoration(
-                                color: statusColor(order.status).withValues(alpha: 0.12),
+                                color: statusColor(order.status)
+                                    .withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(4.w),
                               ),
                               child: Text(order.status,
-                                  style: TextStyle(fontSize: 9.sp, color: statusColor(order.status))),
+                                  style: TextStyle(
+                                      fontSize: 9.sp,
+                                      color: statusColor(order.status))),
                             ),
                           ],
                         ),

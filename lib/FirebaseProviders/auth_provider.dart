@@ -65,8 +65,7 @@ class AuthProvider extends ChangeNotifier {
   /// branches of [handleSignIn]), since that's what the Astra call needs.
   void _registerWithAstraBestEffort() {
     unawaited(registerPatientWithAstra(
-      name: SharedPreferenceHelper.getString(FirestoreConstants.nickname) ??
-          '',
+      name: SharedPreferenceHelper.getString(FirestoreConstants.nickname) ?? '',
       email: SharedPreferenceHelper.getString(FirestoreConstants.email),
       phone: SharedPreferenceHelper.getString(Preferences.phone),
     ));

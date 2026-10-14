@@ -33,7 +33,8 @@ class DoctorBookingScreen extends HookWidget {
     final loadingSlots = useState(true);
     final booking = useState(false);
 
-    final dates = List.generate(7, (i) => DateTime.now().add(Duration(days: i)));
+    final dates =
+        List.generate(7, (i) => DateTime.now().add(Duration(days: i)));
 
     Future<void> loadSlots() async {
       loadingSlots.value = true;
@@ -66,7 +67,8 @@ class DoctorBookingScreen extends HookWidget {
           time: selectedSlot.value!,
           amountRupees: _defaultConsultationFeeRupees,
         );
-        Fluttertoast.showToast(msg: 'Appointment booked with ${appointment.doctorName}');
+        Fluttertoast.showToast(
+            msg: 'Appointment booked with ${appointment.doctorName}');
         if (context.mounted) Navigator.pop(context, true);
       } on AppointmentPaymentCancelledException {
         Fluttertoast.showToast(msg: 'Payment cancelled');
@@ -90,12 +92,16 @@ class DoctorBookingScreen extends HookWidget {
                   Padding(
                     padding: EdgeInsets.only(bottom: 2.h),
                     child: Text(doctor.specialization!,
-                        style: TextStyle(fontSize: 13.sp, color: Palette.dark_grey)),
+                        style: TextStyle(
+                            fontSize: 13.sp, color: Palette.dark_grey)),
                   ),
                 Text('Consultation fee: ₹$_defaultConsultationFeeRupees',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 13.sp)),
                 SizedBox(height: 2.h),
-                Text('Select date', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
+                Text('Select date',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 13.sp)),
                 SizedBox(height: 1.h),
                 SizedBox(
                   height: 9.h,
@@ -112,7 +118,9 @@ class DoctorBookingScreen extends HookWidget {
                         child: Container(
                           width: 16.w,
                           decoration: BoxDecoration(
-                            color: isSelected ? Palette.primary : Palette.lightGrey,
+                            color: isSelected
+                                ? Palette.primary
+                                : Palette.lightGrey,
                             borderRadius: BorderRadius.circular(2.w),
                           ),
                           alignment: Alignment.center,
@@ -122,12 +130,16 @@ class DoctorBookingScreen extends HookWidget {
                               Text(DateFormat('EEE').format(d),
                                   style: TextStyle(
                                       fontSize: 10.sp,
-                                      color: isSelected ? Colors.white : Palette.dark_grey)),
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Palette.dark_grey)),
                               Text(DateFormat('d MMM').format(d),
                                   style: TextStyle(
                                       fontSize: 11.sp,
                                       fontWeight: FontWeight.w600,
-                                      color: isSelected ? Colors.white : Colors.black)),
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.black)),
                             ],
                           ),
                         ),
@@ -136,13 +148,16 @@ class DoctorBookingScreen extends HookWidget {
                   ),
                 ),
                 SizedBox(height: 2.h),
-                Text('Available times', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
+                Text('Available times',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 13.sp)),
                 SizedBox(height: 1.h),
                 if (loadingSlots.value)
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 2.h),
                     child: Center(
-                        child: SpinKitFadingCircle(color: Palette.primary, size: 5.h)),
+                        child: SpinKitFadingCircle(
+                            color: Palette.primary, size: 5.h)),
                   )
                 else if (slots.value.isEmpty)
                   Padding(
@@ -158,17 +173,22 @@ class DoctorBookingScreen extends HookWidget {
                       return GestureDetector(
                         onTap: () => selectedSlot.value = slot,
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 4.w, vertical: 1.5.h),
                           decoration: BoxDecoration(
                             color: isSelected ? Palette.primary : Colors.white,
                             border: Border.all(
-                                color: isSelected ? Palette.primary : Palette.lightGrey),
+                                color: isSelected
+                                    ? Palette.primary
+                                    : Palette.lightGrey),
                             borderRadius: BorderRadius.circular(2.w),
                           ),
                           child: Text(slot,
                               style: TextStyle(
                                   fontSize: 12.sp,
-                                  color: isSelected ? Colors.white : Colors.black)),
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.black)),
                         ),
                       );
                     }).toList(),
@@ -181,7 +201,9 @@ class DoctorBookingScreen extends HookWidget {
             child: ButtonV2(
               label: booking.value ? 'Booking…' : 'Book & Pay',
               width: 100.w,
-              onPressed: selectedSlot.value == null || booking.value ? null : confirmBooking,
+              onPressed: selectedSlot.value == null || booking.value
+                  ? null
+                  : confirmBooking,
             ),
           ),
         ],

@@ -16,8 +16,10 @@ class PopularDoctorCard extends HookWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) => DoctorBookingScreen(doctor: doctor)));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => DoctorBookingScreen(doctor: doctor)));
       },
       child: Card(
         margin: EdgeInsets.symmetric(

@@ -20,7 +20,8 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
     final dio = await _gateway.dio();
     final response = await dio.get(
       AstraGatewayApis.appointmentsDoctors,
-      queryParameters: specialization != null ? {'specialization': specialization} : null,
+      queryParameters:
+          specialization != null ? {'specialization': specialization} : null,
     );
     final data = response.data as Map<String, dynamic>;
     final doctors = (data['doctors'] as List<dynamic>? ?? []);
@@ -37,7 +38,9 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
       queryParameters: {'date': date},
     );
     final data = response.data as Map<String, dynamic>;
-    return (data['slots'] as List<dynamic>? ?? []).map((s) => s.toString()).toList();
+    return (data['slots'] as List<dynamic>? ?? [])
+        .map((s) => s.toString())
+        .toList();
   }
 
   @override
@@ -108,7 +111,8 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
     required String razorpaySignature,
   }) async {
     final dio = await _gateway.dio();
-    final response = await dio.post(AstraGatewayApis.financeVerifyPayment, data: {
+    final response =
+        await dio.post(AstraGatewayApis.financeVerifyPayment, data: {
       'consultation_id': consultationId,
       'razorpay_payment_id': razorpayPaymentId,
       'razorpay_order_id': razorpayOrderId,

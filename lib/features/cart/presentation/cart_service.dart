@@ -15,7 +15,8 @@ class CartPaymentCancelledException implements Exception {}
 class CartService {
   final CartRepository _repository;
 
-  CartService({CartRepository? repository}) : _repository = repository ?? CartRepositoryImpl();
+  CartService({CartRepository? repository})
+      : _repository = repository ?? CartRepositoryImpl();
 
   Future<List<Product>> listProducts() => _repository.listProducts();
 
@@ -24,15 +25,18 @@ class CartService {
   Future<Cart> addItem(String medicineName, {int quantity = 1}) =>
       _repository.addItem(medicineName, quantity: quantity);
 
-  Future<Cart> removeItem(String productId) => _repository.removeItem(productId);
+  Future<Cart> removeItem(String productId) =>
+      _repository.removeItem(productId);
 
   Future<List<CartOrder>> orderHistory() => _repository.orderHistory();
 
   /// Runs checkout -> Razorpay -> server verification.
-  Future<void> checkoutAndPay({String? contactPhone, String? contactEmail}) async {
+  Future<void> checkoutAndPay(
+      {String? contactPhone, String? contactEmail}) async {
     final ref = await _repository.checkout();
 
-    final callback = await _openCheckout(ref, contactPhone: contactPhone, contactEmail: contactEmail);
+    final callback = await _openCheckout(ref,
+        contactPhone: contactPhone, contactEmail: contactEmail);
 
     final verified = await _repository.verifyPayment(
       cartId: ref.cartId,

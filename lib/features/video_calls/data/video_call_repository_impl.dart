@@ -81,8 +81,10 @@ VideoCallToken parseVideoCallTokenResponse(dynamic data) {
     throw VideoCallException('Unexpected video token response: $data');
   }
   final payload = data['data'] is Map ? data['data'] as Map : data;
-  final channelName = payload['cn'] ?? payload['channel_name'] ?? payload['channel'];
-  final token = payload['token'] ?? payload['rtc_token'] ?? payload['agora_token'];
+  final channelName =
+      payload['cn'] ?? payload['channel_name'] ?? payload['channel'];
+  final token =
+      payload['token'] ?? payload['rtc_token'] ?? payload['agora_token'];
   if (channelName == null || token == null) {
     logger.w('Video token response missing channel/token: $data');
     throw VideoCallException('Could not start the video call.');

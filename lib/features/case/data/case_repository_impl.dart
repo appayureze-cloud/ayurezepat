@@ -54,10 +54,12 @@ class CaseRepositoryImpl implements CaseRepository {
   @override
   Future<Case> createCase() async {
     final dio = await _gateway.dio();
-    final response = await dio.post(AstraGatewayApis.companionCaseOpen, data: {});
+    final response =
+        await dio.post(AstraGatewayApis.companionCaseOpen, data: {});
     final data = response.data as Map<String, dynamic>;
     final created = Case.fromJson(data);
-    await SharedPreferenceHelper.setString(Preferences.activeCaseId, created.id);
+    await SharedPreferenceHelper.setString(
+        Preferences.activeCaseId, created.id);
     return created;
   }
 }

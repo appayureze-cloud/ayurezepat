@@ -115,22 +115,30 @@ class CartScreen extends HookWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(item.name,
-                                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
-                              Text('Qty ${item.quantity} · ₹${item.price.toStringAsFixed(2)} each',
-                                  style: TextStyle(fontSize: 11.sp, color: Palette.dark_grey)),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13.sp)),
+                              Text(
+                                  'Qty ${item.quantity} · ₹${item.price.toStringAsFixed(2)} each',
+                                  style: TextStyle(
+                                      fontSize: 11.sp,
+                                      color: Palette.dark_grey)),
                             ],
                           ),
                         ),
                         Text('₹${item.lineTotal.toStringAsFixed(2)}',
-                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.sp)),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 12.sp)),
                         IconButton(
                           onPressed: isRemoving ? null : () => removeItem(item),
                           icon: isRemoving
                               ? SizedBox(
                                   width: 4.w,
                                   height: 4.w,
-                                  child: const CircularProgressIndicator(strokeWidth: 2))
-                              : const Icon(Icons.delete_outline, color: Colors.red),
+                                  child: const CircularProgressIndicator(
+                                      strokeWidth: 2))
+                              : const Icon(Icons.delete_outline,
+                                  color: Colors.red),
                         ),
                       ],
                     ),
@@ -146,9 +154,12 @@ class CartScreen extends HookWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Total', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                      Text('Total',
+                          style: TextStyle(
+                              fontSize: 14.sp, fontWeight: FontWeight.w600)),
                       Text('₹${cart.value?.totalAmount ?? 0}',
-                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700)),
+                          style: TextStyle(
+                              fontSize: 14.sp, fontWeight: FontWeight.w700)),
                     ],
                   ),
                   SizedBox(height: 1.h),

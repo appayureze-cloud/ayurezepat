@@ -56,7 +56,8 @@ class AstraGatewayApis {
 
   /// Full Shopify product catalog (619 items confirmed live) - `security:
   /// none`, same as the single-item search above.
-  static const String shopifyProductsAvailable = 'api/v1/shopify/products/available';
+  static const String shopifyProductsAvailable =
+      'api/v1/shopify/products/available';
 
   /// Smart order drafts (one auto-created per prescription - see
   /// docs/backend/smart-orders.md). The originally speculated

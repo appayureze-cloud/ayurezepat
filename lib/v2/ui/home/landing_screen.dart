@@ -127,7 +127,8 @@ class MainLandingPage extends HookWidget {
                 // Astra-backed medicine shop (lib/features/cart) - distinct
                 // from the legacy Laravel catalog on the Home tab.
                 SpeedDialChild(
-                  child: const Icon(Icons.storefront_outlined, color: Colors.green),
+                  child: const Icon(Icons.storefront_outlined,
+                      color: Colors.green),
                   label: 'Shop Medicines',
                   backgroundColor: Colors.white,
                   onTap: () => Navigator.push(
