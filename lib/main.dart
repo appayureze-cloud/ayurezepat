@@ -13,6 +13,7 @@ import 'package:doctro_patient/FirebaseProviders/chat_provider.dart';
 import 'package:doctro_patient/FirebaseProviders/home_provider.dart';
 import 'package:doctro_patient/FirebaseProviders/setting_provider.dart';
 import 'package:doctro_patient/const/preference.dart';
+import 'package:doctro_patient/theme.dart';
 import 'package:doctro_patient/v2/ui/address/add_address.dart';
 import 'package:doctro_patient/v2/ui/address/address_list.dart';
 import 'package:doctro_patient/v2/ui/authentication/change_password.dart'
@@ -48,7 +49,6 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'Chat/chatPage.dart';
 import 'VideoCall/overlay_handler.dart';
 import 'VideoCall/videoCall.dart';
-import 'const/Palette.dart';
 import 'const/prefConstatnt.dart';
 import 'firebase_options.dart';
 import 'api/retrofit_Api.dart';
@@ -564,72 +564,26 @@ class _MyAppState extends State<MyApp> {
             // },
             debugShowCheckedModeBanner: false,
             initialRoute: "/",
-            theme: ThemeData(
-              useMaterial3: false,
-              primaryColor: Palette.primary,
-              splashColor: Palette.transparent,
-              highlightColor: Palette.transparent,
-              colorScheme: ColorScheme.light(
-                primary: Palette.primary,
-                // 👈 Affects date picker header, selected date, etc.
-                onPrimary: Palette.white,
-                // 👈 Text color on selected header
-                onSurface: Palette.dark_blue, // 👈 Normal text color
-              ),
-              textButtonTheme: TextButtonThemeData(
-                style: TextButton.styleFrom(
-                  foregroundColor:
-                      Palette.primary, // 👈 Affects "Cancel" and "OK" buttons
-                ),
-              ),
+            // Serene Herbalist modern-calm-healthcare theme (lib/theme.dart),
+            // generated from the Google Stitch UI master prompt
+            // (docs/stitch-ui-master-prompt.md). Replaces the old
+            // Palette-driven ThemeData app-wide; screens that reference
+            // Palette.* directly for explicit colors are unaffected by this
+            // swap and can be migrated to AppColors.* incrementally.
+            theme: AppTheme.lightTheme.copyWith(
               tabBarTheme: TabBarThemeData(
-                labelColor: Palette.primary,
-                unselectedLabelColor: Palette.grey,
-                indicator: UnderlineTabIndicator(
-                  borderSide: BorderSide(color: Palette.primary, width: 2),
+                labelColor: AppColors.sagePrimary,
+                unselectedLabelColor: AppColors.slateTextSecondary,
+                indicator: const UnderlineTabIndicator(
+                  borderSide:
+                      BorderSide(color: AppColors.sagePrimary, width: 2),
                 ),
               ),
               textSelectionTheme: TextSelectionThemeData(
-                cursorColor: Palette.primary,
-                selectionColor: Palette.primary.withOpacity(0.4),
-                selectionHandleColor: Palette.primary,
+                cursorColor: AppColors.sagePrimary,
+                selectionColor: AppColors.sagePrimary.withOpacity(0.4),
+                selectionHandleColor: AppColors.sagePrimary,
               ),
-              elevatedButtonTheme: ElevatedButtonThemeData(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Palette.primary,
-                ),
-              ),
-              inputDecorationTheme: InputDecorationTheme(
-                prefixIconColor: Palette.primary,
-                filled: false,
-                suffixIconColor: Palette.primary,
-                iconColor: Palette.primary,
-                hoverColor: Colors.transparent,
-                focusColor: Colors.transparent,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(2.w),
-                  borderSide: BorderSide(color: Palette.primary, width: 1),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(2.w),
-                  borderSide: BorderSide(color: Palette.grey, width: 1),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(2.w),
-                  borderSide: BorderSide(color: Palette.grey, width: 1),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(2.w),
-                  borderSide: BorderSide(color: Palette.red, width: 1),
-                ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(2.w),
-                  borderSide: BorderSide(color: Palette.red, width: 1),
-                ),
-                labelStyle: TextStyle(color: Palette.primary),
-                floatingLabelStyle: TextStyle(color: Palette.primary),
-              ),
-              dialogTheme: DialogThemeData(backgroundColor: Palette.white),
             ),
             routes: {
               '/': (context) => SplashScreen(),
