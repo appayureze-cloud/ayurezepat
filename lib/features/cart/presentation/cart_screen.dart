@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../const/Palette.dart';
-import '../../../v2/ui/widgets/button_v2.dart';
+import '../../../theme.dart';
 import '../../../v2/ui/widgets/header.dart';
 import '../../../v2/utils/logger.dart';
 import '../domain/entities/cart.dart';
 import 'cart_service.dart';
 import 'order_history_screen.dart';
 
+/// Matches the Stitch "Cart" screen (ayureze_cart/code.html): line
+/// items, an order-summary card, and a sticky bottom "Checkout" pill
+/// button; a calm empty-cart state when there's nothing to check out.
 class CartScreen extends HookWidget {
   const CartScreen({super.key});
 
@@ -71,13 +72,14 @@ class CartScreen extends HookWidget {
     final items = cart.value?.items ?? const <CartItem>[];
 
     return Scaffold(
+      backgroundColor: AppColors.creamSurface,
       body: Column(
         children: [
           Header_v2(
             title: 'Your Cart',
             actions: [
               IconButton(
-                icon: const Icon(Icons.history),
+                icon: const Icon(Icons.history, color: AppColors.sagePrimary),
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const OrderHistoryScreen()),
@@ -86,27 +88,47 @@ class CartScreen extends HookWidget {
             ],
           ),
           if (loading.value)
-            Expanded(
+            const Expanded(
               child: Center(
-                child: SpinKitFadingCircle(color: Palette.primary, size: 6.h),
+                child:
+                    SpinKitFadingCircle(color: AppColors.sagePrimary, size: 36),
               ),
             )
           else if (items.isEmpty)
-            const Expanded(child: Center(child: Text('Your cart is empty')))
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.shopping_cart_outlined,
+                        size: 56, color: AppColors.slateTextMuted),
+                    const SizedBox(height: 14),
+                    const Text('Your cart is empty',
+                        style: TextStyle(color: AppColors.slateTextMuted)),
+                    const SizedBox(height: 14),
+                    OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Browse medicines'),
+                    ),
+                  ],
+                ),
+              ),
+            )
           else
             Expanded(
               child: ListView.builder(
-                padding: EdgeInsets.all(4.w),
+                padding: const EdgeInsets.all(16),
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final item = items[index];
                   final isRemoving = removingProductId.value == item.productId;
                   return Container(
-                    margin: EdgeInsets.symmetric(vertical: 0.75.h),
-                    padding: EdgeInsets.all(3.w),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Palette.lightGrey),
-                      borderRadius: BorderRadius.circular(2.w),
+                      color: AppColors.creamSurfaceLowest,
+                      border: Border.all(color: AppColors.slateBorder),
+                      borderRadius: AppRadius.roundedLg,
                     ),
                     child: Row(
                       children: [
@@ -115,30 +137,30 @@ class CartScreen extends HookWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(item.name,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 13.sp)),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall),
                               Text(
                                   'Qty ${item.quantity} · ₹${item.price.toStringAsFixed(2)} each',
-                                  style: TextStyle(
-                                      fontSize: 11.sp,
-                                      color: Palette.dark_grey)),
+                                  style: Theme.of(context).textTheme.bodySmall),
                             ],
                           ),
                         ),
                         Text('₹${item.lineTotal.toStringAsFixed(2)}',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 12.sp)),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(color: AppColors.sagePrimary)),
                         IconButton(
                           onPressed: isRemoving ? null : () => removeItem(item),
                           icon: isRemoving
-                              ? SizedBox(
-                                  width: 4.w,
-                                  height: 4.w,
-                                  child: const CircularProgressIndicator(
-                                      strokeWidth: 2))
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2))
                               : const Icon(Icons.delete_outline,
-                                  color: Colors.red),
+                                  color: AppColors.clayAlert),
                         ),
                       ],
                     ),
@@ -147,28 +169,41 @@ class CartScreen extends HookWidget {
               ),
             ),
           if (items.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.all(4.w),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Total',
-                          style: TextStyle(
-                              fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                      Text('₹${cart.value?.totalAmount ?? 0}',
-                          style: TextStyle(
-                              fontSize: 14.sp, fontWeight: FontWeight.w700)),
-                    ],
-                  ),
-                  SizedBox(height: 1.h),
-                  ButtonV2(
-                    label: checkingOut.value ? 'Processing…' : 'Checkout & Pay',
-                    width: 100.w,
-                    onPressed: checkingOut.value ? null : checkout,
-                  ),
-                ],
+            SafeArea(
+              top: false,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+                decoration: BoxDecoration(
+                  color: AppColors.creamSurfaceLowest,
+                  boxShadow: AppShadows.floatingNav,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Total',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        Text('₹${cart.value?.totalAmount ?? 0}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(color: AppColors.sagePrimary)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: checkingOut.value ? null : checkout,
+                        child: Text(checkingOut.value
+                            ? 'Processing...'
+                            : 'Checkout & Pay'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
         ],

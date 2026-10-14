@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../const/Palette.dart';
+import '../../../theme.dart';
 import '../../../v2/ui/widgets/header.dart';
 import '../../../v2/utils/logger.dart';
 import '../domain/entities/product.dart';
 import 'cart_screen.dart';
 import 'cart_service.dart';
 
+/// Matches the Stitch "Medicine Catalog" screen
+/// (ayureze_medicine_catalog/code.html), adapted for what the real
+/// Shopify catalog endpoint actually returns: no product photos,
+/// categories, or descriptions (see Product's doc comment) - so this
+/// stays a search-first list rather than a browsable photo grid, to
+/// avoid inventing data the backend doesn't have.
 class ShopScreen extends HookWidget {
   const ShopScreen({super.key});
 
@@ -64,6 +69,7 @@ class ShopScreen extends HookWidget {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.creamSurface,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.push(
           context,
@@ -71,52 +77,59 @@ class ShopScreen extends HookWidget {
         ),
         icon: const Icon(Icons.shopping_cart_outlined),
         label: const Text('Cart'),
-        backgroundColor: Palette.primary,
       ),
       body: Column(
         children: [
-          Header_v2(title: 'Shop Medicines'),
+          const Header_v2(title: 'Shop Medicines'),
           Padding(
-            padding: EdgeInsets.all(4.w),
+            padding: const EdgeInsets.all(16),
             child: TextField(
               onChanged: (v) => query.value = v,
-              decoration: InputDecoration(
-                hintText: 'Search medicines…',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(2.w)),
+              decoration: const InputDecoration(
+                hintText: 'Search medicines...',
+                prefixIcon: Icon(Icons.search, color: AppColors.slateTextMuted),
               ),
             ),
           ),
           if (loading.value)
-            Expanded(
+            const Expanded(
               child: Center(
-                child: SpinKitFadingCircle(color: Palette.primary, size: 6.h),
+                child:
+                    SpinKitFadingCircle(color: AppColors.sagePrimary, size: 36),
               ),
             )
           else if (error.value != null)
-            Expanded(child: Center(child: Text(error.value!)))
+            Expanded(
+                child: Center(
+                    child: Text(error.value!,
+                        style:
+                            const TextStyle(color: AppColors.slateTextMuted))))
           else if (query.value.trim().isEmpty)
             const Expanded(
-              child:
-                  Center(child: Text('Search for a medicine to get started')),
+              child: Center(
+                  child: Text('Search for a medicine to get started',
+                      style: TextStyle(color: AppColors.slateTextMuted))),
             )
           else if (filtered.isEmpty)
-            const Expanded(child: Center(child: Text('No matching medicines')))
+            const Expanded(
+                child: Center(
+                    child: Text('No matching medicines',
+                        style: TextStyle(color: AppColors.slateTextMuted))))
           else
             Expanded(
               child: ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: filtered.length,
                 itemBuilder: (context, index) {
                   final product = filtered[index];
                   final isAdding = addingProductId.value == product.productId;
                   return Container(
-                    margin: EdgeInsets.symmetric(vertical: 0.75.h),
-                    padding: EdgeInsets.all(3.w),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Palette.lightGrey),
-                      borderRadius: BorderRadius.circular(2.w),
+                      color: AppColors.creamSurfaceLowest,
+                      border: Border.all(color: AppColors.slateBorder),
+                      borderRadius: AppRadius.roundedLg,
                     ),
                     child: Row(
                       children: [
@@ -125,33 +138,35 @@ class ShopScreen extends HookWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(product.name,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 13.sp)),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall),
                               Text(
                                   '₹${product.priceNumeric.toStringAsFixed(2)}',
-                                  style: TextStyle(
-                                      fontSize: 12.sp,
-                                      color: Palette.dark_grey)),
+                                  style: Theme.of(context).textTheme.bodySmall),
                               if (!product.available)
-                                Text('Out of stock',
+                                const Text('Out of stock',
                                     style: TextStyle(
-                                        fontSize: 10.sp, color: Colors.red)),
+                                        fontSize: 11,
+                                        color: AppColors.clayAlert)),
                             ],
                           ),
                         ),
                         if (product.available)
                           IconButton(
+                            style: IconButton.styleFrom(
+                              backgroundColor: AppColors.sagePrimarySubtle,
+                            ),
                             onPressed:
                                 isAdding ? null : () => addToCart(product),
                             icon: isAdding
-                                ? SizedBox(
-                                    width: 4.w,
-                                    height: 4.w,
-                                    child: const CircularProgressIndicator(
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
                                         strokeWidth: 2))
-                                : Icon(Icons.add_shopping_cart,
-                                    color: Palette.primary),
+                                : const Icon(Icons.add_shopping_cart,
+                                    color: AppColors.sagePrimary),
                           ),
                       ],
                     ),

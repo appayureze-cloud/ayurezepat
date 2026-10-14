@@ -3,14 +3,16 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../const/Palette.dart';
+import '../../../theme.dart';
 import '../../../v2/ui/widgets/header.dart';
 import '../../../v2/utils/logger.dart';
 import '../domain/entities/cart.dart';
 import 'cart_service.dart';
 
+/// Matches the Stitch "Order History & Tracking" screen
+/// (ayureze_order_history_tracking/code.html): orders as cards with an
+/// icon+label status chip (never color alone).
 class OrderHistoryScreen extends HookWidget {
   const OrderHistoryScreen({super.key});
 
@@ -37,42 +39,61 @@ class OrderHistoryScreen extends HookWidget {
       return null;
     }, const []);
 
-    Color statusColor(String status) {
+    (Color, Color, IconData) statusStyle(String status) {
       switch (status) {
         case 'completed':
-          return Colors.green;
+          return (
+            AppColors.sagePrimaryContainer,
+            AppColors.sagePrimary,
+            Icons.check_circle_outline
+          );
         case 'pending_payment':
-          return Colors.orange;
+          return (
+            AppColors.amberWarningContainer,
+            AppColors.amberWarning,
+            Icons.schedule
+          );
         default:
-          return Colors.grey;
+          return (
+            AppColors.creamSurfaceLow,
+            AppColors.slateTextMuted,
+            Icons.local_shipping_outlined
+          );
       }
     }
 
     return Scaffold(
+      backgroundColor: AppColors.creamSurface,
       body: Column(
         children: [
-          Header_v2(title: 'Order History'),
+          const Header_v2(title: 'Order History'),
           if (loading.value)
-            Expanded(
+            const Expanded(
               child: Center(
-                child: SpinKitFadingCircle(color: Palette.primary, size: 6.h),
+                child:
+                    SpinKitFadingCircle(color: AppColors.sagePrimary, size: 36),
               ),
             )
           else if (orders.value.isEmpty)
-            const Expanded(child: Center(child: Text('No orders yet')))
+            const Expanded(
+                child: Center(
+                    child: Text('No orders yet',
+                        style: TextStyle(color: AppColors.slateTextMuted))))
           else
             Expanded(
               child: ListView.builder(
-                padding: EdgeInsets.all(4.w),
+                padding: const EdgeInsets.all(16),
                 itemCount: orders.value.length,
                 itemBuilder: (context, index) {
                   final order = orders.value[index];
+                  final (bgColor, fgColor, icon) = statusStyle(order.status);
                   return Container(
-                    margin: EdgeInsets.symmetric(vertical: 0.75.h),
-                    padding: EdgeInsets.all(3.w),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Palette.lightGrey),
-                      borderRadius: BorderRadius.circular(2.w),
+                      color: AppColors.creamSurfaceLowest,
+                      border: Border.all(color: AppColors.slateBorder),
+                      borderRadius: AppRadius.roundedLg,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,40 +103,46 @@ class OrderHistoryScreen extends HookWidget {
                             Expanded(
                               child: Text(
                                 order.items.map((i) => i.name).join(', '),
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12.sp),
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             Text('₹${order.totalAmount}',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12.sp)),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(color: AppColors.sagePrimary)),
                           ],
                         ),
-                        SizedBox(height: 0.5.h),
+                        const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                                 DateFormat('d MMM yyyy')
                                     .format(order.updatedAt),
-                                style: TextStyle(
-                                    fontSize: 10.sp, color: Palette.dark_grey)),
+                                style: Theme.of(context).textTheme.bodySmall),
                             Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 2.w, vertical: 0.3.h),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: statusColor(order.status)
-                                    .withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(4.w),
+                                color: bgColor,
+                                borderRadius: AppRadius.roundedPill,
                               ),
-                              child: Text(order.status,
-                                  style: TextStyle(
-                                      fontSize: 9.sp,
-                                      color: statusColor(order.status))),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(icon, size: 13, color: fgColor),
+                                  const SizedBox(width: 4),
+                                  Text(order.status,
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: fgColor)),
+                                ],
+                              ),
                             ),
                           ],
                         ),
