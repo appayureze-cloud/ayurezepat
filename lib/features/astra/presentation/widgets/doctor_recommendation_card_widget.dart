@@ -29,7 +29,7 @@ class DoctorRecommendationCardWidget extends StatelessWidget {
               ),
             ),
           ),
-        DoctorInfoCard_v2(doctor: card.doctor),
+        DoctorInfoCard_v2(doctor: card.doctor, showRecommendedBadge: true),
       ],
     );
   }

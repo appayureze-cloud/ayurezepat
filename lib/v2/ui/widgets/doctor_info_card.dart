@@ -12,7 +12,23 @@ import '../../../theme.dart';
 class DoctorInfoCard_v2 extends HookWidget {
   final DoctorSummary doctor;
 
-  const DoctorInfoCard_v2({required this.doctor, super.key});
+  /// Shows the "Recommended doctor" pill - only when Astra itself is the
+  /// one suggesting this doctor (see DoctorRecommendationCardWidget),
+  /// never in a plain directory listing.
+  final bool showRecommendedBadge;
+
+  /// Called with the booking result (true if booked) after the push to
+  /// DoctorBookingScreen returns, so callers like DoctorListScreen can
+  /// bubble that up to whoever's waiting to refresh (e.g.
+  /// MyAppointmentsScreen's FAB flow).
+  final void Function(bool booked)? onBookingResult;
+
+  const DoctorInfoCard_v2({
+    required this.doctor,
+    this.showRecommendedBadge = false,
+    this.onBookingResult,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,36 +44,37 @@ class DoctorInfoCard_v2 extends HookWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: AppColors.creamSurfaceLow,
-                  borderRadius: AppRadius.roundedPill,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.verified,
-                        size: 14, color: AppColors.sagePrimary),
-                    SizedBox(width: 6),
-                    Text(
-                      'Recommended doctor',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.sagePrimary,
+          if (showRecommendedBadge)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: AppColors.creamSurfaceLow,
+                    borderRadius: AppRadius.roundedPill,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.verified,
+                          size: 14, color: AppColors.sagePrimary),
+                      SizedBox(width: 6),
+                      Text(
+                        'Recommended doctor',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.sagePrimary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
+              ],
+            ),
+          if (showRecommendedBadge) const SizedBox(height: 12),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -115,12 +132,13 @@ class DoctorInfoCard_v2 extends HookWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    final booked = await Navigator.push<bool>(
                         context,
                         MaterialPageRoute(
                             builder: (_) =>
                                 DoctorBookingScreen(doctor: doctor)));
+                    onBookingResult?.call(booked == true);
                   },
                   icon: const Icon(Icons.calendar_month, size: 18),
                   label: const Text('Book appointment'),
