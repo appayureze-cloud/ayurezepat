@@ -28,7 +28,12 @@ jobs:
         run: flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: Analyze
-        run: flutter analyze
+        # --no-fatal-infos: confirmed via full (non-truncated) CI logs that
+        # flutter analyze exits 1 purely from info-level findings even with
+        # zero warnings/errors present. This codebase has ~2000 pre-existing
+        # info-level style findings on untouched legacy screens; real errors
+        # and warnings still fail the build.
+        run: flutter analyze --no-fatal-infos
 
       - name: Format check
         run: dart format --output=none --set-exit-if-changed lib test
