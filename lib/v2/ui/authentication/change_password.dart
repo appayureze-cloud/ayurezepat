@@ -2,7 +2,7 @@ import 'package:doctro_patient/api/base_model.dart';
 import 'package:doctro_patient/api/network_api.dart';
 import 'package:doctro_patient/api/retrofit_Api.dart';
 import 'package:doctro_patient/api/server_error.dart';
-import 'package:doctro_patient/const/Palette.dart';
+import 'package:doctro_patient/theme.dart';
 import 'package:doctro_patient/model/v2/common_response.dart';
 import 'package:doctro_patient/v2/ui/widgets/button_v2.dart';
 import 'package:doctro_patient/v2/ui/widgets/custom_text_field.dart';
@@ -53,7 +53,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                         "Current Password",
                         style: TextStyle(
                           fontSize: 16.sp,
-                          color: Palette.primary,
+                          color: AppColors.sagePrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -81,7 +81,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                         "New Password",
                         style: TextStyle(
                           fontSize: 16.sp,
-                          color: Palette.primary,
+                          color: AppColors.sagePrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -111,7 +111,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                         "Confirm Password",
                         style: TextStyle(
                           fontSize: 16.sp,
-                          color: Palette.primary,
+                          color: AppColors.sagePrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -179,8 +179,8 @@ class _ChangePasswordState extends State<ChangePassword> {
               msg: 'Change Password Successfully...',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.BOTTOM,
-              backgroundColor: Palette.blue,
-              textColor: Palette.white,
+              backgroundColor: AppColors.sagePrimary,
+              textColor: AppColors.creamSurfaceLowest,
             );
           },
         );

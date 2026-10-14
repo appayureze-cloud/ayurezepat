@@ -5,7 +5,7 @@ import 'package:doctro_patient/api/base_model.dart';
 import 'package:doctro_patient/api/network_api.dart';
 import 'package:doctro_patient/api/retrofit_Api.dart';
 import 'package:doctro_patient/api/server_error.dart';
-import 'package:doctro_patient/const/Palette.dart';
+import 'package:doctro_patient/theme.dart';
 import 'package:doctro_patient/const/prefConstatnt.dart';
 import 'package:doctro_patient/const/preference.dart';
 import 'package:doctro_patient/model/v2/login_model.dart';
@@ -81,7 +81,7 @@ class _LoginState extends State<Login> {
                             width: 100.w,
                             height: 100.h,
                             decoration: BoxDecoration(
-                              color: Palette.white,
+                              color: AppColors.creamSurfaceLowest,
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(10.w),
                                 topRight: Radius.circular(10.w),
@@ -101,7 +101,7 @@ class _LoginState extends State<Login> {
                                       style: TextStyle(
                                         fontSize: 21.sp,
                                         fontWeight: FontWeight.bold,
-                                        color: Palette.light_black,
+                                        color: AppColors.slateTextPrimary,
                                       ),
                                     ),
                                     SizedBox(height: 1.h),
@@ -109,7 +109,7 @@ class _LoginState extends State<Login> {
                                       "Sign In",
                                       style: TextStyle(
                                         fontSize: 18.sp,
-                                        color: Palette.dark_grey1,
+                                        color: AppColors.slateTextSecondary,
                                       ),
                                     ),
                                   ],
@@ -171,7 +171,7 @@ class _LoginState extends State<Login> {
                                     "Forgot Password",
                                     style: TextStyle(
                                         fontSize: 16.sp,
-                                        color: Palette.dark_grey),
+                                        color: AppColors.slateTextMuted),
                                     textAlign: TextAlign.center,
                                   ),
                                   onPressed: () {
@@ -187,7 +187,7 @@ class _LoginState extends State<Login> {
                                       "Don't have an account?",
                                       style: TextStyle(
                                         fontSize: 16.sp,
-                                        color: Palette.dark_grey,
+                                        color: AppColors.slateTextMuted,
                                       ),
                                     ),
                                     SizedBox(width: 2.w),
@@ -199,7 +199,7 @@ class _LoginState extends State<Login> {
                                         "Sign Up",
                                         style: TextStyle(
                                           fontSize: 16.sp,
-                                          color: Palette.blue,
+                                          color: AppColors.sagePrimary,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -306,8 +306,8 @@ class _LoginState extends State<Login> {
           msg: '${response.msg}',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          backgroundColor: Palette.blue,
-          textColor: Palette.white,
+          backgroundColor: AppColors.sagePrimary,
+          textColor: AppColors.creamSurfaceLowest,
         );
       } else {
         Preferences.hideDialog(context);
@@ -315,8 +315,8 @@ class _LoginState extends State<Login> {
           msg: '${response.msg}',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          backgroundColor: Palette.blue,
-          textColor: Palette.white,
+          backgroundColor: AppColors.sagePrimary,
+          textColor: AppColors.creamSurfaceLowest,
         );
       }
     } catch (error, stacktrace) {

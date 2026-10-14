@@ -10,7 +10,7 @@ import '../../../api/base_model.dart';
 import '../../../api/network_api.dart';
 import '../../../api/retrofit_Api.dart';
 import '../../../api/server_error.dart';
-import '../../../const/Palette.dart';
+import '../../../theme.dart';
 import '../../../model/v2/forgot_password_model.dart';
 import '../others/connectivity_responder.dart';
 
@@ -50,7 +50,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     "Please enter your email address.You will receive a code to create a new password via email.",
                     style: TextStyle(
                       fontSize: 15.sp,
-                      color: Palette.dark_blue,
+                      color: AppColors.slateTextPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -102,8 +102,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           msg: '${response.msg}',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          backgroundColor: Palette.blue,
-          textColor: Palette.white,
+          backgroundColor: AppColors.sagePrimary,
+          textColor: AppColors.creamSurfaceLowest,
         );
         email.clear();
       });

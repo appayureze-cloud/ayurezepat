@@ -13,7 +13,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../../api/base_model.dart';
 import '../../../api/server_error.dart';
-import '../../../const/Palette.dart';
+import '../../../theme.dart';
 import '../../../const/prefConstatnt.dart';
 import '../../../model/v2/register_model.dart';
 import '../../utils/helper.dart';
@@ -151,7 +151,8 @@ class _RegisterState extends State<Register> {
                                               ),
                                               border: OutlineInputBorder(
                                                 borderSide: BorderSide(
-                                                  color: Palette.grey
+                                                  color: AppColors
+                                                      .slateTextMuted
                                                       .withOpacity(0.2),
                                                 ),
                                               ),
@@ -261,13 +262,13 @@ class _RegisterState extends State<Register> {
                                   "By continuing sign up, you agree to the following ",
                               style: TextStyle(
                                 fontSize: 14.sp,
-                                color: Palette.dark_blue,
+                                color: AppColors.slateTextPrimary,
                               ),
                               children: [
                                 TextSpan(
                                   text: "Terms & Conditions",
                                   style: TextStyle(
-                                    color: Palette.primary,
+                                    color: AppColors.sagePrimary,
                                     decoration: TextDecoration.underline,
                                   ),
                                   recognizer: TapGestureRecognizer()
@@ -299,7 +300,7 @@ class _RegisterState extends State<Register> {
                                 "Already have an account?",
                                 style: TextStyle(
                                   fontSize: 16.sp,
-                                  color: Palette.dark_blue,
+                                  color: AppColors.slateTextPrimary,
                                 ),
                               ),
                               SizedBox(width: 3.w),
@@ -310,7 +311,7 @@ class _RegisterState extends State<Register> {
                                 child: Text(
                                   "Sign In",
                                   style: TextStyle(
-                                    color: Palette.blue,
+                                    color: AppColors.sagePrimary,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16.sp,
                                   ),
@@ -368,8 +369,8 @@ class _RegisterState extends State<Register> {
                 'Successfully registered ${response.data!.name}! Please login to continue!',
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
-            backgroundColor: Palette.blue,
-            textColor: Palette.white,
+            backgroundColor: AppColors.sagePrimary,
+            textColor: AppColors.creamSurfaceLowest,
           );
         });
       }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../const/Palette.dart';
+import '../../../theme.dart';
 
 class ButtonV2 extends StatelessWidget {
   final Color? buttonColor;
@@ -22,19 +21,15 @@ class ButtonV2 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(
-        width: width ?? 85.w,
-        child: FilledButton(
-          style: ButtonStyle(
-            backgroundColor:
-                WidgetStateProperty.all(buttonColor ?? Palette.primary),
-          ),
+        width: width ?? MediaQuery.of(context).size.width * 0.85,
+        child: ElevatedButton(
+          style: buttonColor != null
+              ? ElevatedButton.styleFrom(backgroundColor: buttonColor)
+              : null,
           onPressed: onPressed,
           child: Text(
-            '$label',
-            style: TextStyle(
-              color: Palette.white,
-              fontSize: fontSize ?? 16.sp,
-            ),
+            label,
+            style: fontSize != null ? TextStyle(fontSize: fontSize) : null,
           ),
         ),
       ),
@@ -60,22 +55,18 @@ class SmallButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width ?? 85.w,
-      child: FilledButton(
-        style: ButtonStyle(
-          padding: WidgetStateProperty.all(EdgeInsets.zero),
+      width: width ?? MediaQuery.of(context).size.width * 0.85,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: buttonColor ?? AppColors.sagePrimary,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           visualDensity: VisualDensity.compact,
-          backgroundColor:
-              WidgetStateProperty.all(buttonColor ?? Palette.primary),
         ),
         onPressed: onPressed,
         child: Text(
-          '$label',
-          style: TextStyle(
-            color: Palette.white,
-            fontSize: fontSize ?? 16.sp,
-          ),
+          label,
+          style: fontSize != null ? TextStyle(fontSize: fontSize) : null,
         ),
       ),
     );

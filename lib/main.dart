@@ -20,6 +20,7 @@ import 'package:doctro_patient/v2/ui/authentication/change_password.dart'
     show ChangePassword;
 import 'package:doctro_patient/v2/ui/authentication/forgot_password.dart';
 import 'package:doctro_patient/v2/ui/authentication/login.dart';
+import 'package:doctro_patient/v2/ui/authentication/onboarding_screen.dart';
 import 'package:doctro_patient/v2/ui/authentication/otp_verification.dart';
 import 'package:doctro_patient/v2/ui/authentication/register.dart';
 import 'package:doctro_patient/v2/ui/authentication/splash_screen.dart';
@@ -587,6 +588,7 @@ class _MyAppState extends State<MyApp> {
             ),
             routes: {
               '/': (context) => SplashScreen(),
+              'Onboarding': (context) => const OnboardingScreen(),
               'SignUp': (context) => Register(),
               'ForgotPasswordScreen': (context) => ForgotPasswordScreen(),
               'ChangePassword': (context) => ChangePassword(),
