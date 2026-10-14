@@ -105,7 +105,12 @@ Using the exact same design system from DESIGN.md, add an onboarding and
 auth flow:
 
 1. Splash — app wordmark centered on the cream background with a subtle
-   leaf motif, no text.
+   leaf motif behind it. Describe the animation even though Stitch renders
+   it as a static frame, so it can be handed to engineering as a motion
+   spec: the leaf motif slowly breathes/scales in from 90% to 100% opacity
+   over ~1.2s, the wordmark fades and gently rises 8px into place after a
+   short delay, then a thin sage progress underline fills left-to-right
+   while the app initializes — no spinner, no logo bounce, nothing abrupt.
 2. Onboarding (3 slides in one screen set) — each slide: a calm full-bleed
    illustration (not literal clip-art, soft botanical/abstract), a short
    reassuring headline ("Your Ayurvedic care, in your pocket"), body copy,
@@ -115,6 +120,12 @@ auth flow:
    pill), calm form fields with soft labels, a single pill primary button.
 4. OTP verification — 6-box OTP input, resend-timer text, calm illustration
    of a phone/message at the top.
+5. Permission requests — a reusable single-screen pattern (one instance
+   each for Camera, Microphone, Notifications, Location) used right before
+   the OS permission dialog: a large soft line-icon for the specific
+   permission, a one-sentence plain-language reason ("We use your camera
+   so your doctor can see you during video consults"), and a single
+   "Continue" pill button — never a wall of legal text.
 ```
 
 ---
@@ -250,16 +261,161 @@ full-screen state.
 
 ---
 
+## Prompt 10 — EHR Vault: secure health records (4 screens)
+
+```
+Using the same design system, add a dedicated "Health Vault" section —
+this is distinct from the simple Documents list in an earlier batch: it's
+the patient's full secure electronic health record, organized and locked.
+
+1. Vault Lock Screen — shown every time the vault is opened: a centered
+   soft shield/lock line-icon, "Unlock your Health Vault" headline, a
+   biometric (fingerprint/face) button as the primary action and a PIN
+   fallback link below it; calm, reassuring tone, not an alarming
+   "security" aesthetic.
+2. Vault Home — a grid of category folders (Lab Reports, Prescriptions,
+   Imaging & Scans, Vaccination Records, Insurance, Discharge Summaries),
+   each as a soft rounded tile with a category line-icon, a document
+   count, and last-updated date; a search bar pinned at the top; a
+   floating "Scan or upload" pill action.
+3. Vault Category List — inside a folder: a vertical list of document
+   cards (thumbnail/preview, title, date, issuing doctor/lab name, a
+   small "shared with doctor" indicator chip when relevant) with sort and
+   filter controls at the top.
+4. Document Viewer — full-screen document/image viewer with pinch-zoom,
+   a minimal top bar (back, title, overflow menu), and a bottom action
+   bar (Share, Download, Delete) that stays translucent over the document
+   but never obscures content; include a state for a multi-page PDF with
+   page dots at the bottom.
+```
+
+---
+
+## Prompt 11 — Companion Mode: the full Astra AI experience (4 screens)
+
+```
+Using the same design system, expand Astra beyond the basic chat screen
+into a full "Companion Mode" — an ongoing AI-guided care journey, not just
+a chatbot:
+
+1. Companion Journey Dashboard — opened from the "Talk to Astra" card on
+   Home: a calm progress visualization of the patient's current care
+   journey as connected soft nodes/stages (e.g. Symptom Check-in →
+   Guidance → Doctor Case Opened → Treatment Plan → Follow-up), the
+   current stage highlighted in sage with a short status line beneath it,
+   and a "Continue conversation" pill button below that re-enters the chat
+   where it left off.
+2. Companion Voice Mode (full-screen) — a large centered soft animated
+   orb/blob (sage-to-cream gradient) that represents Astra listening or
+   speaking, a waveform ring around it that pulses gently while listening,
+   a live transcript caption fading in at the bottom, and a bottom bar
+   with mute/end-voice-mode controls; describe the orb's idle state as a
+   slow breathing pulse and its listening state as a slightly faster,
+   amplitude-reactive pulse, so it reads as alive but never frantic.
+3. Companion Chat History — a list of past conversations/journeys as
+   cards (date, a one-line AI-generated summary of what was discussed, an
+   icon indicating outcome: guidance given / doctor referred / case
+   closed), tapping reopens that conversation in read-only chat view.
+4. Companion Case Summary — a calm read-only recap shown at the end of a
+   journey: presenting symptom, AI guidance given, whether a doctor was
+   involved, any prescribed plan, and a closing note — styled like the
+   Case Closure screen from an earlier batch so the two feel like the same
+   family of "wrap-up" screens.
+```
+
+---
+
+## Prompt 12 — Settings & account (6 screens)
+
+```
+Using the same design system, add a full Settings section, reached from
+Profile → Settings:
+
+1. Settings Home — grouped list sections (Account, Notifications,
+   Privacy & Data, App Preferences, Support, About), each row with a soft
+   leading icon and trailing chevron or inline control, matching the
+   Profile screen's row style exactly.
+2. Account Settings — edit name/email/phone/photo, a "Change password"
+   row, a "Linked sign-in methods" row showing Google/phone/email badges,
+   and a clearly separated, calmly-styled "Delete account" row at the
+   bottom (muted red text, no button, requires confirmation on tap).
+3. Notification Preferences — grouped toggles (Appointment reminders,
+   Medication reminders, Daily check-in nudges, Order & shipping updates,
+   WhatsApp updates, Promotional messages), each with a one-line
+   description under the toggle.
+4. Privacy & Data — a plain-language summary of what data is collected
+   and why, a "Download my data" row, a "Manage WhatsApp consent" row
+   (links to the WhatsApp Consent screen from an earlier batch), and a
+   link to the full privacy policy.
+5. Language & App Preferences — a language picker (English/Hindi shown as
+   radio rows with native-script labels), a text-size stepper preview,
+   and a theme row (System / Light) — keep Light as the only real option
+   given the calm palette, but show the row for completeness.
+6. Help & Support / About — an FAQ accordion list, a "Contact support"
+   row (chat/call/email icons), and an About screen with app version,
+   terms of service, privacy policy, and open-source licenses links.
+```
+
+---
+
+## Prompt 13 — Notifications inbox & global search (2 screens)
+
+```
+Using the same design system, add:
+
+1. Notifications Inbox — a chronological list of notification cards
+   (icon per type: appointment, medication, order, companion/AI, system),
+   title, short body, relative timestamp, with unread items marked by a
+   small sage dot rather than bold/loud styling; include a calm empty
+   state ("You're all caught up").
+2. Global Search — a search bar at the top with recent searches as
+   chips below it when empty, and grouped results (Doctors, Medicines,
+   Documents, Past conversations) once a query is entered, each group
+   showing up to 3 results with a "See all" link.
+```
+
+---
+
+## Prompt 14 — Doctor profile & feedback (2 screens)
+
+```
+Using the same design system, add:
+
+1. Doctor Full Profile — expands on the Doctor Detail/Booking card: large
+   photo header, name, specialization, verified badge, years of
+   experience and consultation-count stats as calm pill chips, a bio
+   section, a qualifications list, and a patient reviews section (star
+   rating summary + a few review cards) — the booking controls from the
+   earlier Doctor Detail screen stay reachable via a sticky bottom "Book
+   appointment" button.
+2. Feedback & Rating — shown after a completed appointment or order: a
+   soft star-rating row (not harsh yellow, use the terracotta accent), an
+   optional comment field, and a single "Submit feedback" pill button;
+   include a brief "Thank you" confirmation state.
+```
+
+---
+
 ## After all batches: linking
 
 Once every screen above exists on the canvas, use Stitch's screen-linking
 feature to wire:
-- Home → Astra chat, doctor cards → Doctor Detail, Shop card → Shop
+- Home → Companion Journey Dashboard (not the bare chat) → Companion Voice
+  Mode / Companion Chat History / Companion Case Summary
+- Home doctor cards → Doctor Detail → Doctor Full Profile; "Book" →
+  My Appointments → Appointment Detail → Video Call → Feedback & Rating
 - Bottom tabs across all 5 primary screens
-- Doctor Detail "Book" → My Appointments → Appointment Detail → Video Call
 - Shop → Product Detail → Cart → Order History
-- Profile rows → their respective screens (Documents, Reminders, Address
-  Book, My Orders, My Appointments)
+- Profile → Documents, Reminders, Address Book, My Orders, My
+  Appointments, and Settings Home
+- Settings Home → Account Settings, Notification Preferences, Privacy &
+  Data (→ WhatsApp Consent), Language & App Preferences, Help & Support
+- Profile/Home bell icon → Notifications Inbox; search icon → Global
+  Search
+- Documents row (or a new Vault entry point on Home/Profile) → Vault Lock
+  Screen → Vault Home → Vault Category List → Document Viewer
+- Splash → Onboarding (first launch only) → Sign up/Log in → OTP
+  verification → relevant Permission request screens → Home
 
 This turns the canvas into a clickable prototype of the full replacement
 UI, which can then be handed to engineering as the visual spec for
