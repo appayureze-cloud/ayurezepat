@@ -13,6 +13,7 @@ class Preferences {
 
   static const String is_logged_in = "isLoggedIn";
   static const String has_seen_onboarding = "hasSeenOnboarding";
+  static const String vault_pin = "vaultPin";
   static const String name = "name";
   static const String phone = "phone";
   static const String phoneCode = "phone_code";
