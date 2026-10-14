@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../features/appointments/domain/entities/doctor_summary.dart';
 import '../../../features/appointments/presentation/doctor_booking_screen.dart';
+import '../../../features/appointments/presentation/doctor_full_profile_screen.dart';
 import '../../../theme.dart';
 
 /// Matches the Stitch "Doctor Recommendation Card" bento style
@@ -75,50 +76,56 @@ class DoctorInfoCard_v2 extends HookWidget {
               ],
             ),
           if (showRecommendedBadge) const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ClipOval(
-                child: CachedNetworkImage(
-                  height: 56,
-                  width: 56,
-                  fit: BoxFit.cover,
-                  imageUrl: doctor.photoUrl ?? '',
-                  placeholder: (context, url) => Container(
+          InkWell(
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => DoctorFullProfileScreen(doctor: doctor))),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ClipOval(
+                  child: CachedNetworkImage(
                     height: 56,
                     width: 56,
-                    color: AppColors.creamSurfaceLow,
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    height: 56,
-                    width: 56,
-                    color: AppColors.sagePrimaryContainer,
-                    child:
-                        const Icon(Icons.person, color: AppColors.sagePrimary),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Dr. ${doctor.name}',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                    fit: BoxFit.cover,
+                    imageUrl: doctor.photoUrl ?? '',
+                    placeholder: (context, url) => Container(
+                      height: 56,
+                      width: 56,
+                      color: AppColors.creamSurfaceLow,
                     ),
-                    if ((doctor.specialization ?? '').isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(
-                          doctor.specialization!,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
-                  ],
+                    errorWidget: (context, url, error) => Container(
+                      height: 56,
+                      width: 56,
+                      color: AppColors.sagePrimaryContainer,
+                      child: const Icon(Icons.person,
+                          color: AppColors.sagePrimary),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Dr. ${doctor.name}',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      if ((doctor.specialization ?? '').isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            doctor.specialization!,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 14),
           Container(

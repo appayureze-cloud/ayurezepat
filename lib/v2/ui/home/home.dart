@@ -31,6 +31,7 @@ import '../../../model/v2/blog.dart';
 import '../../../model/v2/user_detail_model.dart';
 import '../../../theme.dart';
 import '../../utils/logger.dart';
+import '../../../features/search/presentation/global_search_screen.dart';
 import '../others/notifications.dart';
 import '../widgets/coming_soon.dart';
 import '../widgets/popular_doctor_card.dart';
@@ -221,6 +222,17 @@ class MainHome extends HookWidget {
                                 ),
                               ],
                             ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          const GlobalSearchScreen()));
+                            },
+                            icon: const Icon(Icons.search,
+                                color: AppColors.sagePrimary),
                           ),
                           IconButton(
                             onPressed: () {

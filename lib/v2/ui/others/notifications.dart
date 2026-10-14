@@ -3,17 +3,18 @@ import 'package:doctro_patient/api/base_model.dart';
 import 'package:doctro_patient/api/network_api.dart';
 import 'package:doctro_patient/api/retrofit_Api.dart';
 import 'package:doctro_patient/api/server_error.dart';
-import 'package:doctro_patient/const/Palette.dart';
 import 'package:doctro_patient/model/v2/notification_model.dart';
+import 'package:doctro_patient/theme.dart';
 import 'package:doctro_patient/v2/ui/widgets/header.dart';
 import 'package:doctro_patient/v2/ui/widgets/no_data.dart';
 import 'package:doctro_patient/v2/utils/helper.dart';
-import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
-import 'package:sizer/sizer.dart';
 
+/// Matches the Stitch "Notifications Inbox" screen
+/// (ayureze_notifications_inbox/code.html): a chronological list of
+/// cards instead of a dotted-divider list.
 class Notifications extends StatefulWidget {
   @override
   _NotificationsState createState() => _NotificationsState();
@@ -32,160 +33,96 @@ class _NotificationsState extends State<Notifications> {
 
   @override
   Widget build(BuildContext context) {
-    double width;
-    double height;
-    width = MediaQuery.of(context).size.width;
-    height = MediaQuery.of(context).size.height;
     return Scaffold(
+      backgroundColor: AppColors.creamSurface,
       body: ModalProgressHUD(
         inAsyncCall: loading,
         opacity: 0,
-        progressIndicator: SpinKitFadingCircle(
-          color: Palette.primary,
-          size: 3.h,
+        progressIndicator: const SpinKitFadingCircle(
+          color: AppColors.sagePrimary,
+          size: 36,
         ),
         child: Column(
           children: [
-            Header_v2(title: 'Notifications'),
-            userNotification.length > 0
-                ? SingleChildScrollView(
-                    child: ListView.builder(
-                      itemCount: userNotification.length,
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        String date = DateUtil().formattedDate(
-                            DateTime.parse(userNotification[index].createdAt!));
-                        return Column(
-                          children: [
-                            Container(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: width * 0.01,
-                                  vertical: width * 0.02),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: width * 0.15,
-                                    alignment: AlignmentDirectional.center,
-                                    margin: EdgeInsets.symmetric(
-                                        horizontal: width * 0.01,
-                                        vertical: width * 0.02),
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          width: width * 0.15,
-                                          height: height * 0.065,
-                                          child: CachedNetworkImage(
-                                            alignment: Alignment.center,
-                                            imageUrl: userNotification[index]
-                                                .doctor!
-                                                .fullImage!,
-                                            imageBuilder:
-                                                (context, imageProvider) =>
-                                                    CircleAvatar(
-                                              radius: 50,
-                                              backgroundColor:
-                                                  Palette.image_circle,
-                                              child: CircleAvatar(
-                                                radius: 60,
-                                                backgroundImage: imageProvider,
-                                              ),
-                                            ),
-                                            placeholder: (context, url) =>
-                                                SpinKitFadingCircle(
-                                                    color: Palette.blue),
-                                            errorWidget: (context, url,
-                                                    error) =>
-                                                Image.asset(
-                                                    "assets/images/NoImage.png"),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    width: width * 0.8,
-                                    child: Container(
-                                      margin: EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.symmetric(
-                                                horizontal: 0, vertical: 5),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Container(
-                                                  child: Text(
-                                                    userNotification[index]
-                                                        .doctor!
-                                                        .name!,
-                                                    style: TextStyle(
-                                                        fontSize: width * 0.04,
-                                                        color:
-                                                            Palette.dark_blue,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                ),
-                                                Container(
-                                                  child: Text(
-                                                    '$date',
-                                                    style: TextStyle(
-                                                      fontSize: width * 0.03,
-                                                      color: Palette.dark_blue,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            alignment:
-                                                AlignmentDirectional.topStart,
-                                            child: Text(
-                                              userNotification[index].message!,
-                                              style: TextStyle(
-                                                fontSize: width * 0.035,
-                                                color: Palette.dark_blue,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+            const Header_v2(title: 'Notifications'),
+            if (userNotification.isEmpty)
+              Expanded(child: Center(child: NoDataWidget()))
+            else
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: userNotification.length,
+                  itemBuilder: (context, index) {
+                    final item = userNotification[index];
+                    final date = DateUtil()
+                        .formattedDate(DateTime.parse(item.createdAt!));
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppColors.creamSurfaceLowest,
+                        border: Border.all(color: AppColors.slateBorder),
+                        borderRadius: AppRadius.roundedLg,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipOval(
+                            child: CachedNetworkImage(
+                              height: 44,
+                              width: 44,
+                              fit: BoxFit.cover,
+                              imageUrl: item.doctor?.fullImage ?? '',
+                              placeholder: (context, url) => Container(
+                                height: 44,
+                                width: 44,
+                                color: AppColors.sagePrimarySubtle,
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                height: 44,
+                                width: 44,
+                                color: AppColors.sagePrimaryContainer,
+                                child: const Icon(Icons.notifications,
+                                    color: AppColors.sagePrimary, size: 20),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        item.doctor?.name ?? 'AyurEze',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineSmall,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                    Text(date,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(item.message ?? '',
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium),
+                              ],
                             ),
-                            Container(
-                              margin: EdgeInsets.symmetric(
-                                  vertical: 5, horizontal: 10),
-                              child: Column(
-                                children: [
-                                  DottedLine(
-                                    direction: Axis.horizontal,
-                                    lineLength: double.infinity,
-                                    lineThickness: 1.0,
-                                    dashLength: 3.0,
-                                    dashColor: Palette.blue,
-                                    dashRadius: 0.0,
-                                    dashGapLength: 1.0,
-                                    dashGapColor: Palette.transparent,
-                                    dashGapRadius: 0.0,
-                                  )
-                                ],
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  )
-                : NoDataWidget(),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
           ],
         ),
       ),
