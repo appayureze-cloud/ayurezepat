@@ -28,13 +28,7 @@ jobs:
         run: flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: Analyze
-        # --no-fatal-infos: flutter analyze fails on any issue by default,
-        # not just errors/warnings. This pre-existing codebase has ~2000
-        # info-level style findings (unnecessary_this, prefer_const_*, etc.)
-        # on untouched legacy screens - real errors and the two
-        # warning-level rules (downgraded to info in analysis_options.yaml)
-        # still fail the build; only cosmetic info findings are tolerated.
-        run: flutter analyze --no-fatal-infos
+        run: flutter analyze
 
       - name: Format check
         run: dart format --output=none --set-exit-if-changed lib test

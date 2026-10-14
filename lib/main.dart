@@ -25,7 +25,6 @@ import 'package:doctro_patient/v2/ui/authentication/splash_screen.dart';
 import 'package:doctro_patient/v2/ui/home/landing_screen.dart';
 import 'package:doctro_patient/v2/ui/medicine/cart.dart';
 import 'package:doctro_patient/v2/ui/medicine/checkout.dart';
-import 'package:doctro_patient/v2/ui/medicine/landing_screen.dart';
 import 'package:doctro_patient/features/cart/presentation/shop_screen.dart';
 import 'package:doctro_patient/v2/ui/others/blog_list.dart' show BlogsList;
 import 'package:doctro_patient/v2/ui/others/notifications.dart';
