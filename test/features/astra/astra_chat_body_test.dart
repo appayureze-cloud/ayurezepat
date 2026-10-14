@@ -62,16 +62,26 @@ void main() {
     )));
 
     // The red-flag path is fully synchronous (no repository call), so a
-    // plain tap + pump is enough here - a second pump is just a safety
-    // margin for the rebuild to flush on a slower CI runner (this flaked
-    // intermittently in CI, never locally, with a single pump).
+    // plain tap + pump is enough here.
     await tester.enterText(find.byType(TextField), 'I have chest pain');
     await tester.tap(find.byIcon(Icons.send));
     await tester.pump();
-    await tester.pump();
 
     expect(find.text('Clinical Safety Advisory'), findsOneWidget);
-    expect(find.widgetWithText(ElevatedButton, 'Call 112 now'), findsOneWidget);
+    // Not find.widgetWithText(ElevatedButton, ...): ElevatedButton.icon's
+    // internal composition differs between Flutter versions (CI pins
+    // 3.35.0, newer than that unifies it into a plain ElevatedButton,
+    // older versions use a distinct subclass with a different
+    // runtimeType), so an exact-type ancestor match passes on one and
+    // fails on the other. ButtonStyleButton is the stable common
+    // superclass of all Material buttons across versions.
+    expect(
+      find.ancestor(
+        of: find.text('Call 112 now'),
+        matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('sending an ordinary message renders a streamed reply',
