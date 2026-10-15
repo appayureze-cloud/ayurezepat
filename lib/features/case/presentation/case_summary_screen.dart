@@ -9,6 +9,7 @@ import '../../astra/data/astra_service.dart';
 import '../../astra/presentation/astra_chat_screen.dart';
 import '../../astra/presentation/daily_checkin_reminder_scheduler.dart';
 import '../../../v2/utils/logger.dart';
+import '../data/case_history_store.dart';
 import 'case_service.dart';
 import '../domain/entities/case.dart';
 
@@ -114,6 +115,14 @@ class CaseSummaryScreen extends HookWidget {
         // different backends. Re-fetching surfaces that mismatch instead
         // of masking it with an optimistic local update.
         activeCase.value = await CaseService.withDio(dio).getCase(current.id);
+        // Best-effort: records this closed journey into the local
+        // Companion Chat History (see CaseHistoryStore) - never blocks
+        // the case from actually closing if this fails.
+        try {
+          await CaseHistoryStore.recordClosed(activeCase.value!);
+        } catch (e) {
+          logger.e('Failed to record case history: $e');
+        }
       } catch (e) {
         error.value = 'Could not close your case. Please try again.';
       } finally {

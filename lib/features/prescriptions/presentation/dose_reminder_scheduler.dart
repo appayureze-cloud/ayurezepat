@@ -128,6 +128,10 @@ Future<void> scheduleDoseReminders({
           'reminder_id': reminderId,
           'title': 'Time for ${item.name}',
           'body': '${item.dose} - ${item.timing}',
+          // Not part of the ack flow - read back by
+          // MedicationRemindersScreen so it can show/sort real scheduled
+          // doses instead of just an opaque pending-notification list.
+          'scheduled_for': scheduledFor.toIso8601String(),
         }),
       );
     }

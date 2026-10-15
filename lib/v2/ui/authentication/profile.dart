@@ -234,6 +234,11 @@ class Profile extends HookWidget {
                         icon: Icons.folder_shared_outlined,
                       ),
                       ProfileSectionCard(
+                        title: 'Medication Reminders',
+                        route: 'MedicationReminders',
+                        icon: Icons.medication_outlined,
+                      ),
+                      ProfileSectionCard(
                         title: 'Documents',
                         route: 'Documents',
                         icon: Icons.description_outlined,

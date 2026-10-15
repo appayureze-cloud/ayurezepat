@@ -9,6 +9,7 @@ import '../../../v2/utils/logger.dart';
 import '../domain/entities/product.dart';
 import 'cart_screen.dart';
 import 'cart_service.dart';
+import 'product_detail_screen.dart';
 
 /// Matches the Stitch "Medicine Catalog" screen
 /// (ayureze_medicine_catalog/code.html), adapted for what the real
@@ -123,52 +124,62 @@ class ShopScreen extends HookWidget {
                 itemBuilder: (context, index) {
                   final product = filtered[index];
                   final isAdding = addingProductId.value == product.productId;
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: AppColors.creamSurfaceLowest,
-                      border: Border.all(color: AppColors.slateBorder),
-                      borderRadius: AppRadius.roundedLg,
+                  return InkWell(
+                    borderRadius: AppRadius.roundedLg,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductDetailScreen(product: product),
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(product.name,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall),
-                              Text(
-                                  '₹${product.priceNumeric.toStringAsFixed(2)}',
-                                  style: Theme.of(context).textTheme.bodySmall),
-                              if (!product.available)
-                                const Text('Out of stock',
-                                    style: TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.clayAlert)),
-                            ],
-                          ),
-                        ),
-                        if (product.available)
-                          IconButton(
-                            style: IconButton.styleFrom(
-                              backgroundColor: AppColors.sagePrimarySubtle,
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppColors.creamSurfaceLowest,
+                        border: Border.all(color: AppColors.slateBorder),
+                        borderRadius: AppRadius.roundedLg,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(product.name,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall),
+                                Text(
+                                    '₹${product.priceNumeric.toStringAsFixed(2)}',
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall),
+                                if (!product.available)
+                                  const Text('Out of stock',
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.clayAlert)),
+                              ],
                             ),
-                            onPressed:
-                                isAdding ? null : () => addToCart(product),
-                            icon: isAdding
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2))
-                                : const Icon(Icons.add_shopping_cart,
-                                    color: AppColors.sagePrimary),
                           ),
-                      ],
+                          if (product.available)
+                            IconButton(
+                              style: IconButton.styleFrom(
+                                backgroundColor: AppColors.sagePrimarySubtle,
+                              ),
+                              onPressed:
+                                  isAdding ? null : () => addToCart(product),
+                              icon: isAdding
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2))
+                                  : const Icon(Icons.add_shopping_cart,
+                                      color: AppColors.sagePrimary),
+                            ),
+                        ],
+                      ),
                     ),
                   );
                 },

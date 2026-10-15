@@ -34,6 +34,7 @@ import 'package:doctro_patient/features/settings/presentation/help_support_scree
 import 'package:doctro_patient/features/settings/presentation/language_preferences_screen.dart';
 import 'package:doctro_patient/features/settings/presentation/notification_preferences_screen.dart';
 import 'package:doctro_patient/features/settings/presentation/privacy_data_screen.dart';
+import 'package:doctro_patient/features/prescriptions/presentation/medication_reminders_screen.dart';
 import 'package:doctro_patient/features/settings/presentation/settings_home_screen.dart';
 import 'package:doctro_patient/features/vault/presentation/vault_lock_screen.dart';
 import 'package:doctro_patient/v2/ui/others/blog_list.dart' show BlogsList;
@@ -614,6 +615,8 @@ class _MyAppState extends State<MyApp> {
               'CaseSummary': (context) => const CaseSummaryScreen(),
               'HealthRecord': (context) => const HealthRecordTimelineScreen(),
               'Documents': (context) => const DocumentsScreen(),
+              'MedicationReminders': (context) =>
+                  const MedicationRemindersScreen(),
               'VaultLock': (context) => const VaultLockScreen(),
               'SettingsHome': (context) => const SettingsHomeScreen(),
               'SettingsAccount': (context) => const AccountSettingsScreen(),

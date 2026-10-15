@@ -7,6 +7,7 @@ import '../../../theme.dart';
 import '../../../v2/ui/widgets/header.dart';
 import '../../case/domain/entities/case.dart';
 import '../../case/presentation/case_service.dart';
+import '../../case/presentation/companion_chat_history_screen.dart';
 import 'astra_chat_screen.dart';
 
 const _stages = [
@@ -66,7 +67,20 @@ class CompanionJourneyScreen extends HookWidget {
       backgroundColor: AppColors.creamSurface,
       body: Column(
         children: [
-          const Header_v2(title: 'Your Journey'),
+          Header_v2(
+            title: 'Your Journey',
+            actions: [
+              IconButton(
+                tooltip: 'Companion history',
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const CompanionChatHistoryScreen()),
+                ),
+                icon: const Icon(Icons.history, color: AppColors.sagePrimary),
+              ),
+            ],
+          ),
           Expanded(
             child: loading.value
                 ? const Center(
