@@ -36,14 +36,16 @@ class Env {
   );
 
   /// Flipped to real at the user's request. createSession/sendMessage/
-  /// resolveCase are confirmed live. checkin (daily check-in) and
-  /// ackReminder (medication reminders) still target
-  /// `${Apis.baseUrl}astra/...` endpoints that were never confirmed to
-  /// exist on the real backend during the earlier audit - both call
-  /// sites already fail gracefully (caught, shown as a retryable error,
-  /// never crash), so this is safe to ship, but those two actions may
-  /// 404 until someone verifies the backend actually has them. See
-  /// docs/backend/astra.md.
+  /// resolveCase/triage/recommendations/plan/medicineInfo are confirmed
+  /// live. checkin (daily check-in) and ackReminder (medication
+  /// reminders) were verified live against the real backend on
+  /// 2026-10-15 (`curl` to `https://ayureze.org/api/astra/...` with a
+  /// real Firebase ID token) and both 404 at the Laravel router level
+  /// ("The route ... could not be found") - the routes don't exist yet.
+  /// AstraService.withDio routes those two calls to the mock even when
+  /// this flag is false (see PartialMockAstraRepository) so the daily
+  /// check-in and reminder-ack flows keep working instead of failing on
+  /// every use. See docs/backend/astra.md.
   static const bool useMockAstra = bool.fromEnvironment(
     'USE_MOCK_ASTRA',
     defaultValue: false,
