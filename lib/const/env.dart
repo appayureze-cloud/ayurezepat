@@ -35,15 +35,18 @@ class Env {
     defaultValue: false,
   );
 
-  /// Deliberately still mock: AstraRepositoryImpl's createSession/
-  /// sendMessage/resolveCase are confirmed live, but recommendations/
-  /// triage/plan/checkin/ackReturn target an unconfirmed contract -
-  /// checkin has a live caller (daily check-in), so flipping this would
-  /// trade a known-good mock for an unverified real call. See
+  /// Flipped to real at the user's request. createSession/sendMessage/
+  /// resolveCase are confirmed live. checkin (daily check-in) and
+  /// ackReminder (medication reminders) still target
+  /// `${Apis.baseUrl}astra/...` endpoints that were never confirmed to
+  /// exist on the real backend during the earlier audit - both call
+  /// sites already fail gracefully (caught, shown as a retryable error,
+  /// never crash), so this is safe to ship, but those two actions may
+  /// 404 until someone verifies the backend actually has them. See
   /// docs/backend/astra.md.
   static const bool useMockAstra = bool.fromEnvironment(
     'USE_MOCK_ASTRA',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   /// Shows canned demo prescription line items when the backend hasn't
