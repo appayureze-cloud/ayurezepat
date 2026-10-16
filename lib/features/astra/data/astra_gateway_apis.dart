@@ -14,6 +14,18 @@ class AstraGatewayApis {
   static const String authRefresh = 'api/v1/auth/refresh';
   static const String companionJourneyStart = 'api/companion/journey/start';
   static const String companionCaseCreate = 'api/companion/case/create';
+
+  /// The right chat route for this app: journey-scoped, with safety
+  /// middleware and intent-decay monitoring built in (confirmed by reading
+  /// app/companion_api.py's `companion_chat` handler directly). Two other
+  /// live chat routes exist on this same backend and are deliberately
+  /// NOT used here - they are different services, not duplicates, so
+  /// don't "fix" this by switching to one of them:
+  ///   - `/api/v1/chat/message` - a separate, non-journey-scoped pipeline
+  ///     (Supabase session validation, RAG memory, language detection).
+  ///   - `/api/v1/brain/chat` - raw AI chat streaming with no journey
+  ///     context or safety wrapper; this is what the doctor app's AI-assist
+  ///     feature calls instead, for a genuinely different purpose.
   static const String companionChat = 'api/companion/chat';
   static String companionJourneyStatus(String journeyId) =>
       'api/companion/journey/$journeyId/status';
