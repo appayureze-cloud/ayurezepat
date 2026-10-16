@@ -80,3 +80,25 @@ class AstraFillExtraction {
     );
   }
 }
+
+/// `POST /api/v1/astra-fill/transcribe-voice` response (`VoiceTranscriptPending`
+/// in the live OpenAPI spec) - Phase 1 of the voice safety gate: raw STT
+/// output the patient must confirm or edit before AI extraction runs.
+class VoiceTranscriptPending {
+  final String pendingId;
+  final String rawTranscript;
+  final double? confidenceScore;
+
+  VoiceTranscriptPending({
+    required this.pendingId,
+    required this.rawTranscript,
+    this.confidenceScore,
+  });
+
+  factory VoiceTranscriptPending.fromJson(Map<String, dynamic> json) =>
+      VoiceTranscriptPending(
+        pendingId: json['pending_id'] as String,
+        rawTranscript: json['raw_transcript'] as String,
+        confidenceScore: (json['confidence_score'] as num?)?.toDouble(),
+      );
+}

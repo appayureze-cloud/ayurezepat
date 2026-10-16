@@ -47,12 +47,24 @@ class AstraGatewayApis {
   /// above) - confirmed live via app/companion_api.py's MilestoneRequest.
   static const String companionMilestoneAdd = 'api/companion/milestone/add';
 
-  /// Deprecated in the live spec in favour of `transcribe-voice` +
-  /// `confirm-transcript` (not built here). `process-text` takes
-  /// `application/x-www-form-urlencoded`, not JSON - confirmed live (a
-  /// JSON body gets a 422). See AstraFillService for the full contract.
+  /// `process-text` takes `application/x-www-form-urlencoded`, not JSON -
+  /// confirmed live (a JSON body gets a 422). See AstraFillService for
+  /// the full contract (text and voice intake alike).
   static const String astraFillProcessText = 'api/v1/astra-fill/process-text';
   static const String astraFillConfirm = 'api/v1/astra-fill/confirm';
+
+  /// The real voice intake flow (not deprecated, unlike process-voice):
+  /// a two-phase "voice safety gate" - Phase 1 runs STT only and returns
+  /// a short-lived `pending_id` + raw transcript for the patient to
+  /// review; Phase 2 only runs AI extraction after the patient confirms
+  /// (or edits) that transcript. Confirmed live: a real speech sample
+  /// against transcribe-voice returns a 422 "no speech detected"
+  /// business response (not a 404/405), proving the route, auth and
+  /// multipart handling are all real.
+  static const String astraFillTranscribeVoice =
+      'api/v1/astra-fill/transcribe-voice';
+  static const String astraFillConfirmTranscript =
+      'api/v1/astra-fill/confirm-transcript';
 
   /// Supabase-backed medicine reminders. Unlike the companion endpoints
   /// above, these are marked `security: none` in the published spec.
