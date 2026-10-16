@@ -51,9 +51,10 @@ Future<void> linkAppointmentToAstra({
 
   String? journeyId;
   try {
-    final existing = await dio.get(AstraGatewayApis.companionJourneyUser(patientId));
-    final journeys = (existing.data as Map<String, dynamic>)['journeys']
-        as List<dynamic>?;
+    final existing =
+        await dio.get(AstraGatewayApis.companionJourneyUser(patientId));
+    final journeys =
+        (existing.data as Map<String, dynamic>)['journeys'] as List<dynamic>?;
     final active = journeys
         ?.cast<Map<String, dynamic>>()
         .where((j) => j['status'] == 'active')

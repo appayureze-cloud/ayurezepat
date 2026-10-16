@@ -126,8 +126,7 @@ class AstraFillIntakeScreen extends HookWidget {
                       ? const SizedBox(
                           height: 18,
                           width: 18,
-                          child:
-                              CircularProgressIndicator(strokeWidth: 2))
+                          child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Continue'),
                 ),
               ),
@@ -164,8 +163,7 @@ class AstraFillIntakeScreen extends HookWidget {
             _ReviewField(
               label: 'Severity',
               value: data.severityClues,
-              onChanged: (v) =>
-                  intake.value = data.copyWith(severityClues: v),
+              onChanged: (v) => intake.value = data.copyWith(severityClues: v),
             ),
             _ReviewField(
               label: 'Pattern / timing',

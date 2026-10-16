@@ -44,7 +44,8 @@ class HealthIntake {
     String? previousTreatment,
     bool? isFollowUp,
     String? stopOrGapSign,
-  }) => HealthIntake(
+  }) =>
+      HealthIntake(
         primaryComplaint: primaryComplaint ?? this.primaryComplaint,
         duration: duration ?? this.duration,
         severityClues: severityClues ?? this.severityClues,

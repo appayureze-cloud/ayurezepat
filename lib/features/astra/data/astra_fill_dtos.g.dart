@@ -6,8 +6,7 @@ part of 'astra_fill_dtos.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-HealthIntake _$HealthIntakeFromJson(Map<String, dynamic> json) =>
-    HealthIntake(
+HealthIntake _$HealthIntakeFromJson(Map<String, dynamic> json) => HealthIntake(
       primaryComplaint: json['primary_complaint'] as String,
       duration: json['duration'] as String,
       severityClues: json['severity_clues'] as String,
