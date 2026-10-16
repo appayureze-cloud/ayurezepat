@@ -4,6 +4,14 @@ import '../domain/appointment_repository.dart';
 import '../domain/entities/appointment.dart';
 import '../domain/entities/doctor_summary.dart';
 
+/// Workaround for a confirmed real backend bug: `GET appointments/doctors/
+/// {id}/slots` returns every slot duplicated (e.g. "09:00","09:00",
+/// "09:30","09:30",...) - live-verified against astra.ayureze.in, not a
+/// client parsing issue. No access to that backend's source to fix the
+/// root cause, so this dedupes defensively (order-preserving) rather than
+/// show a doctor's slot list doubled.
+List<String> dedupeSlots(List<String> rawSlots) => rawSlots.toSet().toList();
+
 /// Talks to the real Astra gateway: app/appointment_routes.py (booking,
 /// slots, doctor directory) and app/finance_routes.py (payment, reused from
 /// the same consultation_id a booking creates) - not the main app backend's
@@ -38,9 +46,10 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
       queryParameters: {'date': date},
     );
     final data = response.data as Map<String, dynamic>;
-    return (data['slots'] as List<dynamic>? ?? [])
+    final rawSlots = (data['slots'] as List<dynamic>? ?? [])
         .map((s) => s.toString())
         .toList();
+    return dedupeSlots(rawSlots);
   }
 
   @override
