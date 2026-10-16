@@ -1,7 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:dio/dio.dart';
 
-import '../../../api/network_api.dart';
 import '../../../v2/utils/logger.dart';
 import 'astra_gateway_apis.dart';
 import 'astra_gateway_client.dart';
@@ -26,18 +24,19 @@ import 'astra_gateway_dtos.dart';
 /// otherwise hit. A new journey is only started when none is active.
 ///
 
-/// `appointmentId` and `laravelDio` are optional only so existing call sites
-/// that predate this still compile; pass both to actually stitch the case
-/// back onto the appointment (see below). `GET /api/companion/case/by-doctor/
-/// {doctor_id}` does exist and is doctor-role-gated (confirmed live), so the
-/// doctor app can discover cases this way even without the Laravel stitch
-/// below - but it still can't tell which case belongs to which appointment
-/// without it.
+/// `appointmentId` is optional only so existing call sites that predate it
+/// still compile; pass it to actually stitch the case to the appointment.
+/// This used to try a Laravel-side `link_appointment_astra_case` route
+/// that was confirmed not to exist (see `Apis.link_appointment_astra_case`'s
+/// doc comment). No Laravel route is needed at all: `case/create`'s
+/// `metadata` field is stored and echoed back verbatim by the real backend
+/// (confirmed live), so `appointmentId` is passed there instead - the
+/// doctor app's `case/by-doctor/{doctor_id}` listing surfaces it back as
+/// `case['metadata']['appointment_id']`.
 Future<void> linkAppointmentToAstra({
   required int doctorId,
   required String healthConcern,
   String? appointmentId,
-  Dio? laravelDio,
 }) async {
   final gateway = AstraGatewayClient();
   // Must come first: this is what actually performs the Firebase->Astra
@@ -90,34 +89,12 @@ Future<void> linkAppointmentToAstra({
       doctorId: 'DOC-$doctorId',
       diagnosis:
           healthConcern.isNotEmpty ? healthConcern : 'Pending consultation',
+      metadata:
+          appointmentId != null ? {'appointment_id': appointmentId} : null,
     ).toJson(),
   );
   final result = CompanionCreateCaseResponse.fromJson(caseResponse.data);
   if (result.success != true) {
     logger.w('Astra case/create returned failure: ${result.message}');
-    return;
-  }
-
-  final caseId = result.caseId;
-  if (caseId == null || appointmentId == null || laravelDio == null) return;
-
-  // Best-effort, same as everything above: a failure here must not surface
-  // to the user, since the booking itself already succeeded. This route
-  // does not exist on the Laravel backend yet (confirmed: not in any
-  // accessible backend source), so this currently always fails and logs -
-  // once Laravel accepts POST link_appointment_astra_case with
-  // {appointment_id, astra_case_id} and persists astra_case_id onto that
-  // appointment row (surfaced back on GET get_appointment/{id} as
-  // astra_case_id - see Appointment.astraCaseId in
-  // model/v2/appointment_details_response.dart), this starts working with
-  // no further client change.
-  try {
-    await RestClient(laravelDio).linkAppointmentAstraCase({
-      'appointment_id': appointmentId,
-      'astra_case_id': caseId,
-    });
-  } catch (e) {
-    logger.w('Failed to stitch astra_case_id onto Laravel appointment '
-        '$appointmentId (expected until that backend route exists): $e');
   }
 }

@@ -114,6 +114,13 @@ class CompanionStartJourneyResponse {
 /// `POST /api/companion/case/create` request - binds a patient's companion
 /// journey to a specific doctor, confirmed live during the doctor/patient
 /// unification testing (see docs/backend/astra_doctor_patient_flow.md).
+///
+/// `metadata` is a free-form map the backend stores and echoes back
+/// verbatim on `GET case/{id}` (confirmed live: a `{"appointment_id": ...}`
+/// sent here comes back unchanged under `case.metadata`). This is what
+/// `linkAppointmentToAstra` uses to link a case to its Laravel appointment
+/// instead of the Laravel-side `link_appointment_astra_case` route, which
+/// doesn't exist - no backend work needed, this field was already there.
 @JsonSerializable()
 class CompanionCreateCaseRequest {
   @JsonKey(name: 'journey_id')
@@ -123,12 +130,14 @@ class CompanionCreateCaseRequest {
   @JsonKey(name: 'doctor_id')
   final String doctorId;
   final String diagnosis;
+  final Map<String, dynamic>? metadata;
 
   CompanionCreateCaseRequest({
     required this.journeyId,
     required this.userId,
     required this.doctorId,
     required this.diagnosis,
+    this.metadata,
   });
 
   factory CompanionCreateCaseRequest.fromJson(Map<String, dynamic> json) =>
