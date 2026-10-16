@@ -17,15 +17,10 @@ class AstraGatewayApis {
   static const String companionChat = 'api/companion/chat';
   static String companionJourneyStatus(String journeyId) =>
       'api/companion/journey/$journeyId/status';
+  static String companionJourneyGet(String journeyId) =>
+      'api/companion/journey/$journeyId';
   static String companionCaseHealthRecords(String caseId) =>
       'api/companion/case/$caseId/health_records';
-
-  /// Patient-self-service case bootstrap - distinct from companionCaseCreate
-  /// above, which requires a doctor_id + diagnosis already known (it's for
-  /// a doctor to open a case after seeing a patient). This is for opening a
-  /// case BEFORE any doctor is involved, to thread a case_id through
-  /// bookings/orders/therapy (see app/companion_api.py's open_patient_case).
-  static const String companionCaseOpen = 'api/companion/case/open';
   static String companionCaseGet(String caseId) => 'api/companion/case/$caseId';
 
   /// Supabase-backed medicine reminders. Unlike the companion endpoints

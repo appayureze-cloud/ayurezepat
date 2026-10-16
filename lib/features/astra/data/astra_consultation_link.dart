@@ -25,10 +25,11 @@ import 'astra_gateway_dtos.dart';
 ///
 /// `appointmentId` and `laravelDio` are optional only so existing call sites
 /// that predate this still compile; pass both to actually stitch the case
-/// back onto the appointment (see below) - without `appointmentId` the
-/// doctor app has no way to ever discover a case created here (there is no
-/// "list cases by doctor_id" endpoint on the Astra side; see
-/// docs/backend/astra_doctor_patient_flow.md).
+/// back onto the appointment (see below). `GET /api/companion/case/by-doctor/
+/// {doctor_id}` does exist and is doctor-role-gated (confirmed live), so the
+/// doctor app can discover cases this way even without the Laravel stitch
+/// below - but it still can't tell which case belongs to which appointment
+/// without it.
 Future<void> linkAppointmentToAstra({
   required int doctorId,
   required String healthConcern,
