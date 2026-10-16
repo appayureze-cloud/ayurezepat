@@ -9,6 +9,7 @@ import '../../case/domain/entities/case.dart';
 import '../../case/presentation/case_service.dart';
 import '../../case/presentation/companion_chat_history_screen.dart';
 import 'astra_chat_screen.dart';
+import 'astra_fill_intake_screen.dart';
 
 const _stages = [
   (CaseStatus.open, 'Symptom check-in', Icons.chat_bubble_outline),
@@ -70,6 +71,16 @@ class CompanionJourneyScreen extends HookWidget {
           Header_v2(
             title: 'Your Journey',
             actions: [
+              IconButton(
+                tooltip: 'Health intake',
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const AstraFillIntakeScreen()),
+                ),
+                icon: const Icon(Icons.assignment_outlined,
+                    color: AppColors.sagePrimary),
+              ),
               IconButton(
                 tooltip: 'Companion history',
                 onPressed: () => Navigator.push(

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 
 import '../../../api/network_api.dart';
@@ -18,11 +19,13 @@ import 'astra_gateway_dtos.dart';
 /// with `DOC-` to match the id format `sync_service.py` assigns when it
 /// syncs that same row into Astra's Supabase `doctors` table.
 ///
-/// Deliberately starts a fresh journey/case per booking rather than reusing
-/// an existing one: each appointment is its own consultation (potentially a
-/// different doctor or concern each time), matching how the Astra chat tab
-/// already starts its own journey per session.
+/// Reuses the patient's existing active journey (`GET /api/companion/
+/// journey/user/{user_id}`) when one exists, rather than always starting a
+/// fresh one - avoids the duplicate-journey-per-booking problem a patient
+/// booking multiple appointments for the same ongoing concern would
+/// otherwise hit. A new journey is only started when none is active.
 ///
+
 /// `appointmentId` and `laravelDio` are optional only so existing call sites
 /// that predate this still compile; pass both to actually stitch the case
 /// back onto the appointment (see below). `GET /api/companion/case/by-doctor/
@@ -46,23 +49,42 @@ Future<void> linkAppointmentToAstra({
   final patientId = gateway.cachedUserId;
   if (patientId == null || patientId.isEmpty) return;
 
-  final journeyResponse = await dio.post(
-    AstraGatewayApis.companionJourneyStart,
-    data: CompanionStartJourneyRequest(
-      userId: patientId,
-      healthConcern: healthConcern.isNotEmpty ? healthConcern : 'Consultation',
-    ).toJson(),
-  );
-  final journey = CompanionStartJourneyResponse.fromJson(journeyResponse.data);
-  if (journey.success != true || journey.journeyId == null) {
-    logger.w('Astra journey/start did not return a journey_id for booking');
-    return;
+  String? journeyId;
+  try {
+    final existing = await dio.get(AstraGatewayApis.companionJourneyUser(patientId));
+    final journeys = (existing.data as Map<String, dynamic>)['journeys']
+        as List<dynamic>?;
+    final active = journeys
+        ?.cast<Map<String, dynamic>>()
+        .where((j) => j['status'] == 'active')
+        .firstOrNull;
+    journeyId = active?['journey_id'] as String? ?? active?['id'] as String?;
+  } catch (e) {
+    logger.w('Failed to check for an existing journey before booking: $e');
+  }
+
+  if (journeyId == null) {
+    final journeyResponse = await dio.post(
+      AstraGatewayApis.companionJourneyStart,
+      data: CompanionStartJourneyRequest(
+        userId: patientId,
+        healthConcern:
+            healthConcern.isNotEmpty ? healthConcern : 'Consultation',
+      ).toJson(),
+    );
+    final journey =
+        CompanionStartJourneyResponse.fromJson(journeyResponse.data);
+    if (journey.success != true || journey.journeyId == null) {
+      logger.w('Astra journey/start did not return a journey_id for booking');
+      return;
+    }
+    journeyId = journey.journeyId!;
   }
 
   final caseResponse = await dio.post(
     AstraGatewayApis.companionCaseCreate,
     data: CompanionCreateCaseRequest(
-      journeyId: journey.journeyId!,
+      journeyId: journeyId,
       userId: patientId,
       doctorId: 'DOC-$doctorId',
       diagnosis:

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
+import '../data/astra_milestones.dart';
 import '../domain/astra_repository.dart';
 import '../domain/entities/checkin_result.dart';
 
@@ -32,6 +35,15 @@ class DailyCheckinNotifier extends ChangeNotifier {
     try {
       result = await repository.checkin(caseId, symptomScore: symptomScore);
       status = DailyCheckinStatus.done;
+      // Best-effort, non-blocking: caseId here is really the journey id
+      // (CaseRepositoryImpl is journey-backed) - records the check-in as a
+      // real, queryable milestone on the journey, separate from the
+      // mocked astra/cases/{id}/checkins call above.
+      unawaited(recordMilestone(
+        journeyId: caseId,
+        milestoneType: 'daily_checkin',
+        description: 'Daily check-in: symptom score $symptomScore/5',
+      ));
     } catch (e) {
       error = 'Could not submit your check-in. Please try again.';
       status = DailyCheckinStatus.error;

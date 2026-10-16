@@ -19,9 +19,28 @@ class AstraGatewayApis {
       'api/companion/journey/$journeyId/status';
   static String companionJourneyGet(String journeyId) =>
       'api/companion/journey/$journeyId';
+  static String companionJourneyUser(String userId) =>
+      'api/companion/journey/user/$userId';
   static String companionCaseHealthRecords(String caseId) =>
       'api/companion/case/$caseId/health_records';
   static String companionCaseGet(String caseId) => 'api/companion/case/$caseId';
+
+  /// Requires a real, doctor-created case_id (CreateCaseRequest in
+  /// companion_api.py), not the journey-backed pseudo-case
+  /// CaseRepositoryImpl otherwise uses - only callable once a doctor has
+  /// actually created one via case/create.
+  static const String companionCaseProgress = 'api/companion/case/progress';
+
+  /// Attaches to a journey_id, so always callable (unlike case/progress
+  /// above) - confirmed live via app/companion_api.py's MilestoneRequest.
+  static const String companionMilestoneAdd = 'api/companion/milestone/add';
+
+  /// Deprecated in the live spec in favour of `transcribe-voice` +
+  /// `confirm-transcript` (not built here). `process-text` takes
+  /// `application/x-www-form-urlencoded`, not JSON - confirmed live (a
+  /// JSON body gets a 422). See AstraFillService for the full contract.
+  static const String astraFillProcessText = 'api/v1/astra-fill/process-text';
+  static const String astraFillConfirm = 'api/v1/astra-fill/confirm';
 
   /// Supabase-backed medicine reminders. Unlike the companion endpoints
   /// above, these are marked `security: none` in the published spec.

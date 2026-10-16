@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../../api/retrofit_Api.dart';
 import '../../../theme.dart';
 import '../../../v2/ui/widgets/header.dart';
+import '../../astra/data/astra_milestones.dart';
 import '../../astra/data/astra_service.dart';
 import '../../astra/presentation/astra_chat_screen.dart';
 import '../../astra/presentation/daily_checkin_reminder_scheduler.dart';
@@ -123,6 +126,14 @@ class CaseSummaryScreen extends HookWidget {
         } catch (e) {
           logger.e('Failed to record case history: $e');
         }
+        // Best-effort: current.id here is really the journey id
+        // (CaseRepositoryImpl is journey-backed) - records closure as a
+        // real, queryable milestone, separate from resolveCase above.
+        unawaited(recordMilestone(
+          journeyId: current.id,
+          milestoneType: 'case_resolved',
+          description: 'Patient marked this case as resolved.',
+        ));
       } catch (e) {
         error.value = 'Could not close your case. Please try again.';
       } finally {
