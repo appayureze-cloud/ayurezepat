@@ -12,6 +12,7 @@ import '../../../v2/ui/widgets/header.dart';
 import '../../../v2/utils/logger.dart';
 import '../../astra/data/astra_service.dart';
 import '../../medicine_reminders/presentation/medicine_reminder_service.dart';
+import '../data/paused_reminder_store.dart';
 import 'dose_reminder_scheduler.dart';
 
 class _PendingDose {
@@ -45,11 +46,13 @@ class MedicationRemindersScreen extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final doses = useState<List<_PendingDose>>([]);
+    final pausedMedicines = useState<Map<String, (String, String, int)>>({});
     final loading = useState(true);
 
     Future<void> load() async {
       loading.value = true;
       try {
+        pausedMedicines.value = await PausedReminderStore.getPaused();
         final pending =
             await flutterLocalNotificationsPlugin.pendingNotificationRequests();
         final parsed = <_PendingDose>[];
@@ -130,6 +133,37 @@ class MedicationRemindersScreen extends HookWidget {
       } catch (e) {
         logger.e('Failed to update reminder: $e');
         Fluttertoast.showToast(msg: 'Could not update reminder');
+      }
+    }
+
+    Future<void> pauseMedicine(String medicineKey) async {
+      try {
+        final pending =
+            await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+        final count =
+            await PausedReminderStore.pauseMedicine(medicineKey, pending);
+        Fluttertoast.showToast(
+            msg: count > 0
+                ? 'Paused $count upcoming reminder${count == 1 ? '' : 's'}'
+                : 'Nothing to pause');
+        await load();
+      } catch (e) {
+        logger.e('Failed to pause reminders: $e');
+        Fluttertoast.showToast(msg: 'Could not pause reminders');
+      }
+    }
+
+    Future<void> resumeMedicine(String medicineKey) async {
+      try {
+        final count = await PausedReminderStore.resumeMedicine(medicineKey);
+        Fluttertoast.showToast(
+            msg: count > 0
+                ? 'Resumed $count reminder${count == 1 ? '' : 's'}'
+                : 'Those reminder times have already passed');
+        await load();
+      } catch (e) {
+        logger.e('Failed to resume reminders: $e');
+        Fluttertoast.showToast(msg: 'Could not resume reminders');
       }
     }
 
@@ -262,10 +296,49 @@ class MedicationRemindersScreen extends HookWidget {
                             ),
                           ],
                         ),
+                        if (medicineKeyFor(dose.reminderId) != null) ...[
+                          const SizedBox(height: 6),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton.icon(
+                              icon: const Icon(Icons.pause_circle_outline,
+                                  size: 16),
+                              label: const Text('Pause remaining doses'),
+                              onPressed: () => pauseMedicine(
+                                  medicineKeyFor(dose.reminderId)!),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   );
                 },
+              ),
+            ),
+          if (pausedMedicines.value.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
+                  Text('Paused', style: Theme.of(context).textTheme.titleSmall),
+                  const SizedBox(height: 6),
+                  for (final entry in pausedMedicines.value.entries)
+                    Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.pause_circle_outline,
+                            color: AppColors.amberWarning),
+                        title: Text(entry.value.$1),
+                        subtitle: Text(
+                            '${entry.value.$3} upcoming dose${entry.value.$3 == 1 ? '' : 's'} paused'),
+                        trailing: TextButton(
+                          onPressed: () => resumeMedicine(entry.key),
+                          child: const Text('Resume'),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
         ],

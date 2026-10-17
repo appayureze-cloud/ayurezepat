@@ -13,6 +13,7 @@ import '../domain/entities/astra_message.dart';
 import 'astra_chat_notifier.dart';
 import 'astra_localization.dart';
 import 'companion_journey_screen.dart';
+import '../../wellness/presentation/wellness_log_screen.dart';
 import 'companion_voice_mode_screen.dart';
 import 'daily_checkin_screen.dart';
 import 'voice_controller.dart';
@@ -82,6 +83,14 @@ class AstraChatScreen extends HookWidget {
                 ),
                 icon: Icon(Icons.checklist, color: AppColors.sagePrimary),
                 tooltip: 'Daily check-in',
+              ),
+              IconButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const WellnessLogScreen()),
+                ),
+                icon: Icon(Icons.spa_outlined, color: AppColors.sagePrimary),
+                tooltip: 'Wellness',
               ),
               TextButton(
                 onPressed: () {
