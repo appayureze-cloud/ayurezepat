@@ -13,19 +13,30 @@ import 'package:doctro_patient/FirebaseProviders/chat_provider.dart';
 import 'package:doctro_patient/FirebaseProviders/home_provider.dart';
 import 'package:doctro_patient/FirebaseProviders/setting_provider.dart';
 import 'package:doctro_patient/const/preference.dart';
+import 'package:doctro_patient/theme.dart';
 import 'package:doctro_patient/v2/ui/address/add_address.dart';
 import 'package:doctro_patient/v2/ui/address/address_list.dart';
 import 'package:doctro_patient/v2/ui/authentication/change_password.dart'
     show ChangePassword;
 import 'package:doctro_patient/v2/ui/authentication/forgot_password.dart';
 import 'package:doctro_patient/v2/ui/authentication/login.dart';
+import 'package:doctro_patient/v2/ui/authentication/onboarding_screen.dart';
 import 'package:doctro_patient/v2/ui/authentication/otp_verification.dart';
 import 'package:doctro_patient/v2/ui/authentication/register.dart';
 import 'package:doctro_patient/v2/ui/authentication/splash_screen.dart';
 import 'package:doctro_patient/v2/ui/home/landing_screen.dart';
 import 'package:doctro_patient/v2/ui/medicine/cart.dart';
 import 'package:doctro_patient/v2/ui/medicine/checkout.dart';
-import 'package:doctro_patient/v2/ui/medicine/landing_screen.dart';
+import 'package:doctro_patient/features/cart/presentation/shop_screen.dart';
+import 'package:doctro_patient/features/documents/presentation/documents_screen.dart';
+import 'package:doctro_patient/features/settings/presentation/account_settings_screen.dart';
+import 'package:doctro_patient/features/settings/presentation/help_support_screen.dart';
+import 'package:doctro_patient/features/settings/presentation/language_preferences_screen.dart';
+import 'package:doctro_patient/features/settings/presentation/notification_preferences_screen.dart';
+import 'package:doctro_patient/features/settings/presentation/privacy_data_screen.dart';
+import 'package:doctro_patient/features/prescriptions/presentation/medication_reminders_screen.dart';
+import 'package:doctro_patient/features/settings/presentation/settings_home_screen.dart';
+import 'package:doctro_patient/features/vault/presentation/vault_lock_screen.dart';
 import 'package:doctro_patient/v2/ui/others/blog_list.dart' show BlogsList;
 import 'package:doctro_patient/v2/ui/others/notifications.dart';
 import 'package:doctro_patient/v2/ui/therapy/landing_screen.dart';
@@ -48,7 +59,6 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'Chat/chatPage.dart';
 import 'VideoCall/overlay_handler.dart';
 import 'VideoCall/videoCall.dart';
-import 'const/Palette.dart';
 import 'const/prefConstatnt.dart';
 import 'firebase_options.dart';
 import 'api/retrofit_Api.dart';
@@ -564,88 +574,58 @@ class _MyAppState extends State<MyApp> {
             // },
             debugShowCheckedModeBanner: false,
             initialRoute: "/",
-            theme: ThemeData(
-              useMaterial3: false,
-              primaryColor: Palette.primary,
-              splashColor: Palette.transparent,
-              highlightColor: Palette.transparent,
-              colorScheme: ColorScheme.light(
-                primary: Palette.primary,
-                // 👈 Affects date picker header, selected date, etc.
-                onPrimary: Palette.white,
-                // 👈 Text color on selected header
-                onSurface: Palette.dark_blue, // 👈 Normal text color
-              ),
-              textButtonTheme: TextButtonThemeData(
-                style: TextButton.styleFrom(
-                  foregroundColor:
-                      Palette.primary, // 👈 Affects "Cancel" and "OK" buttons
-                ),
-              ),
+            // Serene Herbalist modern-calm-healthcare theme (lib/theme.dart),
+            // generated from the Google Stitch UI master prompt
+            // (docs/stitch-ui-master-prompt.md). Replaces the old
+            // Palette-driven ThemeData app-wide; screens that reference
+            // Palette.* directly for explicit colors are unaffected by this
+            // swap and can be migrated to AppColors.* incrementally.
+            theme: AppTheme.lightTheme.copyWith(
               tabBarTheme: TabBarThemeData(
-                labelColor: Palette.primary,
-                unselectedLabelColor: Palette.grey,
-                indicator: UnderlineTabIndicator(
-                  borderSide: BorderSide(color: Palette.primary, width: 2),
+                labelColor: AppColors.sagePrimary,
+                unselectedLabelColor: AppColors.slateTextSecondary,
+                indicator: const UnderlineTabIndicator(
+                  borderSide:
+                      BorderSide(color: AppColors.sagePrimary, width: 2),
                 ),
               ),
               textSelectionTheme: TextSelectionThemeData(
-                cursorColor: Palette.primary,
-                selectionColor: Palette.primary.withOpacity(0.4),
-                selectionHandleColor: Palette.primary,
+                cursorColor: AppColors.sagePrimary,
+                selectionColor: AppColors.sagePrimary.withOpacity(0.4),
+                selectionHandleColor: AppColors.sagePrimary,
               ),
-              elevatedButtonTheme: ElevatedButtonThemeData(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Palette.primary,
-                ),
-              ),
-              inputDecorationTheme: InputDecorationTheme(
-                prefixIconColor: Palette.primary,
-                filled: false,
-                suffixIconColor: Palette.primary,
-                iconColor: Palette.primary,
-                hoverColor: Colors.transparent,
-                focusColor: Colors.transparent,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(2.w),
-                  borderSide: BorderSide(color: Palette.primary, width: 1),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(2.w),
-                  borderSide: BorderSide(color: Palette.grey, width: 1),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(2.w),
-                  borderSide: BorderSide(color: Palette.grey, width: 1),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(2.w),
-                  borderSide: BorderSide(color: Palette.red, width: 1),
-                ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(2.w),
-                  borderSide: BorderSide(color: Palette.red, width: 1),
-                ),
-                labelStyle: TextStyle(color: Palette.primary),
-                floatingLabelStyle: TextStyle(color: Palette.primary),
-              ),
-              dialogTheme: DialogThemeData(backgroundColor: Palette.white),
             ),
             routes: {
               '/': (context) => SplashScreen(),
+              'Onboarding': (context) => const OnboardingScreen(),
               'SignUp': (context) => Register(),
               'ForgotPasswordScreen': (context) => ForgotPasswordScreen(),
               'ChangePassword': (context) => ChangePassword(),
               'SignIn': (context) => Login(),
               'PhoneVerification': (context) => OTPVerification(),
               'EditProfile': (context) => EditProfile(),
-              'MedicineHome': (context) => MedicineLandingPage(),
+              // Retargeted to the Astra-native cart feature's product
+              // catalog - the Laravel medicine_home/cart/checkout screens it
+              // used to point to are now unreachable dead code.
+              'MedicineHome': (context) => const ShopScreen(),
               'Blogs': (context) => BlogsList(),
               'AddressList': (context) => AddressList(),
               'Notifications': (context) => Notifications(),
               'WhatsAppOptIn': (context) => const WhatsappOptInScreen(),
               'CaseSummary': (context) => const CaseSummaryScreen(),
               'HealthRecord': (context) => const HealthRecordTimelineScreen(),
+              'Documents': (context) => const DocumentsScreen(),
+              'MedicationReminders': (context) =>
+                  const MedicationRemindersScreen(),
+              'VaultLock': (context) => const VaultLockScreen(),
+              'SettingsHome': (context) => const SettingsHomeScreen(),
+              'SettingsAccount': (context) => const AccountSettingsScreen(),
+              'SettingsNotifications': (context) =>
+                  const NotificationPreferencesScreen(),
+              'SettingsPrivacy': (context) => const PrivacyDataScreen(),
+              'SettingsLanguage': (context) =>
+                  const LanguagePreferencesScreen(),
+              'SettingsSupport': (context) => const HelpSupportScreen(),
 
               'Home': (context) => MainLandingPage(),
               // 'Home22': (context) => MedicineLandingPage(),

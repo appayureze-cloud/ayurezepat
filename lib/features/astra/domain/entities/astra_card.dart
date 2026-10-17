@@ -1,4 +1,4 @@
-import '../../../../model/v2/home_response.dart' show Doctor;
+import '../../../appointments/domain/entities/doctor_summary.dart';
 
 /// The five card kinds the backend contract defines for
 /// `POST /astra/sessions/{id}/messages`. Phase 1 renders [tip], [doctor]
@@ -17,7 +17,7 @@ class TipCard extends AstraCard {
 }
 
 class DoctorRecommendationCard extends AstraCard {
-  final Doctor doctor;
+  final DoctorSummary doctor;
   final String? reason;
 
   const DoctorRecommendationCard({required this.doctor, this.reason});

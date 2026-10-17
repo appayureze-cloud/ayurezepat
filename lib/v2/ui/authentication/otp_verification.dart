@@ -12,7 +12,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../../api/base_model.dart';
 import '../../../api/server_error.dart';
-import '../../../const/Palette.dart';
+import '../../../theme.dart';
 import '../../../model/v2/check_otp_model.dart';
 import '../../../model/v2/resend_otp_model.dart';
 
@@ -49,7 +49,7 @@ class _OTPVerificationState extends State<OTPVerification> {
           inAsyncCall: loader,
           opacity: 0.5,
           progressIndicator: SpinKitFadingCircle(
-            color: Palette.primary,
+            color: AppColors.sagePrimary,
             size: 3.h,
           ),
           child: GestureDetector(
@@ -85,7 +85,7 @@ class _OTPVerificationState extends State<OTPVerification> {
                             submittedPinTheme: PinTheme().copyWith(
                                 textStyle: TextStyle(
                                   fontSize: 16.sp,
-                                  color: Palette.white,
+                                  color: AppColors.creamSurfaceLowest,
                                 ),
                                 constraints: BoxConstraints(
                                   maxHeight: 5.h,
@@ -93,9 +93,10 @@ class _OTPVerificationState extends State<OTPVerification> {
                                 ),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(3.w),
-                                  color: Palette.primary,
+                                  color: AppColors.sagePrimary,
                                   border: Border.all(
-                                    color: Palette.primary.withOpacity(.2),
+                                    color:
+                                        AppColors.sagePrimary.withOpacity(.2),
                                   ),
                                 )),
                             focusedPinTheme: PinTheme().copyWith(
@@ -106,15 +107,16 @@ class _OTPVerificationState extends State<OTPVerification> {
                                 ),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(3.w),
-                                  color: Palette.primary_bg,
+                                  color: AppColors.sagePrimarySubtle,
                                   border: Border.all(
-                                    color: Palette.primary.withOpacity(.2),
+                                    color:
+                                        AppColors.sagePrimary.withOpacity(.2),
                                   ),
                                 )),
                             followingPinTheme: PinTheme().copyWith(
                                 textStyle: TextStyle(
                                   fontSize: 16.sp,
-                                  color: Palette.white,
+                                  color: AppColors.creamSurfaceLowest,
                                 ),
                                 constraints: BoxConstraints(
                                   maxHeight: 5.h,
@@ -122,9 +124,10 @@ class _OTPVerificationState extends State<OTPVerification> {
                                 ),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(3.w),
-                                  color: Palette.primary,
+                                  color: AppColors.sagePrimary,
                                   border: Border.all(
-                                    color: Palette.tealAccent.withOpacity(.2),
+                                    color:
+                                        AppColors.sagePrimary.withOpacity(.2),
                                   ),
                                 )),
                           ),
@@ -139,7 +142,7 @@ class _OTPVerificationState extends State<OTPVerification> {
                             "00:${value.toInt()}",
                             style: TextStyle(
                               fontSize: 15.sp,
-                              color: Palette.grey,
+                              color: AppColors.slateTextMuted,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -152,7 +155,7 @@ class _OTPVerificationState extends State<OTPVerification> {
                             "Didn't received verification code?",
                             style: TextStyle(
                               fontSize: 15.sp,
-                              color: Palette.dark_blue,
+                              color: AppColors.slateTextPrimary,
                             ),
                           ),
                           SizedBox(height: 1.h),
@@ -165,7 +168,7 @@ class _OTPVerificationState extends State<OTPVerification> {
                                 child: Text(
                                   "Resend new OTP",
                                   style: TextStyle(
-                                    color: Palette.primary,
+                                    color: AppColors.sagePrimary,
                                     fontWeight: FontWeight.w500,
                                     fontSize: 16.sp,
                                   ),

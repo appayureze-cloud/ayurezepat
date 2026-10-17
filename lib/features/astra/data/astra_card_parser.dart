@@ -1,4 +1,4 @@
-import '../../../model/v2/home_response.dart' show Doctor;
+import '../../appointments/domain/entities/doctor_summary.dart';
 import '../domain/entities/astra_card.dart';
 
 /// Parses one card from the `cards[]` array documented in the Astra
@@ -15,7 +15,7 @@ AstraCard? parseAstraCard(Map<String, dynamic> json) {
       final doctorJson = json['doctor'] as Map<String, dynamic>?;
       if (doctorJson == null) return null;
       return DoctorRecommendationCard(
-        doctor: Doctor.fromJson(doctorJson),
+        doctor: DoctorSummary.fromJson(doctorJson),
         reason: json['reason'] as String?,
       );
     case 'order':

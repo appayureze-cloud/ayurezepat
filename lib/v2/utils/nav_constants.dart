@@ -1,3 +1,7 @@
+/// Bottom-nav tab index for Astra on MainLandingPage
+/// (lib/v2/ui/home/landing_screen.dart).
+const int astraTabIndex = 0;
+
 /// Bottom-nav tab index for Doctors on MainLandingPage
 /// (lib/v2/ui/home/landing_screen.dart), shared with call sites elsewhere
 /// that deep link into it (e.g. tapping a category card from Home) via

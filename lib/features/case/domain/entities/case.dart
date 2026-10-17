@@ -2,14 +2,20 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'case.g.dart';
 
+// Values matched to Astra's real wire format (app/companion_system.py's
+// CaseStatus enum: open/in_treatment/follow_up/resolved/closed) - the
+// original 'treating'/'following_up' values didn't match what Astra
+// actually sends, which would have silently fallen through json_serializable's
+// unknown-enum-value handling. 'consulting' has no Astra equivalent and is
+// kept only because nothing currently depends on removing it.
 enum CaseStatus {
   @JsonValue('open')
   open,
   @JsonValue('consulting')
   consulting,
-  @JsonValue('treating')
+  @JsonValue('in_treatment')
   treating,
-  @JsonValue('following_up')
+  @JsonValue('follow_up')
   followingUp,
   @JsonValue('resolved')
   resolved,

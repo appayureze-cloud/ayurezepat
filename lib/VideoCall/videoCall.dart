@@ -8,7 +8,7 @@ import 'package:doctro_patient/api/base_model.dart';
 import 'package:doctro_patient/api/network_api.dart';
 import 'package:doctro_patient/api/retrofit_Api.dart';
 import 'package:doctro_patient/api/server_error.dart';
-import 'package:doctro_patient/const/Palette.dart';
+import 'package:doctro_patient/theme.dart';
 import 'package:doctro_patient/const/prefConstatnt.dart';
 import 'package:doctro_patient/const/preference.dart';
 import 'package:doctro_patient/features/astra/data/astra_gateway_auth.dart';
@@ -27,7 +27,13 @@ class VideoCall extends StatefulWidget {
   final int? doctorId;
   final String? flag;
 
-  VideoCall({this.doctorId, this.flag});
+  /// Astra's doctor_id (e.g. "DOC-7"), not a Laravel numeric id - set this
+  /// instead of [doctorId] when starting a call for an Astra-backed
+  /// appointment (see features/appointments). Purely additive: every
+  /// existing call site keeps using [doctorId] unchanged.
+  final String? astraDoctorId;
+
+  VideoCall({this.doctorId, this.flag, this.astraDoctorId});
 
   @override
   _VideoCallState createState() => _VideoCallState();
@@ -81,12 +87,16 @@ class _VideoCallState extends State<VideoCall> {
                   onPressed: _onToggleMute,
                   child: Icon(
                     muted ? Icons.mic_off : Icons.mic,
-                    color: muted ? Palette.white : Palette.blue,
+                    color: muted
+                        ? AppColors.creamSurfaceLowest
+                        : AppColors.sagePrimary,
                     size: overlayProvider.inPipMode == true ? 12.0 : 15.0,
                   ),
                   shape: const CircleBorder(),
                   elevation: 2.0,
-                  fillColor: muted ? Palette.blue : Palette.white,
+                  fillColor: muted
+                      ? AppColors.sagePrimary
+                      : AppColors.creamSurfaceLowest,
                   padding: EdgeInsets.all(
                       overlayProvider.inPipMode == true ? 5.0 : 12.0),
                 ),
@@ -96,12 +106,12 @@ class _VideoCallState extends State<VideoCall> {
                   onPressed: () => _onCallEnd(context),
                   child: Icon(
                     Icons.call_end,
-                    color: Palette.white,
+                    color: AppColors.creamSurfaceLowest,
                     size: overlayProvider.inPipMode == true ? 15.0 : 30.0,
                   ),
                   shape: const CircleBorder(),
                   elevation: 2.0,
-                  fillColor: Palette.red,
+                  fillColor: AppColors.clayAlert,
                   padding: EdgeInsets.all(
                       overlayProvider.inPipMode == true ? 5.0 : 15.0),
                 ),
@@ -111,12 +121,12 @@ class _VideoCallState extends State<VideoCall> {
                   onPressed: _onSwitchCamera,
                   child: Icon(
                     Icons.switch_camera,
-                    color: Palette.blue,
+                    color: AppColors.sagePrimary,
                     size: overlayProvider.inPipMode == true ? 12.0 : 15.0,
                   ),
                   shape: const CircleBorder(),
                   elevation: 2.0,
-                  fillColor: Palette.white,
+                  fillColor: AppColors.creamSurfaceLowest,
                   padding: EdgeInsets.all(
                       overlayProvider.inPipMode == true ? 5.0 : 12.0),
                 ),
@@ -339,17 +349,17 @@ class _VideoCallState extends State<VideoCall> {
       if (widget.flag == "InComming") {
         return ScalingText(
           'Connecting...',
-          style: TextStyle(fontSize: 16, color: Palette.dark_blue),
+          style: TextStyle(fontSize: 16, color: AppColors.slateTextPrimary),
         );
       } else if (widget.flag == "Cut") {
         return ScalingText(
           'Call Ended...',
-          style: TextStyle(fontSize: 16, color: Palette.dark_blue),
+          style: TextStyle(fontSize: 16, color: AppColors.slateTextPrimary),
         );
       } else {
         return ScalingText(
           'Ringing...',
-          style: TextStyle(fontSize: 16, color: Palette.dark_blue),
+          style: TextStyle(fontSize: 16, color: AppColors.slateTextPrimary),
         );
       }
     }
@@ -372,7 +382,8 @@ class _VideoCallState extends State<VideoCall> {
         log("Could not fetch video config, falling back to cached appId: $e");
       }
 
-      final result = await repository.generateToken(toId: '${widget.doctorId}');
+      final toId = widget.astraDoctorId ?? '${widget.doctorId}';
+      final result = await repository.generateToken(toId: toId);
       channelName = result.channelName;
       token = result.token;
       log("channelName = $channelName, token = $token");
@@ -384,7 +395,7 @@ class _VideoCallState extends State<VideoCall> {
       if (patientId != null && patientId.isNotEmpty) {
         unawaited(repository
             .addCallHistory(
-          doctorId: '${widget.doctorId}',
+          doctorId: toId,
           patientId: patientId,
           channelName: channelName!,
           startTime: DateTime.now(),

@@ -8,7 +8,11 @@ sealed class HealthRecordEntry {
 class EncounterEntry extends HealthRecordEntry {
   final String doctorName;
   final String? specialty;
-  final int appointmentId;
+  // Astra's case id (a UUID), not a Laravel appointment row id - the real
+  // backend for this timeline is Astra's own case data, which has no
+  // concept of a Laravel appointment at all. Kept as `appointmentId` to
+  // match the documented contract's field name.
+  final String appointmentId;
 
   const EncounterEntry({
     required DateTime at,
@@ -19,8 +23,10 @@ class EncounterEntry extends HealthRecordEntry {
 }
 
 class PrescriptionEntry extends HealthRecordEntry {
-  final int prescriptionId;
-  final int appointmentId;
+  // Astra's prescription id (e.g. "PRES-..."), not a Laravel row id - see
+  // the note on EncounterEntry.appointmentId above.
+  final String prescriptionId;
+  final String appointmentId;
   final String doctorName;
 
   const PrescriptionEntry({

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:doctro_patient/model/v2/home_response.dart' as hr;
@@ -21,12 +23,16 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../api/network_api.dart';
 import '../../../api/retrofit_Api.dart';
-import '../../../const/Palette.dart';
 import '../../../const/prefConstatnt.dart';
 import '../../../const/preference.dart';
+import '../../../features/appointments/domain/entities/doctor_summary.dart';
+import '../../../features/appointments/presentation/appointment_service.dart';
 import '../../../model/v2/blog.dart';
 import '../../../model/v2/user_detail_model.dart';
+import '../../../theme.dart';
 import '../../utils/logger.dart';
+import '../../../features/search/presentation/global_search_screen.dart';
+import '../others/notifications.dart';
 import '../widgets/coming_soon.dart';
 import '../widgets/popular_doctor_card.dart';
 
@@ -39,15 +45,25 @@ class MainHome extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _showSearch = useState(false);
     final blogs = useState<List<Blogs>>([]);
     final categories = useState<List<hr.DoctorCategory>>([]);
-    final doctors = useState<List<hr.Doctor>>([]);
+    final doctors = useState<List<DoctorSummary>>([]);
     final banners = useState<List<hr.Banner>>([]);
     final loading = useState(true);
     final _isRequestingPermission = useState(false);
     final userDetails = useState<UserDetail?>(null);
     final place = useState<Placemark?>(null);
+
+    Future<void> loadDoctors() async {
+      // Sourced from the real Astra/Supabase doctors table, not the Laravel
+      // home response - Laravel doctor ids and Astra doctor_ids are not the
+      // same identity space, so this can't come from appointmentHomeData().
+      try {
+        doctors.value = await AppointmentService().listDoctors();
+      } catch (e) {
+        logger.e('Error fetching doctors from Astra: $e');
+      }
+    }
 
     Future<void> callApiForUserDetail() async {
       try {
@@ -125,7 +141,6 @@ class MainHome extends HookWidget {
         if (response.success == true) {
           blogs.value = response.data?.blogs ?? [];
           categories.value = response.data?.categories ?? [];
-          doctors.value = response.data?.doctors ?? [];
           banners.value = response.data?.banner ?? [];
 
           if (response.data?.settings != null) {
@@ -149,6 +164,7 @@ class MainHome extends HookWidget {
           }
         }
         await callApiForUserDetail();
+        unawaited(loadDoctors());
         loading.value = false;
         landingLoader.value = false;
       } catch (e, stacktrace) {
@@ -167,7 +183,7 @@ class MainHome extends HookWidget {
           locationSnapshot.connectionState == ConnectionState.waiting,
       opacity: 0.5,
       progressIndicator: SpinKitFadingCircle(
-        color: Palette.primary,
+        color: AppColors.sagePrimary,
         size: 3.h,
       ),
       child: RefreshIndicator(
@@ -179,161 +195,169 @@ class MainHome extends HookWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      height: _showSearch.value ? 20.h : 16.5.h,
-                      child: Stack(
+                    // Greeting header + notification bell (Stitch: Top App
+                    // Bar + "Good morning" headline, ayureze_home/code.html).
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            height: _showSearch.value ? 18.h : 13.5.h,
-                            color: Palette.primary,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 3.w, vertical: 1.h),
+                          Expanded(
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                AnimatedContainer(
-                                    duration: Duration(milliseconds: 300),
-                                    height: 6.h),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              '${userDetails.value?.name ?? '-'}',
-                                              style: TextStyle(
-                                                fontSize: 18.sp,
-                                                color: Palette.white,
-                                                fontWeight: FontWeight.normal,
-                                              ),
-                                            ),
-                                            Icon(
-                                              Icons.keyboard_arrow_down_sharp,
-                                              size: 21.sp,
-                                              color: Palette.white,
-                                            ),
-                                          ],
-                                        ),
-                                        Text(
-                                          '${place.value?.locality ?? '-'} ${place.value?.administrativeArea ?? ''} ${place.value?.country ?? ''}',
-                                          style: TextStyle(
-                                            fontSize: 13.sp,
-                                            color: Palette.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            _showSearch.value =
-                                                !_showSearch.value;
-                                          },
-                                          child: Container(
-                                            padding: EdgeInsets.all(5.sp),
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: Palette
-                                                    .white, // Border color
-                                                width: 0.5, // Border width
-                                              ),
-                                            ),
-                                            child: Icon(
-                                              !_showSearch.value
-                                                  ? Icons.search
-                                                  : Icons.search_off_outlined,
-                                              size: 18.sp,
-                                              color: Palette.white,
-                                            ),
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            Navigator.pushNamed(
-                                                context, 'MedicineHome');
-                                          },
-                                          child: Badge(
-                                            child: Container(
-                                              margin:
-                                                  EdgeInsets.only(left: 15.sp),
-                                              padding: EdgeInsets.all(5.sp),
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                border: Border.all(
-                                                  color: Palette
-                                                      .white, // Border color
-                                                  width: 0.5, // Border width
-                                                ),
-                                              ),
-                                              child: Icon(
-                                                Icons.shopping_cart_outlined,
-                                                size: 18.sp,
-                                                color: Palette.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                Text(
+                                  'Hello, ${userDetails.value?.name ?? 'there'}',
+                                  style:
+                                      Theme.of(context).textTheme.displayMedium,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${place.value?.locality ?? ''} ${place.value?.administrativeArea ?? ''}'
+                                          .trim()
+                                          .isEmpty
+                                      ? 'How is your care today?'
+                                      : '${place.value?.locality} ${place.value?.administrativeArea}',
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ],
                             ),
                           ),
-                          AnimatedScale(
-                            duration: const Duration(milliseconds: 200),
-                            scale: _showSearch.value ? 1 : 0,
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 2.w, vertical: 0.5.h),
-                                child: TextField(
-                                  textCapitalization: TextCapitalization.words,
-                                  textAlignVertical: TextAlignVertical.center,
-                                  onSubmitted: (text) {
-                                    if (text.isNotEmpty) {
-                                      Navigator.pushReplacementNamed(
-                                          context, 'Home',
-                                          arguments: [doctorsTabIndex, text]);
-                                    }
-                                  },
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Palette.white,
-                                    constraints: BoxConstraints(
-                                      maxHeight: 5.5.h,
-                                      maxWidth: 80.w,
-                                    ),
-                                    hintText: "Search Doctor",
-                                    hintStyle: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Palette.grey,
-                                    ),
-                                    prefixIcon: Padding(
-                                      padding: const EdgeInsets.all(12),
-                                      child: Icon(
-                                        Icons.search_outlined,
-                                        size: 17.sp,
-                                      ),
-                                    ),
-                                    border: InputBorder.none,
-                                  ),
-                                ),
-                              ),
-                            ),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          const GlobalSearchScreen()));
+                            },
+                            icon: const Icon(Icons.search,
+                                color: AppColors.sagePrimary),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => Notifications()));
+                            },
+                            icon: const Icon(Icons.notifications_none,
+                                color: AppColors.sagePrimary),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, 'MedicineHome');
+                            },
+                            icon: const Icon(Icons.shopping_cart_outlined,
+                                color: AppColors.sagePrimary),
                           ),
                         ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                      child: TextField(
+                        textCapitalization: TextCapitalization.words,
+                        onSubmitted: (text) {
+                          if (text.isNotEmpty) {
+                            Navigator.pushReplacementNamed(context, 'Home',
+                                arguments: [doctorsTabIndex, text]);
+                          }
+                        },
+                        decoration: const InputDecoration(
+                          hintText: 'Search doctors, medicines...',
+                          prefixIcon: Icon(Icons.search,
+                              color: AppColors.slateTextMuted),
+                        ),
+                      ),
+                    ),
+                    // Hero "Talk to Astra" card
+                    // (ayureze_home/code.html: "AI Ayurvedic Companion").
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                      child: GestureDetector(
+                        onTap: () => Navigator.pushReplacementNamed(
+                            context, 'Home',
+                            arguments: [astraTabIndex]),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(22),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.sagePrimaryContainer,
+                                AppColors.sagePrimary,
+                              ],
+                            ),
+                            borderRadius: AppRadius.roundedLg,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.15),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.psychology,
+                                        size: 18, color: Colors.white),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  const Text(
+                                    'AI AYURVEDIC COMPANION',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Text('Talk to Astra',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineLarge
+                                      ?.copyWith(color: Colors.white)),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Describe your symptoms or ask about remedies and daily rituals.',
+                                style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 13),
+                              ),
+                              const SizedBox(height: 14),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 18, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: AppColors.creamSurfaceLowest,
+                                  borderRadius: AppRadius.roundedPill,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: const [
+                                    Text('Start conversation',
+                                        style: TextStyle(
+                                            color: AppColors.sagePrimary,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 13)),
+                                    SizedBox(width: 6),
+                                    Icon(Icons.arrow_forward,
+                                        size: 16, color: AppColors.sagePrimary),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     Padding(
@@ -343,11 +367,11 @@ class MainHome extends HookWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (_showSearch.value) SizedBox(height: 1.h),
+                          SizedBox(height: 3.h),
                           Text(
                             'What are you looking for',
                             style: TextStyle(
-                              color: Palette.grey,
+                              color: AppColors.slateTextMuted,
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                             ),
@@ -412,7 +436,7 @@ class MainHome extends HookWidget {
                                                 decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
                                                     color: i == 0
-                                                        ? Palette.primary
+                                                        ? AppColors.sagePrimary
                                                         : i == 1
                                                             ? Color(0xffE2B5B5)
                                                             : i == 2
@@ -421,20 +445,22 @@ class MainHome extends HookWidget {
                                                                 : i == 3
                                                                     ? Color(
                                                                         0xffE7A03D)
-                                                                    : Palette
-                                                                        .primary),
+                                                                    : AppColors
+                                                                        .sagePrimary),
                                                 child: SvgPicture.asset(
                                                   'assets/icons/${i == 0 ? 'doctor' : i == 1 ? 'lab_test' : i == 2 ? 'therapy' : i == 3 ? 'medicine' : 'medical_tourism'}.svg',
                                                   height: 11.w,
                                                   width: 11.w,
-                                                  color: Palette.white,
+                                                  color: AppColors
+                                                      .creamSurfaceLowest,
                                                 ),
                                               ),
                                               SizedBox(height: 10.sp),
                                               Text(
                                                 '${i == 0 ? 'Doctor' : i == 1 ? 'Lab Test' : i == 2 ? 'Therapy' : i == 3 ? 'Medicine' : 'Medical Tourism'}',
                                                 style: TextStyle(
-                                                  color: Palette.grey,
+                                                  color:
+                                                      AppColors.slateTextMuted,
                                                   fontSize: 14.sp,
                                                 ),
                                                 textAlign: TextAlign.center,
@@ -480,7 +506,7 @@ class MainHome extends HookWidget {
                               Text(
                                 'Browse by category',
                                 style: TextStyle(
-                                  color: Palette.grey,
+                                  color: AppColors.slateTextMuted,
                                   fontSize: 16.sp,
                                 ),
                               ),
@@ -495,7 +521,7 @@ class MainHome extends HookWidget {
                                 child: Text(
                                   'See All',
                                   style: TextStyle(
-                                    color: Palette.primary,
+                                    color: AppColors.sagePrimary,
                                     fontSize: 15.sp,
                                   ),
                                 ),
@@ -521,7 +547,7 @@ class MainHome extends HookWidget {
                               Text(
                                 'Popular Doctors',
                                 style: TextStyle(
-                                  color: Palette.grey,
+                                  color: AppColors.slateTextMuted,
                                   fontSize: 16.sp,
                                 ),
                               ),
@@ -534,7 +560,7 @@ class MainHome extends HookWidget {
                                 child: Text(
                                   'See All',
                                   style: TextStyle(
-                                    color: Palette.primary,
+                                    color: AppColors.sagePrimary,
                                     fontSize: 15.sp,
                                   ),
                                 ),
@@ -561,7 +587,7 @@ class MainHome extends HookWidget {
                               Text(
                                 'Blogs',
                                 style: TextStyle(
-                                  color: Palette.black,
+                                  color: AppColors.slateTextPrimary,
                                   fontSize: 17.sp,
                                 ),
                               ),
@@ -575,7 +601,7 @@ class MainHome extends HookWidget {
                                 child: Text(
                                   'View All',
                                   style: TextStyle(
-                                    color: Palette.primary,
+                                    color: AppColors.sagePrimary,
                                     fontSize: 16.sp,
                                   ),
                                 ),
@@ -606,7 +632,7 @@ class MainHome extends HookWidget {
                                             );
                                           },
                                           child: Card(
-                                            color: Palette.white,
+                                            color: AppColors.creamSurfaceLowest,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(10.sp),
@@ -631,7 +657,8 @@ class MainHome extends HookWidget {
                                                       placeholder: (context,
                                                               url) =>
                                                           SpinKitFadingCircle(
-                                                        color: Palette.primary,
+                                                        color: AppColors
+                                                            .sagePrimary,
                                                       ),
                                                       errorWidget: (context,
                                                               url, error) =>
@@ -662,8 +689,8 @@ class MainHome extends HookWidget {
                                                               .ellipsis,
                                                           style: TextStyle(
                                                             fontSize: 16.sp,
-                                                            color: Palette
-                                                                .dark_blue,
+                                                            color: AppColors
+                                                                .slateTextPrimary,
                                                             fontWeight:
                                                                 FontWeight.bold,
                                                           ),
@@ -677,8 +704,8 @@ class MainHome extends HookWidget {
                                                               .ellipsis,
                                                           style: TextStyle(
                                                             fontSize: 13.sp,
-                                                            color: Palette
-                                                                .dark_blue,
+                                                            color: AppColors
+                                                                .slateTextPrimary,
                                                           ),
                                                         ),
                                                       ],

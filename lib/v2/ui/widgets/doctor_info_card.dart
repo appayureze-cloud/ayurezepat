@@ -1,165 +1,158 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:doctro_patient/const/prefConstatnt.dart';
-import 'package:doctro_patient/const/preference.dart';
-import 'package:doctro_patient/model/v2/home_response.dart';
-import 'package:doctro_patient/v2/ui/appointment/make_appointment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../const/Palette.dart';
-import 'button_v2.dart';
+import '../../../features/appointments/domain/entities/doctor_summary.dart';
+import '../../../features/appointments/presentation/doctor_booking_screen.dart';
+import '../../../features/appointments/presentation/doctor_full_profile_screen.dart';
+import '../../../theme.dart';
 
+/// Matches the Stitch "Doctor Recommendation Card" bento style
+/// (ayureze_astra_ai_chat/code.html) - used both inline in the Astra chat
+/// and anywhere else a compact doctor card is needed.
 class DoctorInfoCard_v2 extends HookWidget {
-  final Doctor doctor;
+  final DoctorSummary doctor;
 
-  const DoctorInfoCard_v2({required this.doctor, super.key});
+  /// Shows the "Recommended doctor" pill - only when Astra itself is the
+  /// one suggesting this doctor (see DoctorRecommendationCardWidget),
+  /// never in a plain directory listing.
+  final bool showRecommendedBadge;
+
+  /// Called with the booking result (true if booked) after the push to
+  /// DoctorBookingScreen returns, so callers like DoctorListScreen can
+  /// bubble that up to whoever's waiting to refresh (e.g.
+  /// MyAppointmentsScreen's FAB flow).
+  final void Function(bool booked)? onBookingResult;
+
+  const DoctorInfoCard_v2({
+    required this.doctor,
+    this.showRecommendedBadge = false,
+    this.onBookingResult,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: Palette.grey.withValues(alpha: .5),
-        ),
-        borderRadius: BorderRadius.circular(2.w),
+        color: AppColors.creamSurfaceLowest,
+        borderRadius: AppRadius.roundedLg,
+        border: Border.all(color: AppColors.slateBorder),
+        boxShadow: AppShadows.subtleCard,
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(left: 2.w, top: 1.5.h, right: 2.w),
-                child: Badge(
-                  backgroundColor: Palette.rating,
-                  smallSize: 1.h,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(2.w),
-                    child: CachedNetworkImage(
-                      height: 15.w,
-                      width: 15.w,
-                      alignment: Alignment.center,
-                      imageUrl: doctor.fullImage ?? '',
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => SpinKitFadingCircle(
-                        color: Palette.primary,
+          if (showRecommendedBadge)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: AppColors.creamSurfaceLow,
+                    borderRadius: AppRadius.roundedPill,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.verified,
+                          size: 14, color: AppColors.sagePrimary),
+                      SizedBox(width: 6),
+                      Text(
+                        'Recommended doctor',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.sagePrimary,
+                        ),
                       ),
-                      errorWidget: (context, url, error) => Image.asset(
-                        "assets/images/no_image.jpg",
-                        fit: BoxFit.fitHeight,
-                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          if (showRecommendedBadge) const SizedBox(height: 12),
+          InkWell(
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => DoctorFullProfileScreen(doctor: doctor))),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ClipOval(
+                  child: CachedNetworkImage(
+                    height: 56,
+                    width: 56,
+                    fit: BoxFit.cover,
+                    imageUrl: doctor.photoUrl ?? '',
+                    placeholder: (context, url) => Container(
+                      height: 56,
+                      width: 56,
+                      color: AppColors.creamSurfaceLow,
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      height: 56,
+                      width: 56,
+                      color: AppColors.sagePrimaryContainer,
+                      child: const Icon(Icons.person,
+                          color: AppColors.sagePrimary),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(width: 3.w),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(right: 2.w, top: 1.5.h),
+                const SizedBox(width: 12),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Dr. ${doctor.name}',
-                        style: TextStyle(
-                          color: Palette.black,
-                          fontSize: 16.sp,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      if ((doctor.specialization ?? '').isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            doctor.specialization!,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 0.5.h),
-                      Text(
-                        '${doctor.category?.name}',
-                        style: TextStyle(
-                          color: Palette.grey,
-                          fontSize: 14.5.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(height: 0.5.h),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.work,
-                            color: Palette.primary,
-                            size: 4.w,
-                          ),
-                          SizedBox(width: 1.w),
-                          Text(
-                            '${doctor.experience} years',
-                            style: TextStyle(
-                              color: Palette.grey,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                          SizedBox(width: 3.w),
-                          Icon(
-                            Icons.star,
-                            color: Palette.rating,
-                            size: 5.w,
-                          ),
-                          SizedBox(width: 0.5.w),
-                          Text(
-                            '${doctor.rate}',
-                            style: TextStyle(
-                              color: Palette.grey,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 0.5.h),
-          Divider(),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 3.w),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Starting from',
-                      style: TextStyle(
-                        color: Palette.grey,
-                        fontSize: 14.sp,
-                      ),
-                    ),
-                    SizedBox(height: 0.5.h),
-                    Text(
-                      '${SharedPreferenceHelper.getString(Preferences.currency_symbol)} ${doctor.appointmentFees} / ${doctor.timeslot == 'other' ? doctor.customTimeslot : doctor.timeslot} mins',
-                      style: TextStyle(
-                        color: Palette.black,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                ButtonV2(
-                  width: 25.w,
-                  label: 'Book',
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => MakeAppointment(doctor: doctor)));
-                  },
                 ),
               ],
             ),
           ),
-          SizedBox(height: 0.5.h),
+          const SizedBox(height: 14),
+          Container(
+            decoration: const BoxDecoration(
+              border: Border(
+                top: BorderSide(color: AppColors.slateBorderSubtle),
+              ),
+            ),
+            padding: const EdgeInsets.only(top: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final booked = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                DoctorBookingScreen(doctor: doctor)));
+                    onBookingResult?.call(booked == true);
+                  },
+                  icon: const Icon(Icons.calendar_month, size: 18),
+                  label: const Text('Book appointment'),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -16,7 +16,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../../api/network_api.dart';
 import '../../../api/retrofit_Api.dart';
-import '../../../const/Palette.dart';
+import '../../../theme.dart';
 import '../../../model/v2/blog.dart';
 import '../../utils/logger.dart';
 import '../widgets/header.dart';
@@ -73,7 +73,7 @@ class TherapyHome extends HookWidget {
       inAsyncCall: loading.value,
       opacity: 0.5,
       progressIndicator: SpinKitFadingCircle(
-        color: Palette.primary,
+        color: AppColors.sagePrimary,
         size: 3.h,
       ),
       child: SingleChildScrollView(
@@ -89,7 +89,7 @@ class TherapyHome extends HookWidget {
                   child: Icon(
                     Icons.search,
                     size: 18.sp,
-                    color: Palette.black,
+                    color: AppColors.slateTextPrimary,
                   ),
                 ),
               ],
@@ -129,7 +129,7 @@ class TherapyHome extends HookWidget {
                   //     Text(
                   //       'Upcoming Bookings',
                   //       style: TextStyle(
-                  //         color: Palette.black,
+                  //         color: AppColors.slateTextPrimary,
                   //         fontSize: 17.sp,
                   //       ),
                   //     ),
@@ -142,7 +142,7 @@ class TherapyHome extends HookWidget {
                   //       child: Text(
                   //         'View All',
                   //         style: TextStyle(
-                  //           color: Palette.primary,
+                  //           color: AppColors.sagePrimary,
                   //           fontSize: 16.sp,
                   //         ),
                   //       ),
@@ -158,7 +158,7 @@ class TherapyHome extends HookWidget {
                       Text(
                         'Our Partnered Centers',
                         style: TextStyle(
-                          color: Palette.black,
+                          color: AppColors.slateTextPrimary,
                           fontSize: 17.sp,
                         ),
                       ),
@@ -174,7 +174,7 @@ class TherapyHome extends HookWidget {
                         child: Text(
                           'View All',
                           style: TextStyle(
-                            color: Palette.primary,
+                            color: AppColors.sagePrimary,
                             fontSize: 16.sp,
                           ),
                         ),
@@ -192,7 +192,7 @@ class TherapyHome extends HookWidget {
                       Text(
                         'Treatments',
                         style: TextStyle(
-                          color: Palette.black,
+                          color: AppColors.slateTextPrimary,
                           fontSize: 17.sp,
                         ),
                       ),
@@ -206,7 +206,7 @@ class TherapyHome extends HookWidget {
                         child: Text(
                           'View All',
                           style: TextStyle(
-                            color: Palette.primary,
+                            color: AppColors.sagePrimary,
                             fontSize: 16.sp,
                           ),
                         ),
@@ -232,7 +232,7 @@ class TherapyHome extends HookWidget {
                       Text(
                         'Packages',
                         style: TextStyle(
-                          color: Palette.black,
+                          color: AppColors.slateTextPrimary,
                           fontSize: 17.sp,
                         ),
                       ),
@@ -246,7 +246,7 @@ class TherapyHome extends HookWidget {
                         child: Text(
                           'View All',
                           style: TextStyle(
-                            color: Palette.primary,
+                            color: AppColors.sagePrimary,
                             fontSize: 16.sp,
                           ),
                         ),
@@ -276,7 +276,7 @@ class TherapyHome extends HookWidget {
                       Text(
                         'Blogs',
                         style: TextStyle(
-                          color: Palette.black,
+                          color: AppColors.slateTextPrimary,
                           fontSize: 17.sp,
                         ),
                       ),
@@ -288,7 +288,7 @@ class TherapyHome extends HookWidget {
                         child: Text(
                           'View All',
                           style: TextStyle(
-                            color: Palette.primary,
+                            color: AppColors.sagePrimary,
                             fontSize: 16.sp,
                           ),
                         ),
@@ -318,7 +318,7 @@ class TherapyHome extends HookWidget {
                                     );
                                   },
                                   child: Card(
-                                    color: Palette.white,
+                                    color: AppColors.creamSurfaceLowest,
                                     shape: RoundedRectangleBorder(
                                       borderRadius:
                                           BorderRadius.circular(10.sp),
@@ -341,7 +341,7 @@ class TherapyHome extends HookWidget {
                                               fit: BoxFit.cover,
                                               placeholder: (context, url) =>
                                                   SpinKitFadingCircle(
-                                                color: Palette.primary,
+                                                color: AppColors.sagePrimary,
                                               ),
                                               errorWidget:
                                                   (context, url, error) =>
@@ -369,7 +369,8 @@ class TherapyHome extends HookWidget {
                                                       TextOverflow.ellipsis,
                                                   style: TextStyle(
                                                     fontSize: 16.sp,
-                                                    color: Palette.dark_blue,
+                                                    color: AppColors
+                                                        .slateTextPrimary,
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
@@ -380,7 +381,8 @@ class TherapyHome extends HookWidget {
                                                       TextOverflow.ellipsis,
                                                   style: TextStyle(
                                                     fontSize: 13.sp,
-                                                    color: Palette.dark_blue,
+                                                    color: AppColors
+                                                        .slateTextPrimary,
                                                   ),
                                                 ),
                                               ],

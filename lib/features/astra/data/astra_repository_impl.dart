@@ -13,6 +13,7 @@ import '../domain/entities/care_plan.dart';
 import '../domain/entities/checkin_result.dart';
 import '../domain/entities/medicine_info.dart';
 import '../domain/entities/triage_result.dart';
+import 'astra_card_parser.dart';
 import 'astra_dtos.dart';
 import 'astra_gateway_apis.dart';
 import 'astra_gateway_client.dart';
@@ -112,6 +113,26 @@ class AstraRepositoryImpl implements AstraRepository {
       logger.d('Astra companion intervention_type: ${parsed.interventionType}');
     }
     yield AstraTextChunk(parsed.response);
+
+    // The backend's /api/companion/chat now attaches an optional
+    // `metadata.cards[]` (see app/companion_suggestions.py) - a rule-based
+    // first pass at a tip or doctor suggestion for this turn, in the same
+    // `cards[]` shape astra_card_parser.dart already parses (previously
+    // only reachable via MockAstraRepository). Read straight off the raw
+    // response rather than CompanionChatResponse, which doesn't model
+    // `metadata` - avoids a codegen rebuild for one optional field.
+    final metadata = response.data is Map
+        ? (response.data as Map)['metadata'] as Map<String, dynamic>?
+        : null;
+    final cardsJson = metadata?['cards'] as List<dynamic>?;
+    if (cardsJson != null) {
+      for (final cardJson in cardsJson) {
+        if (cardJson is Map<String, dynamic>) {
+          final card = parseAstraCard(cardJson);
+          if (card != null) yield AstraCardEvent(card);
+        }
+      }
+    }
   }
 
   @override

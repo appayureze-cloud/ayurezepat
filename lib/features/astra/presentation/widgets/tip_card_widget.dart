@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../../const/Palette.dart';
+import '../../../../theme.dart';
+import '../../../../v2/ui/widgets/content_origin_badge.dart';
 import '../../domain/entities/astra_card.dart';
 
 class TipCardWidget extends StatelessWidget {
@@ -13,35 +13,33 @@ class TipCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(vertical: 0.5.h),
-      padding: EdgeInsets.all(3.w),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Palette.green_bg,
-        borderRadius: BorderRadius.circular(2.w),
+        color: AppColors.sagePrimarySubtle,
+        borderRadius: AppRadius.roundedMd,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.lightbulb_outline, color: Palette.green, size: 4.w),
-              SizedBox(width: 2.w),
+              const Icon(Icons.spa_outlined,
+                  color: AppColors.sagePrimary, size: 18),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   card.title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14.sp,
-                    color: Palette.black,
-                  ),
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
+              const ContentOriginBadge(origin: ContentOrigin.aiSuggested),
             ],
           ),
-          SizedBox(height: 1.h),
+          const SizedBox(height: 6),
           Text(
             card.body,
-            style: TextStyle(fontSize: 13.sp, color: Palette.dark_grey1),
+            style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
       ),

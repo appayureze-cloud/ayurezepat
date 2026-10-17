@@ -18,6 +18,14 @@
 /// product). This has NOT had a clinician's sign-off. Get one before real
 /// patients rely on it, and route any changes they ask for through this
 /// file.
+///
+/// Each category now also carries common Hindi phrasings (the chat itself
+/// supports Hindi via AstraLocalization, so English-only detection was a
+/// real coverage gap, not just a nice-to-have). The Hindi phrasings are
+/// everyday colloquial expressions, not a literal/clinical translation of
+/// the English list - they need the same clinician review as the English
+/// phrasings, and ideally review by a Hindi-speaking clinician specifically,
+/// before being relied on.
 enum RedFlag {
   chestPain,
   strokeSigns,
@@ -40,6 +48,10 @@ class RedFlagDetector {
       'chest tightness',
       'pain in my chest',
       'crushing pain',
+      'सीने में दर्द',
+      'छाती में दर्द',
+      'सीने में दबाव',
+      'छाती में जकड़न',
     ],
     RedFlag.strokeSigns: [
       'face drooping',
@@ -51,6 +63,13 @@ class RedFlagDetector {
       'sudden numbness',
       'sudden weakness',
       'sudden confusion',
+      'चेहरा टेढ़ा',
+      'बोलने में परेशानी',
+      'लड़खड़ाती आवाज़',
+      'शरीर का एक हिस्सा सुन्न',
+      'अचानक सुन्नपन',
+      'अचानक कमजोरी',
+      'अचानक भ्रम',
     ],
     RedFlag.breathingDifficulty: [
       'can\'t breathe',
@@ -59,6 +78,9 @@ class RedFlagDetector {
       'shortness of breath',
       'gasping for air',
       'choking',
+      'सांस नहीं आ रही',
+      'सांस लेने में तकलीफ',
+      'दम घुट रहा है',
     ],
     RedFlag.suicidalThoughts: [
       'kill myself',
@@ -67,6 +89,11 @@ class RedFlagDetector {
       'end my life',
       'want to die',
       'harm myself',
+      'खुदकुशी',
+      'आत्महत्या',
+      'मरना चाहता हूं',
+      'मरना चाहती हूं',
+      'खुद को नुकसान',
     ],
     RedFlag.heavyBleeding: [
       'heavy bleeding',
@@ -74,6 +101,9 @@ class RedFlagDetector {
       'bleeding heavily',
       'blood everywhere',
       'severe blood loss',
+      'बहुत खून बह रहा है',
+      'खून रुक नहीं रहा',
+      'भारी रक्तस्राव',
     ],
     RedFlag.anaphylaxis: [
       'throat closing',
@@ -84,6 +114,10 @@ class RedFlagDetector {
       'allergic reaction',
       'anaphylaxis',
       'hives and difficulty',
+      'गला बंद हो रहा है',
+      'जीभ में सूजन',
+      'चेहरे पर सूजन',
+      'एलर्जी की प्रतिक्रिया',
     ],
     RedFlag.seizure: [
       'seizure',
@@ -91,6 +125,9 @@ class RedFlagDetector {
       'convulsion',
       'convulsing',
       'fit and unconscious',
+      'दौरा पड़ रहा है',
+      'मिर्गी का दौरा',
+      'ऐंठन',
     ],
     RedFlag.severeAbdominalPain: [
       'severe abdominal pain',
@@ -98,6 +135,9 @@ class RedFlagDetector {
       'worst stomach pain',
       'unbearable stomach pain',
       'rigid abdomen',
+      'पेट में तेज़ दर्द',
+      'असहनीय पेट दर्द',
+      'पेट सख्त हो गया',
     ],
     RedFlag.pediatricHighFever: [
       'baby has a high fever',
@@ -106,6 +146,9 @@ class RedFlagDetector {
       'baby is unresponsive',
       'infant is unresponsive',
       'baby is limp',
+      'बच्चे को तेज़ बुखार',
+      'बच्चा बेहोश',
+      'बच्चा सुस्त पड़ गया',
     ],
   };
 

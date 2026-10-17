@@ -1,6 +1,7 @@
 import 'package:doctro_patient/const/Palette.dart';
+import 'package:doctro_patient/features/appointments/presentation/my_appointments_screen.dart';
 import 'package:doctro_patient/features/astra/presentation/astra_chat_screen.dart';
-import 'package:doctro_patient/v2/ui/appointment/appointment_list.dart';
+import 'package:doctro_patient/features/cart/presentation/shop_screen.dart';
 import 'package:doctro_patient/v2/ui/authentication/profile.dart';
 import 'package:doctro_patient/v2/ui/home/doctors_list.dart';
 import 'package:doctro_patient/v2/ui/others/connectivity_responder.dart';
@@ -113,7 +114,7 @@ class MainLandingPage extends HookWidget {
                 category: catId.value,
                 search: search.value,
               ),
-              AppointmentList(),
+              const MyAppointmentsScreen(),
               Profile(),
             ].elementAt(currentIndex.value),
             floatingActionButton: SpeedDial(
@@ -123,6 +124,18 @@ class MainLandingPage extends HookWidget {
               overlayColor: Colors.black,
               overlayOpacity: 0.5,
               children: [
+                // Astra-backed medicine shop (lib/features/cart) - distinct
+                // from the legacy Laravel catalog on the Home tab.
+                SpeedDialChild(
+                  child: const Icon(Icons.storefront_outlined,
+                      color: Colors.green),
+                  label: 'Shop Medicines',
+                  backgroundColor: Colors.white,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ShopScreen()),
+                  ),
+                ),
                 // WhatsApp Button
                 SpeedDialChild(
                   child: Image.asset(

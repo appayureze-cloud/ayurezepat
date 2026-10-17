@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../../model/v2/home_response.dart' show Doctor;
+import '../../appointments/domain/entities/doctor_summary.dart';
 import '../domain/entities/astra_card.dart';
 import '../domain/entities/astra_recommendations.dart';
 import '../domain/entities/astra_session.dart';
@@ -111,7 +111,7 @@ class RecommendationsResponse {
             ))
         .toList();
     final doctors = (data['doctors'] as List<dynamic>? ?? [])
-        .map((d) => Doctor.fromJson(d as Map<String, dynamic>))
+        .map((d) => DoctorSummary.fromJson(d as Map<String, dynamic>))
         .toList();
     return RecommendationsResponse(
       success: json['success'] as bool? ?? false,

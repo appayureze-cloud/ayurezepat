@@ -28,14 +28,27 @@ class Env {
     defaultValue: true,
   );
 
+  /// CaseRepositoryImpl is Astra-backed (POST /api/companion/case/open +
+  /// GET /api/companion/case/{id}), confirmed live - defaults to real.
   static const bool useMockCases = bool.fromEnvironment(
     'USE_MOCK_CASES',
-    defaultValue: true,
+    defaultValue: false,
   );
 
+  /// Flipped to real at the user's request. createSession/sendMessage/
+  /// resolveCase/triage/recommendations/plan/medicineInfo are confirmed
+  /// live. checkin (daily check-in) and ackReminder (medication
+  /// reminders) were verified live against the real backend on
+  /// 2026-10-15 (`curl` to `https://ayureze.org/api/astra/...` with a
+  /// real Firebase ID token) and both 404 at the Laravel router level
+  /// ("The route ... could not be found") - the routes don't exist yet.
+  /// AstraService.withDio routes those two calls to the mock even when
+  /// this flag is false (see PartialMockAstraRepository) so the daily
+  /// check-in and reminder-ack flows keep working instead of failing on
+  /// every use. See docs/backend/astra.md.
   static const bool useMockAstra = bool.fromEnvironment(
     'USE_MOCK_ASTRA',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   /// Shows canned demo prescription line items when the backend hasn't
@@ -45,14 +58,20 @@ class Env {
     defaultValue: true,
   );
 
+  /// SmartOrderRepositoryImpl is Astra-backed
+  /// (GET/POST /api/v1/shopify/smart-orders/{id}[/bought|/ignore]) - the
+  /// speculated Laravel route never existed (confirmed 404). Defaults to
+  /// real.
   static const bool useMockSmartOrders = bool.fromEnvironment(
     'USE_MOCK_SMART_ORDERS',
-    defaultValue: true,
+    defaultValue: false,
   );
 
+  /// HealthRecordRepositoryImpl is Astra-backed (GET /api/companion/case/{id}/health_records),
+  /// confirmed live - defaults to real.
   static const bool useMockHealthRecords = bool.fromEnvironment(
     'USE_MOCK_HEALTH_RECORDS',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   /// See docs/backend/whatsapp.md. The client never talks to the WhatsApp
@@ -60,7 +79,7 @@ class Env {
   /// backend, which relays it to the BSP.
   static const bool useMockWhatsappConsent = bool.fromEnvironment(
     'USE_MOCK_WHATSAPP_CONSENT',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   /// The real Supabase-backed medicine reminders API on the Astra gateway
@@ -71,7 +90,7 @@ class Env {
   /// mock so flipping this on is a deliberate choice, not an accident.
   static const bool useMockServerReminders = bool.fromEnvironment(
     'USE_MOCK_SERVER_REMINDERS',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   /// The real documents API on the Astra gateway
@@ -81,7 +100,7 @@ class Env {
   /// backend. Defaults to mock.
   static const bool useMockDocuments = bool.fromEnvironment(
     'USE_MOCK_DOCUMENTS',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   /// The real Shopify medicine-catalog lookup on the Astra gateway
@@ -92,6 +111,6 @@ class Env {
   /// actual orders) are not wired.
   static const bool useMockShopify = bool.fromEnvironment(
     'USE_MOCK_SHOPIFY',
-    defaultValue: true,
+    defaultValue: false,
   );
 }

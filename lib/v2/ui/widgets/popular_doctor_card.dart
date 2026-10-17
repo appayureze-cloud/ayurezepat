@@ -1,130 +1,130 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:doctro_patient/model/v2/home_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../const/Palette.dart';
-import '../appointment/make_appointment.dart';
+import '../../../features/appointments/domain/entities/doctor_summary.dart';
+import '../../../features/appointments/presentation/doctor_booking_screen.dart';
+import '../../../theme.dart';
 
+/// Matches the Stitch "Popular Doctors" carousel card
+/// (ayureze_home/code.html): avatar, verified badge, specialization,
+/// rating, and a "Book" pill button that opens the real booking screen.
 class PopularDoctorCard extends HookWidget {
-  final Doctor doctor;
+  final DoctorSummary doctor;
 
   const PopularDoctorCard({required this.doctor, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) => MakeAppointment(doctor: doctor)));
-      },
-      child: Card(
-        margin: EdgeInsets.symmetric(
-          vertical: 0.5.h,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4.w),
-        ),
-        child: SizedBox(
-          width: 45.w,
-          child: Column(
+    return Container(
+      width: 272,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.creamSurfaceLowest,
+        borderRadius: AppRadius.roundedLg,
+        border: Border.all(color: AppColors.sagePrimary.withOpacity(0.1)),
+        boxShadow: AppShadows.subtleCard,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4.w),
+              ClipOval(
                 child: CachedNetworkImage(
-                  imageUrl: doctor.fullImage ?? '',
-                  fit: BoxFit.fitWidth,
-                  height: 12.h,
-                  width: 45.w,
-                  placeholder: (context, url) => Center(
-                    child: CircularProgressIndicator(),
+                  imageUrl: doctor.photoUrl ?? '',
+                  fit: BoxFit.cover,
+                  height: 56,
+                  width: 56,
+                  errorWidget: (context, url, error) => Container(
+                    height: 56,
+                    width: 56,
+                    color: AppColors.sagePrimaryContainer,
+                    child:
+                        const Icon(Icons.person, color: AppColors.sagePrimary),
                   ),
-                  errorWidget: (context, url, error) => Center(
-                    child: Image.asset(
-                      "assets/images/no_image.jpg",
-                      fit: BoxFit.fitHeight,
-                    ),
+                  placeholder: (context, url) => Container(
+                    height: 56,
+                    width: 56,
+                    color: AppColors.creamSurfaceLow,
                   ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 2.5.w,
-                  vertical: 1.h,
-                ),
+              const SizedBox(width: 12),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '${doctor.name}',
-                      style: TextStyle(
-                        color: Palette.black,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    SizedBox(height: 0.5.h),
-                    Text(
-                      '${doctor.category?.name}',
-                      style: TextStyle(
-                        color: Palette.grey,
-                        fontSize: 15.sp,
-                      ),
-                    ),
-                    if ((doctor.education?.length ?? 0) > 0)
-                      SizedBox(height: 0.5.h),
-                    if ((doctor.education?.length ?? 0) > 0)
-                      Text(
-                        '${doctor.education?.map((e) => e.degree!.toUpperCase()).join(', ')}',
-                        style: TextStyle(
-                          color: Palette.grey.withValues(alpha: .8),
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    SizedBox(height: 1.h),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(width: 1.w),
-                        Icon(
-                          Icons.work,
-                          size: 16.sp,
-                          color: Palette.primary,
-                        ),
-                        SizedBox(width: 1.w),
-                        Text(
-                          '${doctor.experience} Years',
-                          style: TextStyle(
-                            color: Palette.grey,
-                            fontSize: 13.sp,
+                        Expanded(
+                          child: Text(
+                            'Dr. ${doctor.name}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.headlineSmall,
                           ),
                         ),
-                        SizedBox(width: 2.w),
-                        Spacer(),
-                        Icon(
-                          Icons.star,
-                          size: 16.sp,
-                          color: Palette.rating,
-                        ),
-                        SizedBox(width: 1.w),
-                        Text(
-                          '${doctor.rate} (${doctor.review})',
-                          style: TextStyle(
-                            color: Palette.grey,
-                            fontSize: 13.sp,
+                        if (doctor.isVerified)
+                          const Padding(
+                            padding: EdgeInsets.only(left: 4),
+                            child: Icon(Icons.verified,
+                                size: 16, color: AppColors.sagePrimary),
                           ),
-                        ),
-                        SizedBox(width: 1.w),
                       ],
                     ),
+                    if ((doctor.specialization ?? '').isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          doctor.specialization!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
                   ],
                 ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 12),
+          Container(
+            decoration: const BoxDecoration(
+              border: Border(
+                top: BorderSide(color: AppColors.slateBorderSubtle),
+              ),
+            ),
+            padding: const EdgeInsets.only(top: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  doctor.isVerified ? 'Verified Vaidya' : 'Ayurvedic doctor',
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelSmall
+                      ?.copyWith(color: AppColors.slateTextMuted),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                DoctorBookingScreen(doctor: doctor)));
+                  },
+                  child: const Text('Book'),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

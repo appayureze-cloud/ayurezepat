@@ -354,10 +354,23 @@ recommended doctor with no extra mapping.
 
 ## `GET /astra/cases/{id}/plan`, `POST /astra/cases/{id}/checkins`, `POST /astra/reminders/{id}/ack`, `GET /astra/medicines/{id}/info`, `POST /astra/cases/{id}/resolve`
 
-Modeled in the client's `AstraRepository` interface now (so it matches the
-full contract), not yet called from any Phase 1 screen - `plan` and
-`checkins`/reminders drive Phase 3's daily follow-up and dose-reminder
-screens; `resolve` drives Phase 4's case-closure flow.
+Modeled in the client's `AstraRepository` interface so it matches the full
+contract. `plan`/`resolve`/`medicineInfo` are wired into real screens
+(care plan, case closure) and go live when `Env.useMockAstra` is false.
+
+`checkins` (daily check-in) and `reminders/{id}/ack` (medication reminder
+ack) drive Phase 3's daily follow-up and dose-reminder screens, but were
+verified live on 2026-10-15 via a direct `curl` to
+`https://ayureze.org/api/astra/cases/{id}/checkins` and
+`https://ayureze.org/api/astra/reminders/{id}/ack` with a real Firebase ID
+token - both returned `404` at the Laravel router level ("The route ...
+could not be found"), confirming the routes don't exist on the backend
+yet. Because of this, `AstraService.withDio` (`lib/features/astra/data/
+astra_service.dart`) routes `checkin`/`ackReminder` to the mock
+(`PartialMockAstraRepository`) even when `Env.useMockAstra` is false, so
+the daily check-in and reminder screens keep working client-side instead
+of failing on every use. Flip them to real once the backend ships these
+two routes.
 
 ## Events (backend-only, no client involvement)
 

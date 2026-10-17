@@ -23,8 +23,8 @@ Map<String, dynamic> _$CaseToJson(Case instance) => <String, dynamic>{
 const _$CaseStatusEnumMap = {
   CaseStatus.open: 'open',
   CaseStatus.consulting: 'consulting',
-  CaseStatus.treating: 'treating',
-  CaseStatus.followingUp: 'following_up',
+  CaseStatus.treating: 'in_treatment',
+  CaseStatus.followingUp: 'follow_up',
   CaseStatus.resolved: 'resolved',
   CaseStatus.closed: 'closed',
 };

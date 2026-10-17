@@ -32,6 +32,17 @@ String reminderIdFor({
 final _localReminderIdPattern =
     RegExp(r'^presc(\d+)-item(\d+)-day\d+-dose\d+$');
 
+/// The medicine-level grouping key for a dose reminder id (one medicine's
+/// remaining doses share this key) - used to pause/resume all of a
+/// medicine's reminders together rather than one dose at a time, since
+/// pausing a single future dose in isolation isn't a meaningful action a
+/// patient would ask for.
+String? medicineKeyFor(String reminderId) {
+  final match = _localReminderIdPattern.firstMatch(reminderId);
+  if (match == null) return null;
+  return 'presc${match.group(1)}-item${match.group(2)}';
+}
+
 String _serverReminderCacheKey(int prescriptionId, int itemIndex) =>
     '${Preferences.serverReminderIdPrefix}$prescriptionId-item$itemIndex';
 
@@ -128,6 +139,10 @@ Future<void> scheduleDoseReminders({
           'reminder_id': reminderId,
           'title': 'Time for ${item.name}',
           'body': '${item.dose} - ${item.timing}',
+          // Not part of the ack flow - read back by
+          // MedicationRemindersScreen so it can show/sort real scheduled
+          // doses instead of just an opaque pending-notification list.
+          'scheduled_for': scheduledFor.toIso8601String(),
         }),
       );
     }

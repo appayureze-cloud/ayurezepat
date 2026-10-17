@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
 
-import '../../../../const/Palette.dart';
+import '../../../../theme.dart';
 import '../../domain/entities/astra_card.dart';
 
 /// Generic rendering for card kinds whose real screens land in a later
@@ -31,21 +30,26 @@ class PlaceholderCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(vertical: 0.5.h),
-      padding: EdgeInsets.all(3.w),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Palette.lightGrey2,
-        borderRadius: BorderRadius.circular(2.w),
+        color: AppColors.creamSurfaceLow,
+        borderRadius: AppRadius.roundedMd,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.sp),
+            style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                color: AppColors.slateTextPrimary),
           ),
-          SizedBox(height: 0.5.h),
-          Text(body, style: TextStyle(fontSize: 13.sp)),
+          const SizedBox(height: 4),
+          Text(body,
+              style: const TextStyle(
+                  fontSize: 13, color: AppColors.slateTextSecondary)),
         ],
       ),
     );

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:sizer/sizer.dart';
 
 import '../../../api/retrofit_Api.dart';
-import '../../../const/Palette.dart';
-import '../../../v2/ui/widgets/button_v2.dart';
+import '../../../theme.dart';
 import '../../../v2/ui/widgets/header.dart';
 import '../../../v2/utils/nav_constants.dart';
 import '../../case/presentation/case_service.dart';
@@ -13,6 +11,10 @@ import '../data/astra_service.dart';
 import 'astra_chat_screen.dart';
 import 'daily_checkin_notifier.dart';
 
+/// Matches the Stitch "Daily Check-in" screen
+/// (ayureze_daily_check_in/code.html): a calm 1-5 intensity-circle
+/// selector and a non-alarming amber (not red) escalation banner.
+///
 /// Daily follow-up: asks how the patient is feeling on a 1-5 scale and
 /// posts it to `POST /astra/cases/{id}/checkins`. A score the backend
 /// flags with `escalate: true` offers a path to Astra chat or rebooking a
@@ -41,6 +43,7 @@ class DailyCheckinScreen extends HookWidget {
     }, const []);
 
     return Scaffold(
+      backgroundColor: AppColors.creamSurface,
       body: Column(
         children: [
           const Header_v2(title: 'Daily Check-in'),
@@ -50,10 +53,10 @@ class DailyCheckinScreen extends HookWidget {
                     child: bootstrapError.value != null
                         ? Text(
                             bootstrapError.value!,
-                            style: TextStyle(color: Palette.red),
+                            style: const TextStyle(color: AppColors.clayAlert),
                           )
-                        : SpinKitFadingCircle(
-                            color: Palette.primary, size: 6.h),
+                        : const SpinKitFadingCircle(
+                            color: AppColors.sagePrimary, size: 36),
                   )
                 : _DailyCheckinBody(notifier: notifier.value!),
           ),
@@ -75,7 +78,7 @@ class _DailyCheckinBody extends HookWidget {
     if (notifier.status == DailyCheckinStatus.done) {
       final result = notifier.result!;
       return Padding(
-        padding: EdgeInsets.all(4.w),
+        padding: const EdgeInsets.all(20),
         child: result.escalate
             ? _EscalationCard(onDone: () => Navigator.pop(context))
             : _AllGoodCard(onDone: () => Navigator.pop(context)),
@@ -83,20 +86,20 @@ class _DailyCheckinBody extends HookWidget {
     }
 
     return Padding(
-      padding: EdgeInsets.all(4.w),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'How are you feeling today?',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp),
+            style: Theme.of(context).textTheme.headlineLarge,
           ),
-          SizedBox(height: 1.h),
+          const SizedBox(height: 6),
           Text(
             '1 = same as usual, 5 = much worse',
-            style: TextStyle(fontSize: 12.sp, color: Palette.dark_grey),
+            style: Theme.of(context).textTheme.bodySmall,
           ),
-          SizedBox(height: 2.h),
+          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -109,17 +112,21 @@ class _DailyCheckinBody extends HookWidget {
             ],
           ),
           if (notifier.error != null) ...[
-            SizedBox(height: 2.h),
-            Text(notifier.error!, style: TextStyle(color: Palette.red)),
+            const SizedBox(height: 14),
+            Text(notifier.error!,
+                style: const TextStyle(color: AppColors.clayAlert)),
           ],
-          SizedBox(height: 3.h),
-          ButtonV2(
-            label: notifier.status == DailyCheckinStatus.submitting
-                ? 'Submitting...'
-                : 'Submit',
-            onPressed: notifier.status == DailyCheckinStatus.submitting
-                ? null
-                : notifier.submit,
+          const SizedBox(height: 28),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: notifier.status == DailyCheckinStatus.submitting
+                  ? null
+                  : notifier.submit,
+              child: Text(notifier.status == DailyCheckinStatus.submitting
+                  ? 'Submitting...'
+                  : 'Submit check-in'),
+            ),
           ),
         ],
       ),
@@ -135,20 +142,38 @@ class _ScoreButton extends StatelessWidget {
   const _ScoreButton(
       {required this.score, required this.selected, required this.onTap});
 
+  static const _faces = [
+    Icons.sentiment_very_satisfied_outlined,
+    Icons.sentiment_satisfied_outlined,
+    Icons.sentiment_neutral_outlined,
+    Icons.sentiment_dissatisfied_outlined,
+    Icons.sentiment_very_dissatisfied_outlined,
+  ];
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: CircleAvatar(
-        radius: 5.w,
-        backgroundColor: selected ? Palette.primary : Palette.primary_bg,
-        child: Text(
-          '$score',
-          style: TextStyle(
-            color: selected ? Palette.white : Palette.black,
-            fontWeight: FontWeight.w600,
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundColor:
+                selected ? AppColors.sagePrimary : AppColors.sagePrimarySubtle,
+            child: Icon(
+              _faces[score - 1],
+              color: selected ? AppColors.sageOnPrimary : AppColors.sagePrimary,
+            ),
           ),
-        ),
+          const SizedBox(height: 6),
+          Text('$score',
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: selected
+                      ? AppColors.sagePrimary
+                      : AppColors.slateTextMuted)),
+        ],
       ),
     );
   }
@@ -164,14 +189,17 @@ class _AllGoodCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(Icons.check_circle, color: Palette.primary, size: 10.w),
-        SizedBox(height: 1.h),
+        const Icon(Icons.check_circle, color: AppColors.sagePrimary, size: 48),
+        const SizedBox(height: 12),
         Text(
           'Thanks for checking in. Keep following your treatment plan.',
-          style: TextStyle(fontSize: 14.sp),
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
-        SizedBox(height: 3.h),
-        ButtonV2(label: 'Done', onPressed: onDone),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(onPressed: onDone, child: const Text('Done')),
+        ),
       ],
     );
   }
@@ -186,58 +214,64 @@ class _EscalationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(3.w),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Palette.red_bg,
-        borderRadius: BorderRadius.circular(2.w),
-        border: Border.all(color: Palette.red, width: 1.5),
+        color: AppColors.amberWarningContainer,
+        borderRadius: AppRadius.roundedLg,
+        border: Border.all(color: AppColors.amberWarning.withOpacity(0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.info, color: Palette.red, size: 5.w),
-              SizedBox(width: 2.w),
+              const Icon(Icons.info_outline, color: AppColors.amberWarning),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   "It's worth getting this checked",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15.sp,
-                    color: Palette.red,
-                  ),
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall
+                      ?.copyWith(color: AppColors.amberWarning),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 1.h),
+          const SizedBox(height: 10),
           Text(
             'Your symptoms sound worse than usual. Talk to Astra or book a '
             'doctor so they can take a look.',
-            style: TextStyle(fontSize: 13.sp, color: Palette.black),
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
-          SizedBox(height: 2.h),
-          ButtonV2(
-            label: 'Chat with Astra',
-            buttonColor: Palette.red,
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AstraChatScreen()),
-              );
-            },
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.amberWarning,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AstraChatScreen()),
+                );
+              },
+              child: const Text('Chat with Astra'),
+            ),
           ),
-          SizedBox(height: 1.h),
-          ButtonV2(
-            label: 'Book a Doctor',
-            buttonColor: Palette.white,
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, 'Home',
-                  arguments: [doctorsTabIndex]);
-            },
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, 'Home',
+                    arguments: [doctorsTabIndex]);
+              },
+              child: const Text('Book a doctor'),
+            ),
           ),
         ],
       ),

@@ -30,9 +30,11 @@ class Apis {
   static const String place_order = "orders";
   static const String therapy_sessions = "therapy_sessions";
   static const String get_appointment = "/get_appointment/{id}";
-  // Not live on the backend yet - see linkAppointmentToAstra()'s doc comment
-  // (lib/features/astra/data/astra_consultation_link.dart) for the Laravel
-  // route/column this needs before it stops 404ing.
+  // Not live on the backend and no longer called from anywhere -
+  // linkAppointmentToAstra() (lib/features/astra/data/
+  // astra_consultation_link.dart) used to call this, but now stores
+  // appointment_id in case/create's metadata on the Astra side instead,
+  // since that field already exists and needs no Laravel route at all.
   static const String link_appointment_astra_case =
       "link_appointment_astra_case";
   static const String get_therapy_booking = "/get_session/{id}";

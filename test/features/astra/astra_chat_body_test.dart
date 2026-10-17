@@ -67,8 +67,21 @@ void main() {
     await tester.tap(find.byIcon(Icons.send));
     await tester.pump();
 
-    expect(find.text('This may be a medical emergency'), findsOneWidget);
-    expect(find.widgetWithText(ElevatedButton, 'Call 112 now'), findsOneWidget);
+    expect(find.text('Clinical Safety Advisory'), findsOneWidget);
+    // Not find.widgetWithText(ElevatedButton, ...): ElevatedButton.icon's
+    // internal composition differs between Flutter versions (CI pins
+    // 3.35.0, newer than that unifies it into a plain ElevatedButton,
+    // older versions use a distinct subclass with a different
+    // runtimeType), so an exact-type ancestor match passes on one and
+    // fails on the other. ButtonStyleButton is the stable common
+    // superclass of all Material buttons across versions.
+    expect(
+      find.ancestor(
+        of: find.text('Call 112 now'),
+        matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('sending an ordinary message renders a streamed reply',

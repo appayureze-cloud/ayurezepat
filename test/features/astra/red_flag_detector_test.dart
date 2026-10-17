@@ -90,5 +90,40 @@ void main() {
       expect(RedFlagDetector.hasRedFlag('chest pain'), isTrue);
       expect(RedFlagDetector.hasRedFlag('I have a cold'), isFalse);
     });
+
+    test('detects chest pain in Hindi', () {
+      expect(
+        RedFlagDetector.detect('मुझे सीने में दर्द हो रहा है'),
+        contains(RedFlag.chestPain),
+      );
+    });
+
+    test('detects breathing difficulty in Hindi', () {
+      expect(
+        RedFlagDetector.detect('सांस लेने में तकलीफ हो रही है'),
+        contains(RedFlag.breathingDifficulty),
+      );
+    });
+
+    test('detects suicidal thoughts in Hindi', () {
+      expect(
+        RedFlagDetector.detect('मैं मरना चाहता हूं'),
+        contains(RedFlag.suicidalThoughts),
+      );
+    });
+
+    test('detects pediatric high fever in Hindi', () {
+      expect(
+        RedFlagDetector.detect('बच्चे को तेज़ बुखार है और बच्चा बेहोश है'),
+        containsAll([RedFlag.pediatricHighFever]),
+      );
+    });
+
+    test('detects a mixed Hindi/English message', () {
+      expect(
+        RedFlagDetector.detect('I have सीने में दर्द since morning'),
+        contains(RedFlag.chestPain),
+      );
+    });
   });
 }

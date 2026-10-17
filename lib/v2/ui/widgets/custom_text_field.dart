@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:sizer/sizer.dart';
 
-import '../../../const/Palette.dart';
+import '../../../theme.dart';
 
 class CustomTextField extends HookWidget {
   final TextEditingController controller;
@@ -57,20 +57,20 @@ class CustomTextField extends HookWidget {
         onTap: onTap,
         style: TextStyle(
           fontSize: 16.sp,
-          color: Palette.dark_blue,
+          color: AppColors.slateTextPrimary,
         ),
         decoration: InputDecoration(
           constraints: BoxConstraints(maxWidth: 90.w, minWidth: 90.w),
           hintText: hint,
           hintStyle: TextStyle(
             fontSize: 16.sp,
-            color: Palette.dark_grey,
+            color: AppColors.slateTextMuted,
           ),
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
                     _isHidden.value ? Icons.visibility : Icons.visibility_off,
-                    color: Palette.grey,
+                    color: AppColors.slateTextMuted,
                     size: 20.sp,
                   ),
                   onPressed: () {
@@ -126,12 +126,12 @@ class CustomDropdown<T> extends HookWidget {
           hint,
           style: TextStyle(
             fontSize: 16.sp,
-            color: Palette.dark_grey,
+            color: AppColors.slateTextMuted,
           ),
         ),
         style: TextStyle(
           fontSize: 16.sp,
-          color: Palette.dark_blue,
+          color: AppColors.slateTextPrimary,
         ),
         alignment: Alignment.centerLeft,
         isExpanded: true,
@@ -141,23 +141,23 @@ class CustomDropdown<T> extends HookWidget {
           contentPadding: EdgeInsets.zero,
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(2.w),
-            borderSide: BorderSide(color: Palette.primary, width: 1),
+            borderSide: BorderSide(color: AppColors.sagePrimary, width: 1),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(2.w),
-            borderSide: BorderSide(color: Palette.grey, width: 1),
+            borderSide: BorderSide(color: AppColors.slateTextMuted, width: 1),
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(2.w),
-            borderSide: BorderSide(color: Palette.grey, width: 1),
+            borderSide: BorderSide(color: AppColors.slateTextMuted, width: 1),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(2.w),
-            borderSide: BorderSide(color: Palette.red, width: 1),
+            borderSide: BorderSide(color: AppColors.clayAlert, width: 1),
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(2.w),
-            borderSide: BorderSide(color: Palette.red, width: 1),
+            borderSide: BorderSide(color: AppColors.clayAlert, width: 1),
           ),
         ),
         buttonStyleData: ButtonStyleData(
@@ -180,7 +180,7 @@ class CustomDropdown<T> extends HookWidget {
               // 👈 show ellipsis after selection
               style: TextStyle(
                 fontSize: 16.sp,
-                color: Palette.dark_blue,
+                color: AppColors.slateTextPrimary,
               ),
             );
           }).toList();
@@ -195,7 +195,7 @@ class CustomDropdown<T> extends HookWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 16.sp,
-                  color: Palette.dark_blue,
+                  color: AppColors.slateTextPrimary,
                 ),
               ),
               value: item,

@@ -14,7 +14,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../../api/base_model.dart';
 import '../../../api/server_error.dart';
-import '../../../const/Palette.dart';
+import '../../../theme.dart';
 import '../../utils/form_helper.dart';
 import 'add_address.dart';
 
@@ -58,7 +58,7 @@ class _AddressListState extends State<AddressList> {
         inAsyncCall: loading,
         opacity: 0.5,
         progressIndicator: SpinKitFadingCircle(
-          color: Palette.primary,
+          color: AppColors.sagePrimary,
           size: 3.h,
         ),
         child: SingleChildScrollView(
@@ -82,7 +82,7 @@ class _AddressListState extends State<AddressList> {
                     icon: Icon(
                       Icons.add_box_outlined,
                       size: 18.sp,
-                      color: Palette.primary,
+                      color: AppColors.sagePrimary,
                     ),
                   ),
                 ],
@@ -110,7 +110,7 @@ class _AddressListState extends State<AddressList> {
                                           child: Icon(
                                             Icons.location_on_outlined,
                                             size: 5.w,
-                                            color: Palette.primary,
+                                            color: AppColors.sagePrimary,
                                           ),
                                         ),
                                         Container(
@@ -128,7 +128,8 @@ class _AddressListState extends State<AddressList> {
                                                         fontSize: 16.sp,
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        color: Palette.primary,
+                                                        color: AppColors
+                                                            .sagePrimary,
                                                       ),
                                                     )
                                                   : Text(
@@ -137,7 +138,8 @@ class _AddressListState extends State<AddressList> {
                                                         fontSize: 16.sp,
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        color: Palette.primary,
+                                                        color: AppColors
+                                                            .sagePrimary,
                                                       ),
                                                     ),
                                               SizedBox(height: 0.5.h),
@@ -148,7 +150,8 @@ class _AddressListState extends State<AddressList> {
                                                 textAlign: TextAlign.justify,
                                                 style: TextStyle(
                                                   fontSize: 14.sp,
-                                                  color: Palette.dark_grey,
+                                                  color:
+                                                      AppColors.slateTextMuted,
                                                 ),
                                               )
                                             ],
@@ -177,7 +180,7 @@ class _AddressListState extends State<AddressList> {
                                             icon: Icon(
                                               Icons.dangerous,
                                               size: 2.h,
-                                              color: Palette.red,
+                                              color: AppColors.clayAlert,
                                             ),
                                           ),
                                         ),
@@ -246,8 +249,8 @@ class _AddressListState extends State<AddressList> {
             msg: response.msg!,
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
-            backgroundColor: Palette.primary,
-            textColor: Palette.white,
+            backgroundColor: AppColors.sagePrimary,
+            textColor: AppColors.creamSurfaceLowest,
           );
           callApiShowAddress();
         });

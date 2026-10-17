@@ -1,16 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:sizer/sizer.dart';
 
 import '../../../api/retrofit_Api.dart';
-import '../../../const/Palette.dart';
-import '../../../v2/ui/widgets/button_v2.dart';
+import '../../../theme.dart';
 import '../../../v2/ui/widgets/header.dart';
+import '../../astra/data/astra_milestones.dart';
 import '../../astra/data/astra_service.dart';
 import '../../astra/presentation/astra_chat_screen.dart';
 import '../../astra/presentation/daily_checkin_reminder_scheduler.dart';
 import '../../../v2/utils/logger.dart';
+import '../data/case_history_store.dart';
 import 'case_service.dart';
 import '../domain/entities/case.dart';
 
@@ -37,6 +39,9 @@ String _statusDescription(CaseStatus status) => switch (status) {
       CaseStatus.closed => 'This case is closed.',
     };
 
+/// Matches the Stitch "Case Closure" screen (ayureze_case_closure/code.html):
+/// a calm wrap-up card summarizing the case, with the closing action.
+///
 /// Shows the patient's current case status and, while it's still active,
 /// lets them mark it resolved (`POST /astra/cases/{id}/resolve` - see
 /// docs/backend/astra.md). This is the patient confirming they're done,
@@ -113,6 +118,22 @@ class CaseSummaryScreen extends HookWidget {
         // different backends. Re-fetching surfaces that mismatch instead
         // of masking it with an optimistic local update.
         activeCase.value = await CaseService.withDio(dio).getCase(current.id);
+        // Best-effort: records this closed journey into the local
+        // Companion Chat History (see CaseHistoryStore) - never blocks
+        // the case from actually closing if this fails.
+        try {
+          await CaseHistoryStore.recordClosed(activeCase.value!);
+        } catch (e) {
+          logger.e('Failed to record case history: $e');
+        }
+        // Best-effort: current.id here is really the journey id
+        // (CaseRepositoryImpl is journey-backed) - records closure as a
+        // real, queryable milestone, separate from resolveCase above.
+        unawaited(recordMilestone(
+          journeyId: current.id,
+          milestoneType: 'case_resolved',
+          description: 'Patient marked this case as resolved.',
+        ));
       } catch (e) {
         error.value = 'Could not close your case. Please try again.';
       } finally {
@@ -121,60 +142,92 @@ class CaseSummaryScreen extends HookWidget {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.creamSurface,
       body: Column(
         children: [
           const Header_v2(title: 'My Case'),
           Expanded(
             child: loading.value
-                ? Center(
-                    child:
-                        SpinKitFadingCircle(color: Palette.primary, size: 6.h),
+                ? const Center(
+                    child: SpinKitFadingCircle(
+                        color: AppColors.sagePrimary, size: 36),
                   )
                 : activeCase.value == null
                     ? Center(
                         child: Text(error.value ?? 'No case found.',
-                            style: TextStyle(color: Palette.red)),
+                            style: const TextStyle(color: AppColors.clayAlert)),
                       )
                     : Padding(
-                        padding: EdgeInsets.all(4.w),
+                        padding: const EdgeInsets.all(20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              _statusLabel(activeCase.value!.status),
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 18.sp,
-                                  color: Palette.primary),
-                            ),
-                            SizedBox(height: 1.h),
-                            Text(
-                              _statusDescription(activeCase.value!.status),
-                              style: TextStyle(
-                                  fontSize: 13.sp, color: Palette.dark_grey1),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: AppColors.creamSurfaceLowest,
+                                border: Border.all(
+                                    color:
+                                        AppColors.sagePrimary.withOpacity(0.1)),
+                                borderRadius: AppRadius.roundedLg,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.sagePrimarySubtle,
+                                      borderRadius: AppRadius.roundedPill,
+                                    ),
+                                    child: Text(
+                                      _statusLabel(activeCase.value!.status),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                          color: AppColors.sagePrimary),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    _statusDescription(
+                                        activeCase.value!.status),
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ],
+                              ),
                             ),
                             if (error.value != null) ...[
-                              SizedBox(height: 2.h),
+                              const SizedBox(height: 14),
                               Text(error.value!,
-                                  style: TextStyle(color: Palette.red)),
+                                  style: const TextStyle(
+                                      color: AppColors.clayAlert)),
                             ],
-                            SizedBox(height: 3.h),
-                            if (activeCase.value!.isActive)
-                              ButtonV2(
-                                label: resolving.value
-                                    ? 'Closing...'
-                                    : 'Close This Case',
-                                onPressed: resolving.value ? null : resolve,
-                              )
-                            else
-                              ButtonV2(
-                                label: 'Start New Consultation',
-                                onPressed: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => const AstraChatScreen()),
-                                ),
-                              ),
+                            const SizedBox(height: 24),
+                            SizedBox(
+                              width: double.infinity,
+                              child: activeCase.value!.isActive
+                                  ? ElevatedButton(
+                                      onPressed:
+                                          resolving.value ? null : resolve,
+                                      child: Text(resolving.value
+                                          ? 'Closing...'
+                                          : 'Close this case'),
+                                    )
+                                  : ElevatedButton(
+                                      onPressed: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) =>
+                                                const AstraChatScreen()),
+                                      ),
+                                      child:
+                                          const Text('Start new consultation'),
+                                    ),
+                            ),
                           ],
                         ),
                       ),

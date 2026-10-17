@@ -95,6 +95,7 @@ CompanionCreateCaseRequest _$CompanionCreateCaseRequestFromJson(
       userId: json['user_id'] as String,
       doctorId: json['doctor_id'] as String,
       diagnosis: json['diagnosis'] as String,
+      metadata: json['metadata'] as Map<String, dynamic>?,
     );
 
 Map<String, dynamic> _$CompanionCreateCaseRequestToJson(
@@ -104,6 +105,7 @@ Map<String, dynamic> _$CompanionCreateCaseRequestToJson(
       'user_id': instance.userId,
       'doctor_id': instance.doctorId,
       'diagnosis': instance.diagnosis,
+      'metadata': instance.metadata,
     };
 
 CompanionCreateCaseResponse _$CompanionCreateCaseResponseFromJson(
