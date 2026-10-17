@@ -15,7 +15,8 @@ triggers a hardcoded emergency redirect instead of a normal AI reply.
 - Routing: `lib/features/astra/presentation/astra_chat_notifier.dart`
   (`sendUserMessage`)
 - UI shown: `lib/features/astra/presentation/widgets/emergency_card_widget.dart`
-- Tests: `test/features/astra/red_flag_detector_test.dart` (13 cases)
+- Tests: `test/features/astra/red_flag_detector_test.dart` (18 cases, including
+  Hindi and mixed-language phrasings)
 
 ## How it behaves today
 
@@ -44,7 +45,10 @@ triggers a hardcoded emergency redirect instead of a normal AI reply.
 
 ## The full keyword list (verbatim from source)
 
-| Category | Keywords |
+English keywords, by category (see the source file for the parallel Hindi
+list per category - omitted here for table width, not for any other reason):
+
+| Category | English keywords |
 |---|---|
 | Chest pain | chest pain, chest pressure, chest tightness, pain in my chest, crushing pain |
 | Stroke signs | face drooping, facial droop, slurred speech, can't speak, cannot speak properly, one side of my body, sudden numbness, sudden weakness, sudden confusion |
@@ -56,6 +60,11 @@ triggers a hardcoded emergency redirect instead of a normal AI reply.
 | Severe abdominal pain | severe abdominal pain, severe stomach pain, worst stomach pain, unbearable stomach pain, rigid abdomen |
 | Pediatric high fever | baby has a high fever, infant has a high fever, baby won't wake up, baby is unresponsive, infant is unresponsive, baby is limp |
 
+Each category above has 3-11 additional Hindi phrasings in the source file
+(e.g. chest pain also matches "सीने में दर्द", "छाती में दर्द") - a
+Hindi-speaking clinician should review those specifically, since they were
+drafted without clinical input, same as the English list.
+
 ## What a reviewer should actually judge
 
 1. **Coverage**: are there other textbook emergency presentations missing
@@ -64,10 +73,16 @@ triggers a hardcoded emergency redirect instead of a normal AI reply.
    triage red flags, not against this product's actual user base or
    presenting complaints.
 2. **Phrasing**: do these keyword phrasings actually match how real
-   patients describe these symptoms in this population (including code-
-   switched Hindi/English, which the detector does NOT currently handle -
-   it only matches English phrases, even though the chat itself supports
-   Hindi).
+   patients describe these symptoms in this population. Each category now
+   also carries a set of common colloquial Hindi phrasings (added after
+   this review was first written, when the detector was English-only),
+   and code-switched Hindi/English messages are matched too (substring
+   matching works across the mixed string either way). The Hindi
+   phrasings have NOT been reviewed by a Hindi-speaking clinician and are
+   drafted from common colloquial expressions, not a clinical translation
+   of the English list - they need the same sign-off as the English
+   phrasings, specifically from someone fluent in how Hindi-speaking
+   patients actually describe these symptoms.
 3. **False-negative risk from substring matching**: e.g. "my chest doesn't
    hurt but I'm worried about chest pain in general" would still match
    `chest pain` and route to the emergency card (an acceptable false
