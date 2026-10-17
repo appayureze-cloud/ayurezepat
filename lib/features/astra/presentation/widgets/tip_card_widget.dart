@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../theme.dart';
+import '../../../../v2/ui/widgets/content_origin_badge.dart';
 import '../../domain/entities/astra_card.dart';
 
 class TipCardWidget extends StatelessWidget {
@@ -32,6 +33,7 @@ class TipCardWidget extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
+              const ContentOriginBadge(origin: ContentOrigin.aiSuggested),
             ],
           ),
           const SizedBox(height: 6),

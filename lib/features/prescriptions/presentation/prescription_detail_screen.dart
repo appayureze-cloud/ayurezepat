@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../../../const/env.dart';
 import '../../../model/v2/prescription_response.dart';
 import '../../../theme.dart';
+import '../../../v2/ui/widgets/content_origin_badge.dart';
 import '../../../v2/ui/widgets/header.dart';
 import '../../../v2/utils/pdf_downloader.dart';
 import '../domain/entities/prescription_item.dart';
@@ -35,6 +36,14 @@ class PrescriptionDetailScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: ContentOriginBadge(
+                        origin: ContentOrigin.clinicianApproved),
+                  ),
+                ),
                 if (items.isEmpty)
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 32),

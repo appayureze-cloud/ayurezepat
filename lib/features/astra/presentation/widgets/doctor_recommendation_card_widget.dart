@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../theme.dart';
+import '../../../../v2/ui/widgets/content_origin_badge.dart';
 import '../../../../v2/ui/widgets/doctor_info_card.dart';
 import '../../domain/entities/astra_card.dart';
 
@@ -17,6 +18,15 @@ class DoctorRecommendationCardWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              ContentOriginBadge(origin: ContentOrigin.aiSuggested),
+            ],
+          ),
+        ),
         if (card.reason != null)
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
